@@ -24,12 +24,33 @@ env.backends.onnx.wasm.wasmPaths = ortPaths({
 
 const failedHosts = new Set();
 const baseFetch = env.fetch;
+
+// Download progress is measured here rather than through the library's
+// progress callback: that callback triggers extra file-metadata lookups that
+// ignore the pinned revision.
+function withProgress(res, file) {
+  const total = Number(res.headers.get('content-length')) || 0;
+  if (!res.body || total === 0) return res;
+  let loaded = 0;
+  const counted = res.body.pipeThrough(
+    new TransformStream({
+      transform(chunk, controller) {
+        loaded += chunk.byteLength;
+        self.postMessage({ type: 'progress', file, loaded, total });
+        controller.enqueue(chunk);
+      },
+    }),
+  );
+  return new Response(counted, { status: res.status, statusText: res.statusText, headers: res.headers });
+}
+
 env.fetch = async (input, init) => {
   const url = new URL(typeof input === 'string' ? input : input.url ?? String(input), self.location.href);
   try {
     const res = await baseFetch(input, init);
     if (!res.ok && res.status >= 500) failedHosts.add(url.host);
-    return res;
+    const isRange = init?.headers && new Headers(init.headers).has('Range');
+    return res.ok && !isRange ? withProgress(res, url.pathname.split('/').pop()) : res;
   } catch (err) {
     failedHosts.add(url.host);
     throw err;
@@ -38,12 +59,6 @@ env.fetch = async (input, init) => {
 
 let loaded = null; // { tokenizer, model, backend, cache }
 
-const progressCallback = (p) => {
-  if (p.status === 'progress') {
-    self.postMessage({ type: 'progress', file: p.file, loaded: p.loaded ?? 0, total: p.total ?? 0 });
-  }
-};
-
 // Tokenizer and model are loaded directly (not through pipeline()) so every
 // request, including config lookups, uses the pinned revision.
 async function load(backend, cache) {
@@ -51,7 +66,7 @@ async function load(backend, cache) {
   if (loaded) await loaded.model.dispose?.();
   env.useBrowserCache = cache;
   env.useWasmCache = cache;
-  const options = { revision: EMBEDDING_MODEL.revision, progress_callback: progressCallback };
+  const options = { revision: EMBEDDING_MODEL.revision };
   const [tokenizer, model] = await Promise.all([
     AutoTokenizer.from_pretrained(EMBEDDING_MODEL.id, options),
     AutoModel.from_pretrained(EMBEDDING_MODEL.id, { ...options, dtype: EMBEDDING_MODEL.dtype, device: backend }),

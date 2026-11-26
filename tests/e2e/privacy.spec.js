@@ -53,7 +53,9 @@ test.describe('@privacy network behavior', () => {
     await embedNotes(page, ['first note about billing', 'second note about invoices']);
     const later = [];
     context.on('request', (r) => {
-      if (!r.url().startsWith(new URL(page.url()).origin)) later.push(r.url());
+      const url = new URL(r.url());
+      if (['blob:', 'data:'].includes(url.protocol)) return;
+      if (url.origin !== new URL(page.url()).origin) later.push(r.url());
     });
     await page.reload();
     await embedNotes(page, ['third note about refunds', 'fourth note about receipts']);
