@@ -1,5 +1,7 @@
 # Grounded Themes
 
+[![CI](https://github.com/vini-portfolio/grounded-themes/actions/workflows/ci.yml/badge.svg)](https://github.com/vini-portfolio/grounded-themes/actions/workflows/ci.yml)
+
 On-device NLP that turns raw research notes into themes, and shows its work.
 
 Grounded Themes is a reimplementation, built from scratch, of my earlier prototype Sticky Insights. This version is organized around an explainable pipeline: each stage shows what it did and why it was designed that way.
@@ -28,6 +30,15 @@ Requires Node.js 22 or later.
 npm ci
 npm run dev
 ```
+
+## Checks
+
+| Command | What it does |
+|---|---|
+| `npm run lint` | ESLint |
+| `npm run test:unit` | Unit tests (Vitest), no network |
+| `npm run test:e2e` | Browser tests (Playwright) against the production build |
+| `npm run check:weights` | Fails if a model weight file or any file over 10 MB is committed |
 
 ## License
 
