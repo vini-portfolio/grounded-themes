@@ -10,6 +10,8 @@ export const EMBEDDING_MODEL = Object.freeze({
   dimensions: 384,
   license: 'Apache-2.0',
   upstream: 'sentence-transformers/all-MiniLM-L6-v2',
+  pooling: 'mean',
+  prefix: '',
 });
 
 // all-MiniLM-L6-v2 was trained with a 256-token limit (sentence-transformers

@@ -18,7 +18,8 @@
     "check:weights": "node scripts/check-weights.mjs",
     "build:e2e": "node scripts/copy-ort.mjs && VITE_FAULT_HOOKS=1 vite build --outDir dist-e2e",
     "check:dist": "node scripts/check-dist.mjs",
-    "check:data": "node scripts/check-data.mjs"
+    "check:data": "node scripts/check-data.mjs",
+    "experiment:embeddings": "playwright test -c playwright.experiments.config.js"
   },
   "devDependencies": {
     "@eslint/js": "10.0.1",

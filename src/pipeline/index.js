@@ -23,7 +23,15 @@ const round = (x, p = 6) => Math.round(x * 10 ** p) / 10 ** p;
  *   now?: () => number,
  * }} opts
  */
-export async function runPipeline({ texts, embed, seed = C.DEFAULT_SEED, onStage = () => {}, onEvent = () => {}, now = () => performance.now() }) {
+export async function runPipeline({
+  texts,
+  embed,
+  seed = C.DEFAULT_SEED,
+  onStage = () => {},
+  onEvent = () => {},
+  now = () => performance.now(),
+  reducedDimensions = C.REDUCED_DIMENSIONS,
+}) {
   if (texts.length < 2) throw new RangeError('runPipeline needs at least two notes');
   const rng = createRng(seed);
   const events = [];
@@ -51,7 +59,11 @@ export async function runPipeline({ texts, embed, seed = C.DEFAULT_SEED, onStage
   // Reduce
   onStage('reduce');
   t = now();
-  const reduced = pca(vectors, C.REDUCED_DIMENSIONS);
+  // reducedDimensions = null clusters on the full unit vectors (used to compare designs).
+  const reduced =
+    reducedDimensions === null
+      ? { projected: vectors.map((v) => Float64Array.from(v)), explainedVarianceRatio: 1, components: embedded.dims }
+      : pca(vectors, reducedDimensions);
   emit('reduce', t, {
     inputDims: embedded.dims,
     outputDims: reduced.components,

@@ -1,0 +1,58 @@
+// Embedding models compared for clustering notes by purpose. All licensed for
+// commercial use upstream; revisions pinned.
+export const CANDIDATES = [
+  {
+    key: 'minilm',
+    id: 'Xenova/all-MiniLM-L6-v2',
+    revision: '751bff37182d3f1213fa05d7196b954e230abad9',
+    dtype: 'q8',
+    pooling: 'mean',
+    prefix: '',
+    license: 'Apache-2.0 (sentence-transformers/all-MiniLM-L6-v2)',
+  },
+  {
+    key: 'bge-small',
+    id: 'Xenova/bge-small-en-v1.5',
+    revision: 'ea104dacec62c0de699686887e3f920caeb4f3e3',
+    dtype: 'q8',
+    pooling: 'cls',
+    prefix: '',
+    license: 'MIT (BAAI/bge-small-en-v1.5)',
+  },
+  {
+    key: 'e5-small',
+    id: 'Xenova/e5-small-v2',
+    revision: '02af79985278377e65c724a76275707cb0333c70',
+    dtype: 'q8',
+    pooling: 'mean',
+    prefix: 'query: ',
+    license: 'MIT (intfloat/e5-small-v2)',
+  },
+  {
+    key: 'gte-small',
+    id: 'Xenova/gte-small',
+    revision: '5927d1727bb12db490052a1b33265ad78058de08',
+    dtype: 'q8',
+    pooling: 'mean',
+    prefix: '',
+    license: 'MIT (thenlper/gte-small)',
+  },
+  {
+    key: 'arctic-xs',
+    id: 'Snowflake/snowflake-arctic-embed-xs',
+    revision: 'd8c86521100d3556476a063fc2342036d45c106f',
+    dtype: 'q8',
+    pooling: 'cls',
+    prefix: '',
+    license: 'Apache-2.0',
+  },
+  {
+    key: 'nomic-v1.5',
+    id: 'nomic-ai/nomic-embed-text-v1.5',
+    revision: 'e9b6763023c676ca8431644204f50c2b100d9aab',
+    dtype: 'q8',
+    pooling: 'mean',
+    prefix: 'clustering: ',
+    license: 'Apache-2.0',
+  },
+];

@@ -49,6 +49,27 @@ if (import.meta.env.VITE_FAULT_HOOKS === '1') {
   // Test builds only (stripped from production; checked by scripts/check-dist.mjs).
   window.__gtInjectFault = (kind) => embedder.injectFault(kind);
   window.__gtState = state;
+  // Runs the pipeline with another embedding model or design, for comparisons.
+  window.__gtExperiment = async (texts, { model, pipelineOptions, backend } = {}) => {
+    const t0 = performance.now();
+    const events = [];
+    const r = await embedder.run(texts, {
+      backend: backend ?? (state.backend ??= await detectBackend()),
+      modelOverride: model,
+      pipelineOptions,
+      onEvent: (e) => events.push(e),
+    });
+    return {
+      ms: Math.round(performance.now() - t0),
+      assignments: r.assignments,
+      labels: r.themes.map((t) => t.label),
+      downloadedBytes: r.downloadedBytes,
+      modelId: r.modelId,
+      backend: r.backend,
+      cluster: events.find((e) => e.stage === 'cluster').payload.selected,
+      stageMs: Object.fromEntries(events.map((e) => [e.stage, e.durationMs])),
+    };
+  };
 }
 
 const input = h('textarea', { id: 'notes-input', rows: '8', placeholder: 'One note per line' });
