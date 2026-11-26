@@ -166,7 +166,10 @@ async function runPipelineOnce(page, texts, seed, pid) {
 
 /** Runs through the real UI: paste, click, wait for themes to render. */
 async function runUiOnce(page, texts, pid) {
-  await page.evaluate(() => (window.__longTasks = []));
+  await page.evaluate((o) => {
+    window.__longTasks = [];
+    window.__gtPipelineOptions = o;
+  }, PIPELINE_OPTIONS);
   const stop = sampleMemory(pid);
   const t0 = Date.now();
   await page.getByLabel('Paste notes').fill(texts.join('\n'));
@@ -231,6 +234,8 @@ function aggregate(runs) {
     merges: pick((r) => r.merges),
     silhouetteKmeans: pick((r) => r.silhouette.kmeans),
     silhouetteAgglomerative: pick((r) => r.silhouette.agglomerative),
+    bestKKmeans: pick((r) => r.bestK.kmeans),
+    bestKAgglomerative: pick((r) => r.bestK.agglomerative),
     kAgreementShare: pick((r) => (r.kAgreement === null ? null : r.kAgreement ? 1 : 0)),
     ari: pick((r) => r.ari),
     nmi: pick((r) => r.nmi),
@@ -247,7 +252,7 @@ function worstWindow(values, size = 3) {
   let worst = null;
   for (let i = 0; i + size <= values.length; i += 1) {
     const m = values.slice(i, i + size).reduce((s, x) => s + x, 0) / size;
-    if (worst === null || m < worst.mean) worst = { mean: m, seeds: [i, i + size - 1] };
+    if (worst === null || m < worst.mean) worst = { mean: m, runs: [i + 1, i + size] };
   }
   return worst;
 }
@@ -263,9 +268,17 @@ async function main() {
   });
   let browserServer;
   let browser;
+  let commit = 'unknown';
+  try {
+    commit = execFileSync('git', ['rev-parse', '--short', 'HEAD'], { encoding: 'utf8' }).trim();
+  } catch {
+    // not a git checkout
+  }
   const result = {
     name: NAME,
     date: new Date().toISOString(),
+    commit,
+    ciRun: process.env.GITHUB_RUN_ID ? `${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}` : null,
     reference: REFERENCE,
     machine: {
       platform: os.platform(),
@@ -307,6 +320,21 @@ async function main() {
     const pid = browserServer.process().pid;
     browser = await chromium.connect(browserServer.wsEndpoint());
     result.browser = `chromium ${browser.version()} (headless)`;
+
+    // Self-test: the long-task observer must see a deliberate 300 ms task.
+    const probeContext = await browser.newContext();
+    const probe = await newPage(probeContext);
+    await probe.evaluate(() => {
+      const end = performance.now() + 300;
+      while (performance.now() < end) {
+        // busy-wait on purpose
+      }
+    });
+    await probe.waitForTimeout(200);
+    const seen = await probe.evaluate(() => window.__longTasks);
+    result.longTaskSelfTest = { detected: seen.some((d) => d >= 250), entries: seen.map(Math.round) };
+    await probeContext.close();
+    log(`long-task self-test: ${result.longTaskSelfTest.detected ? 'observer works' : 'observer saw nothing'}`);
 
     for (const [name, notes] of Object.entries(DATASETS)) {
       const texts = notes.map((n) => n.text);
@@ -365,6 +393,12 @@ async function main() {
       ui: bigUi,
     };
     await ctx.close();
+  } catch (err) {
+    result.error = String(err?.stack ?? err);
+    mkdirSync('docs/benchmarks', { recursive: true });
+    writeFileSync(`docs/benchmarks/${NAME}.partial.json`, `${JSON.stringify(result, null, 2)}\n`);
+    log(`failed; partial results in docs/benchmarks/${NAME}.partial.json`);
+    throw err;
   } finally {
     await browser?.close().catch(() => {});
     await browserServer?.close().catch(() => {});
@@ -398,7 +432,12 @@ function addVerdicts(result) {
     ...Object.values(result.datasets).flatMap((d) => [d.summary.longTasksOver200.max, d.ui.longTasksOver200]),
     result.maxNotes.ui.longTasksOver200,
   );
-  b.push({ budget: 'Main-thread tasks over 200 ms (every run, including the interface runs)', threshold: '0', measured: String(lt), verdict: verdict(lt === 0) });
+  b.push({
+    budget: 'Main-thread tasks over 200 ms (every run, including the interface runs)',
+    threshold: '0',
+    measured: result.longTaskSelfTest?.detected ? String(lt) : 'observer self-test failed',
+    verdict: result.longTaskSelfTest?.detected ? verdict(lt === 0) : 'not measured',
+  });
   result.budgets = b;
   if (sample) {
     const runs = sample.runs;
@@ -409,6 +448,15 @@ function addVerdicts(result) {
       { check: 'Demo sample: worst mean ARI over 3 consecutive runs (for information)', measured: sample.worstAriWindow ? sample.worstAriWindow.mean.toFixed(3) : 'n/a', verdict: sample.worstAriWindow ? (sample.worstAriWindow.mean >= 0.6 ? 'pass' : 'below 0.6') : 'n/a' },
     ];
   }
+}
+
+function selectedCounts(runs) {
+  const counts = new Map();
+  for (const r of runs) {
+    const key = r.selected ? `${r.selected.algorithm} ${r.selected.k}` : 'none';
+    counts.set(key, (counts.get(key) ?? 0) + 1);
+  }
+  return [...counts].map(([k, n]) => `${k}: ${n}`).join('; ');
 }
 
 const f1 = (x) => (x === null || x === undefined ? 'n/a' : Number(x).toFixed(1));
@@ -422,6 +470,7 @@ function markdown(r) {
   L.push(r.reference ? 'Measured on the reference setup in docs/adr/001-runtime.md.' : '**Not the reference setup**: indicative only; published figures come from reference runs.', '');
   L.push('| | |', '|---|---|');
   L.push(`| Date | ${r.date} |`);
+  L.push(`| Commit | ${r.commit}${r.ciRun ? ` (CI run ${r.ciRun})` : ''} |`);
   L.push(`| Machine | ${r.machine.cpu}, ${r.machine.cores} cores, ${(r.machine.memoryBytes / 1024 ** 3).toFixed(0)} GB, ${r.machine.platform}/${r.machine.arch} |`);
   L.push(`| Browser | ${r.browser} |`, `| Model | ${r.model.id} @ ${r.model.revision.slice(0, 7)} (${r.model.dtype}) |`);
   L.push(`| Constants | ${Object.entries(r.constants).map(([k, v]) => `${k}=${v}`).join(', ')} |`);
@@ -450,6 +499,9 @@ function markdown(r) {
   row('Small themes merged', (d) => range(d.summary.merges));
   row('Best silhouette, k-means', (d) => range(d.summary.silhouetteKmeans, f3));
   row('Best silhouette, agglomerative', (d) => range(d.summary.silhouetteAgglomerative, f3));
+  row('k with the best silhouette, k-means', (d) => range(d.summary.bestKKmeans));
+  row('k with the best silhouette, agglomerative', (d) => range(d.summary.bestKAgglomerative));
+  row('Selected configuration (algorithm × k: runs)', (d) => selectedCounts(d.runs));
   row('Same best k for both algorithms (share of runs)', (d) => range(d.summary.kAgreementShare, f3));
   row('ARI vs ground truth', (d) => range(d.summary.ari, f3));
   row('Worst mean ARI over 3 consecutive runs', (d) => (d.worstAriWindow ? f3(d.worstAriWindow.mean) : 'n/a'));
@@ -472,6 +524,8 @@ function markdown(r) {
   row('Peak memory (GB)', (d) => (d.ui.peakMemoryBytes / 1024 ** 3).toFixed(2));
   const m = r.maxNotes;
   L.push('', `Max notes (${m.notes}): pipeline ${(m.totalMs / 1000).toFixed(1)} s (cluster stage ${ms(m.stageMs.cluster)} ms); through the interface ${(m.ui.totalMs / 1000).toFixed(1)} s, longest main-thread task ${m.ui.longestTaskMs} ms.`);
+  L.push('', `Long-task observer self-test: ${r.longTaskSelfTest?.detected ? `a deliberate 300 ms task was detected (${r.longTaskSelfTest.entries.join(', ')} ms)` : 'failed; long-task figures are not reliable'}.`);
+  if (Object.keys(r.pipelineOptions).length) L.push('', 'The options tried apply to every run, including the runs through the interface.');
   L.push('', 'Generated labels are not implemented yet: every theme name is keyphrase-based, so label counts are 0.');
   L.push('', '## Method', '');
   for (const [k, v] of Object.entries(r.method)) if (typeof v === 'string') L.push(`- ${k}: ${v}`);

@@ -198,6 +198,8 @@ async function run() {
   try {
     state.backend ??= await detectBackend();
     const result = await embedder.run(notes.map((n) => n.text), {
+      // Test builds only: benchmarks can try pipeline options through the real interface.
+      ...(import.meta.env.VITE_FAULT_HOOKS === '1' ? { pipelineOptions: window.__gtPipelineOptions } : {}),
       backend: state.backend,
       cache: state.cache,
       onStage: (stage) => {
