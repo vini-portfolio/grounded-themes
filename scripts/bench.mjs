@@ -187,6 +187,14 @@ async function runUiOnce(page, texts, pid) {
   const stop = sampleMemory(pid);
   const t0 = Date.now();
   await page.getByLabel('Paste notes').fill(texts.join('\n'));
+  // Typing the text into the box is the browser's own work, not the app's:
+  // record it separately and measure the app's blocking from the click on.
+  const inputBlockMs = await page.evaluate(() => {
+    const longest = Math.round(Math.max(0, ...window.__longTasks));
+    window.__longTasks = [];
+    window.__longTaskContext = [];
+    return longest;
+  });
   await page.getByRole('button', { name: 'Find themes' }).click();
   await page.waitForSelector('#app[data-themes]', { timeout: 10 * 60_000 });
   const totalMs = Date.now() - t0;
@@ -195,6 +203,7 @@ async function runUiOnce(page, texts, pid) {
   const blocks = await page.evaluate((limit) => window.__longTaskContext.filter((c) => c.ms > limit), BUDGETS.longTaskMs);
   return {
     blocks,
+    inputBlockMs,
     totalMs,
     peakMemoryBytes,
     longTasksOver200: longTasks.filter((d) => d > BUDGETS.longTaskMs).length,
@@ -319,7 +328,7 @@ async function main() {
       seeds: Array.from({ length: RUNS }, (_, i) => C.DEFAULT_SEED + i),
       cold: `fresh browser profile per run; each response delayed by its size at ${THROTTLE_MBPS} Mbit/s after fetching (parallel downloads overlap, so this approximates a shared link rather than shaping traffic)`,
       warm: 'model files cached; a new page per run (as on a repeat visit), so the model is loaded from cache each time; pipeline driven through a test hook',
-      ui: 'one run per dataset through the real interface (paste, click, wait until the themes render) to include rendering in timing and long tasks',
+      ui: 'one run per dataset through the real interface (paste, click, wait until the themes render) to include rendering; time counts from the paste, main-thread blocking from the click (filling the text box is the browser\'s own work and is reported separately)',
       memory:
         MEMORY_METHOD === 'pss'
           ? 'peak proportional set size (PSS, shared pages split) of the browser and all its processes, sampled every 100 ms'
@@ -539,7 +548,7 @@ function markdown(r) {
   row('Longest main-thread task (ms)', (d) => String(d.ui.longestTaskMs));
   row('Peak memory (GB)', (d) => (d.ui.peakMemoryBytes / 1024 ** 3).toFixed(2));
   const m = r.maxNotes;
-  L.push('', `Max notes (${m.notes}): pipeline ${(m.totalMs / 1000).toFixed(1)} s (cluster stage ${ms(m.stageMs.cluster)} ms); through the interface ${(m.ui.totalMs / 1000).toFixed(1)} s, longest main-thread task ${m.ui.longestTaskMs} ms.`);
+  L.push('', `Max notes (${m.notes}): pipeline ${(m.totalMs / 1000).toFixed(1)} s (cluster stage ${ms(m.stageMs.cluster)} ms); through the interface ${(m.ui.totalMs / 1000).toFixed(1)} s, longest main-thread task ${m.ui.longestTaskMs} ms (measured from the click; the browser's own work filling the text box with ${m.notes} lines took up to ${m.ui.inputBlockMs ?? 'n/a'} ms and is not counted).`);
   for (const b of [...ds.flatMap(([n, d]) => (d.ui.blocks ?? []).map((x) => [n, x])), ...(m.ui.blocks ?? []).map((x) => [`${m.notes} notes`, x])])
     L.push(`- Main-thread block over ${BUDGETS.longTaskMs} ms (${b[0]}, interface run): ${b[1].ms} ms, ending while the status read "${b[1].status}"${b[1].themes ? `, ${b[1].themes} themes shown` : ''}.`);
   L.push('', `Long-task observer self-test: ${r.longTaskSelfTest?.detected ? `a deliberate 300 ms task was detected (${r.longTaskSelfTest.entries.join(', ')} ms)` : 'failed; long-task figures are not reliable'}.`);
