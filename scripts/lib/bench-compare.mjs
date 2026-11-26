@@ -1,6 +1,9 @@
 // Rules for comparing two benchmark results (used by bench-compare.mjs and tests).
 // a is the baseline; b must be within the tolerances of a.
 export const TIMING_TOLERANCE = 0.25;
+// Differences under this many milliseconds are timer noise, whatever the ratio
+// (stages that take a few milliseconds can't meet a ±25% rule).
+export const TIMING_FLOOR_MS = 20;
 export const RATE_TOLERANCE_POINTS = 10;
 
 export function compareBenchmarks(a, b) {
@@ -11,8 +14,8 @@ export function compareBenchmarks(a, b) {
       rows.push({ metric, a: Math.round(x), b: 'missing', ok: false, rule: '±25%' });
       return;
     }
-    const ok = Math.abs(y - x) <= TIMING_TOLERANCE * x;
-    rows.push({ metric, a: Math.round(x), b: Math.round(y), ok, rule: '±25% of baseline' });
+    const ok = Math.abs(y - x) <= Math.max(TIMING_TOLERANCE * x, TIMING_FLOOR_MS);
+    rows.push({ metric, a: Math.round(x), b: Math.round(y), ok, rule: '±25% of baseline (or within 20 ms)' });
   };
   const rate = (metric, x, y) => {
     if (typeof x !== 'number' || typeof y !== 'number') return;

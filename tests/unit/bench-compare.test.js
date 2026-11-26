@@ -19,6 +19,11 @@ describe('benchmark comparison', () => {
     expect(r.ok).toBe(false);
     expect(r.rows.find((x) => x.metric === 'sample warm total ms').ok).toBe(false);
   });
+  it('treats differences under 20 ms as noise', () => {
+    expect(compareBenchmarks(bench(8, 4), bench(20, 4)).ok).toBe(true); // +150% but 12 ms
+    expect(compareBenchmarks(bench(8, 4), bench(40, 4)).ok).toBe(false); // 32 ms
+  });
+
   it('fails when a dataset is missing from the second result', () => {
     const r = compareBenchmarks(bench(1000, 4), { datasets: {} });
     expect(r.ok).toBe(false);

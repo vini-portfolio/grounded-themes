@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-// Compares two benchmark files: timings within ±25%, label pass rates within
-// ±10 percentage points. Usage: npm run bench:compare -- a.json b.json
+// Compares two benchmark files: timings within ±25% of the first (or within
+// 20 ms), label pass rates within ±10 percentage points. Usage: npm run bench:compare -- a.json b.json
 import { readFileSync } from 'node:fs';
 import { compareBenchmarks } from './lib/bench-compare.mjs';
 
