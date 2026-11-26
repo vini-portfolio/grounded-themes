@@ -1,7 +1,8 @@
 // Main-thread wrapper around the inference worker.
 
 /**
- * @typedef {{ vectors: Float32Array[], dims: number, truncated: number, backend: string, cacheFailed: boolean }} EmbedResult
+ * @typedef {{ vectors: Float32Array[], dims: number, themes: { label: string, keyphrases: string[], noteIndexes: number[] }[],
+ *   assignments: number[], coordinates: number[][], truncated: number, backend: string, cacheFailed: boolean }} RunResult
  * @typedef {{ kind: string, hosts: string[], message: string }} EmbedFailure
  */
 
@@ -41,12 +42,15 @@ export function createEmbedder({ onProgress = () => {} } = {}) {
       if (msg.type === 'progress') onProgress(msg);
       const entry = pending.get(msg.id);
       if (!entry) return;
+      if (msg.type === 'stage') return entry.onStage?.(msg.stage);
+      if (msg.type === 'event') return entry.onEvent?.(msg.event);
       pending.delete(msg.id);
-      if (msg.type === 'result') {
+      if (msg.type === 'run-result') {
         const vectors = [];
         for (let i = 0; i < msg.count; i += 1) vectors.push(msg.vectors.subarray(i * msg.dims, (i + 1) * msg.dims));
-        entry.resolve({ vectors, dims: msg.dims, truncated: msg.truncated, backend: msg.backend, cacheFailed: msg.cacheFailed });
-      } else {
+        const { themes, assignments, coordinates, truncated, backend, cacheFailed } = msg;
+        entry.resolve({ vectors, dims: msg.dims, themes, assignments, coordinates, truncated, backend, cacheFailed });
+      } else if (msg.type === 'error') {
         entry.reject(new EmbeddingError(msg));
       }
     });
@@ -62,16 +66,18 @@ export function createEmbedder({ onProgress = () => {} } = {}) {
 
   return {
     /**
+     * Runs the pipeline on the worker.
      * @param {string[]} texts
-     * @param {{ backend?: 'webgpu' | 'wasm', cache?: boolean }} [opts]
-     * @returns {Promise<EmbedResult>}
+     * @param {{ backend?: 'webgpu' | 'wasm', cache?: boolean, seed?: number,
+     *           onStage?: (stage: string) => void, onEvent?: (event: object) => void }} [opts]
+     * @returns {Promise<RunResult>}
      */
-    embed(texts, { backend = 'wasm', cache = true } = {}) {
+    run(texts, { backend = 'wasm', cache = true, seed = 42, onStage, onEvent } = {}) {
       if (!worker) start();
       const id = nextId++;
       return new Promise((resolve, reject) => {
-        pending.set(id, { resolve, reject });
-        worker.postMessage({ type: 'embed', id, texts, backend, cache });
+        pending.set(id, { resolve, reject, onStage, onEvent });
+        worker.postMessage({ type: 'run', id, texts, backend, cache, seed });
       });
     },
     /** Test builds only: make the worker fail in a given way on the next call. */

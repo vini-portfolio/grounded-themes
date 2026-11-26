@@ -1,0 +1,133 @@
+{
+  "name": "Bakery menu brainstorm (test set)",
+  "notes": [
+    {
+      "id": "t001",
+      "text": "Black sesame twist made with laminated dough",
+      "theme": "new recipes",
+      "domain": "bakery menu brainstorm",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "t002",
+      "text": "The pretzel rolls never browned, the lye bath was too weak",
+      "theme": "failed attempts",
+      "domain": "bakery menu brainstorm",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "t003",
+      "text": "Everyone asks for extra icing on the cinnamon buns",
+      "theme": "client favorites",
+      "domain": "bakery menu brainstorm",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "t004",
+      "text": "Maple pecan scones once the weather turns cold",
+      "theme": "seasonal products",
+      "domain": "bakery menu brainstorm",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "t005",
+      "text": "Try a cornbread muffin with jalapeno and honey butter",
+      "theme": "new recipes",
+      "domain": "bakery menu brainstorm",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "t006",
+      "text": "Cheesecake cracked across the top when it cooled too fast",
+      "theme": "failed attempts",
+      "domain": "bakery menu brainstorm",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "t007",
+      "text": "The chocolate croissant is the first thing gone each morning",
+      "theme": "client favorites",
+      "domain": "bakery menu brainstorm",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "t008",
+      "text": "Cherry hand pies for the July fruit festival",
+      "theme": "seasonal products",
+      "domain": "bakery menu brainstorm",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "t009",
+      "text": "Earl grey shortbread with a lavender glaze",
+      "theme": "new recipes",
+      "domain": "bakery menu brainstorm",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "t010",
+      "text": "Puff pastry shrank badly because we skipped resting the dough",
+      "theme": "failed attempts",
+      "domain": "bakery menu brainstorm",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "t011",
+      "text": "Customers rave about the lemon poppy seed muffin",
+      "theme": "client favorites",
+      "domain": "bakery menu brainstorm",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "t012",
+      "text": "Eggnog cupcakes for the two weeks before New Year",
+      "theme": "seasonal products",
+      "domain": "bakery menu brainstorm",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "t013",
+      "text": "Chocolate babka made with tahini instead of hazelnut spread",
+      "theme": "new recipes",
+      "domain": "bakery menu brainstorm",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "t014",
+      "text": "The bread pudding was soggy and the custard never set",
+      "theme": "failed attempts",
+      "domain": "bakery menu brainstorm",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "t015",
+      "text": "The weekend crowd lines up for the morning buns",
+      "theme": "client favorites",
+      "domain": "bakery menu brainstorm",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "t016",
+      "text": "Fig and honey tart while figs are in season in September",
+      "theme": "seasonal products",
+      "domain": "bakery menu brainstorm",
+      "author": "P5",
+      "noisy": false
+    }
+  ]
+}

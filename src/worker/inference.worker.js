@@ -1,13 +1,15 @@
 // Inference worker: the only module that imports the ML runtime. Loads the
-// embedding model once and embeds batches of note text.
+// embedding model once and runs the pipeline off the main thread.
 //
-// Messages in:  { type: 'embed', id, texts, backend?: 'webgpu' | 'wasm', cache?: boolean }
+// Messages in:  { type: 'run', id, texts, seed, backend?: 'webgpu' | 'wasm', cache?: boolean }
 //               { type: 'fault', kind }   (test builds only)
 // Messages out: { type: 'progress', file, loaded, total }
-//               { type: 'result', id, vectors: Float32Array, dims, count, truncated, backend }
+//               { type: 'stage', id, stage } and { type: 'event', id, event } during a run
+//               { type: 'run-result', id, themes, assignments, coordinates, vectors: Float32Array, dims, count, truncated, backend, cacheFailed }
 //               { type: 'error', id, kind, hosts, message }
 import { AutoModel, BertTokenizer, env, mean_pooling } from '@huggingface/transformers';
 import { classifyError } from './errors.js';
+import { runPipeline } from '../pipeline/index.js';
 import { EMBEDDING_MODEL, MAX_TOKENS, MODEL_HOST, ortPaths } from './runtime-config.js';
 
 const FAULT_HOOKS = import.meta.env.VITE_FAULT_HOOKS === '1';
@@ -163,41 +165,93 @@ function maybeFault(stage) {
   if (kind === 'device-lost') throw new Error('gt-fault-hook: WebGPU device lost');
 }
 
-async function embed({ id, texts, backend = 'wasm', cache = true }) {
-  failedHosts.clear();
-  cacheFailed = false;
-  try {
-    maybeFault('load');
-    const { tokenizer, model } = await load(backend, cache);
-    if (FAULT_HOOKS && pendingFault === 'quota') {
-      // The model is already cached from an earlier run: simulate the refusal
-      // on this run's write instead.
-      await env.customCache.put(`${MODEL_HOST}__gt_quota_probe`, new Response('x'));
-      pendingFault = null;
-    }
-    let truncated = 0;
-    for (const text of texts) {
-      if (tokenizer.encode(text).length > MAX_TOKENS) truncated += 1;
-    }
-    const inputs = tokenizer(texts, { padding: true, truncation: true, max_length: MAX_TOKENS });
+const BATCH = 32;
+
+/** Embeds texts in batches; returns unit-length mean-pooled vectors. */
+async function embedTexts(texts, backend, cache) {
+  const { tokenizer, model } = await load(backend, cache);
+  let truncated = 0;
+  const vectors = [];
+  let dims = 0;
+  for (let start = 0; start < texts.length; start += BATCH) {
+    const batch = texts.slice(start, start + BATCH);
+    for (const text of batch) if (tokenizer.encode(text).length > MAX_TOKENS) truncated += 1;
+    const inputs = tokenizer(batch, { padding: true, truncation: true, max_length: MAX_TOKENS });
     const { last_hidden_state: hidden } = await model(inputs);
     const pooled = mean_pooling(hidden, inputs.attention_mask).normalize(2, -1);
-    const vectors = new Float32Array(pooled.data);
-    const [count, dims] = pooled.dims;
-    self.postMessage({ type: 'result', id, vectors, dims, count, truncated, backend, cacheFailed }, [vectors.buffer]);
+    dims = pooled.dims[1];
+    const data = pooled.data;
+    for (let i = 0; i < batch.length; i += 1) vectors.push(Float32Array.from(data.subarray(i * dims, (i + 1) * dims)));
+  }
+  return { vectors, dims, truncated, backend };
+}
+
+function postFailure(id, err) {
+  if (String(err?.message).includes('crash pending')) return;
+  // Any failure while a request to the model host failed is a network
+  // problem, whatever the library wrapped it in.
+  let kind = classifyError(err);
+  if (failedHosts.size > 0 && kind === 'unknown') kind = 'network';
+  if (kind === 'network' && failedHosts.size === 0) failedHosts.add(new URL(MODEL_HOST).host);
+  self.postMessage({ type: 'error', id, kind, hosts: [...failedHosts], message: String(err?.message ?? err) });
+}
+
+async function prepare(backend, cache) {
+  failedHosts.clear();
+  cacheFailed = false;
+  maybeFault('load');
+  await load(backend, cache);
+  if (FAULT_HOOKS && pendingFault === 'quota') {
+    // The model is already cached from an earlier run: simulate the refusal
+    // on this run's write instead.
+    await env.customCache.put(`${MODEL_HOST}__gt_quota_probe`, new Response('x'));
+    pendingFault = null;
+  }
+}
+
+/** Runs the whole pipeline here, off the main thread, reporting each stage. */
+async function run({ id, texts, backend = 'wasm', cache = true, seed }) {
+  try {
+    await prepare(backend, cache);
+    let noteTruncated = 0;
+    let first = true;
+    const result = await runPipeline({
+      texts,
+      seed,
+      embed: async (batch) => {
+        const out = await embedTexts(batch, backend, cache);
+        if (first) noteTruncated = out.truncated; // the first call embeds the notes
+        first = false;
+        return out;
+      },
+      onStage: (stage) => self.postMessage({ type: 'stage', id, stage }),
+      onEvent: (event) => self.postMessage({ type: 'event', id, event }),
+    });
+    const flat = new Float32Array(result.vectors.length * (result.vectors[0]?.length ?? 0));
+    result.vectors.forEach((v, i) => flat.set(v, i * v.length));
+    self.postMessage(
+      {
+        type: 'run-result',
+        id,
+        themes: result.themes,
+        assignments: result.assignments,
+        coordinates: result.coordinates,
+        vectors: flat,
+        dims: result.vectors[0]?.length ?? 0,
+        count: result.vectors.length,
+        truncated: noteTruncated,
+        backend,
+        cacheFailed,
+      },
+      [flat.buffer],
+    );
   } catch (err) {
-    if (String(err?.message).includes('crash pending')) return;
-    // Any failure while a request to the model host failed is a network
-    // problem, whatever the library wrapped it in.
-    let kind = classifyError(err);
-    if (failedHosts.size > 0 && kind === 'unknown') kind = 'network';
-    if (kind === 'network' && failedHosts.size === 0) failedHosts.add(new URL(MODEL_HOST).host);
-    self.postMessage({ type: 'error', id, kind, hosts: [...failedHosts], message: String(err?.message ?? err) });
+    postFailure(id, err);
   }
 }
 
 self.addEventListener('message', (event) => {
   const msg = event.data;
-  if (msg?.type === 'embed') embed(msg);
+  if (msg?.type === 'run') run(msg);
   else if (FAULT_HOOKS && msg?.type === 'fault') pendingFault = msg.kind;
 });
