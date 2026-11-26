@@ -6,7 +6,7 @@ Grounded Themes runs or bundles the following third-party components. Each keeps
 
 | Model | Revision | License | Source |
 |---|---|---|---|
-| Xenova/all-MiniLM-L6-v2 (ONNX conversion of sentence-transformers/all-MiniLM-L6-v2) | 751bff37182d3f1213fa05d7196b954e230abad9 | Apache-2.0 | https://huggingface.co/Xenova/all-MiniLM-L6-v2 |
+| Xenova/bge-small-en-v1.5 (ONNX conversion of BAAI/bge-small-en-v1.5) | ea104dacec62c0de699686887e3f920caeb4f3e3 | MIT (upstream) | https://huggingface.co/Xenova/bge-small-en-v1.5 |
 
 ## Libraries bundled into the site
 

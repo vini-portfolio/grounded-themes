@@ -203,7 +203,7 @@ export function mergeSmallClusters(rows, labels, minSize) {
  * with the highest silhouette. Ties prefer k-means, then the smaller k.
  */
 export function selectClustering(rows, rng, opts) {
-  const { kMax, minNotesPerTheme, agglomerativeMaxN, kmeansRuns, kmeansMaxIter } = opts;
+  const { kMax, minNotesPerTheme, agglomerativeMaxN, kmeansRuns, kmeansMaxIter, kTolerance = 0 } = opts;
   const ks = kRange(rows.length, { kMax, minNotesPerTheme });
   const skipAgglomerative = rows.length > agglomerativeMaxN;
   const cut = skipAgglomerative || ks.length === 0 ? null : agglomerative(rows);
@@ -232,6 +232,13 @@ export function selectClustering(rows, rng, opts) {
     ) {
       selected = s;
     }
+  }
+  // Optional: prefer the smallest k whose silhouette is within kTolerance of the best.
+  if (selected && kTolerance > 0) {
+    const floor = selected.silhouette - kTolerance;
+    const ok = scores.filter((s) => s.silhouette >= floor);
+    ok.sort((a, b) => a.k - b.k || (a.algorithm === 'kmeans' ? -1 : 1) - (b.algorithm === 'kmeans' ? -1 : 1) || b.silhouette - a.silhouette);
+    selected = ok[0];
   }
   const labels = selected ? labelsBy.get(`${selected.algorithm}:${selected.k}`) : rows.map(() => 0);
   // Notes the two algorithms put in different groups at the selected k.

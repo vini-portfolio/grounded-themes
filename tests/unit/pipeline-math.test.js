@@ -130,6 +130,16 @@ describe('clustering', () => {
     expect(res.skipAgglomerative).toBe(false);
   });
 
+  it('with a tolerance, prefers the smallest k within it of the best silhouette', () => {
+    const opts = { kMax: 6, minNotesPerTheme: 4, agglomerativeMaxN: 150, kmeansRuns: 5, kmeansMaxIter: 50 };
+    const strict = selectClustering(rows, createRng(1), opts);
+    const loose = selectClustering(rows, createRng(1), { ...opts, kTolerance: 2 }); // every score qualifies
+    expect(loose.selected.k).toBe(2);
+    expect(loose.selected.k).toBeLessThanOrEqual(strict.selected.k);
+    const none = selectClustering(rows, createRng(1), { ...opts, kTolerance: 0 });
+    expect(none.selected).toEqual(strict.selected);
+  });
+
   it('skips agglomerative clustering above the size limit', () => {
     const res = selectClustering(rows, createRng(1), {
       kMax: 4, minNotesPerTheme: 4, agglomerativeMaxN: 10, kmeansRuns: 2, kmeansMaxIter: 20,

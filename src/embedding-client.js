@@ -48,8 +48,19 @@ export function createEmbedder({ onProgress = () => {} } = {}) {
       if (msg.type === 'run-result') {
         const vectors = [];
         for (let i = 0; i < msg.count; i += 1) vectors.push(msg.vectors.subarray(i * msg.dims, (i + 1) * msg.dims));
-        const { themes, assignments, coordinates, truncated, backend, cacheFailed } = msg;
-        entry.resolve({ vectors, dims: msg.dims, themes, assignments, coordinates, truncated, backend, cacheFailed });
+        const { themes, assignments, coordinates, truncated, backend, cacheFailed, downloadedBytes, modelId } = msg;
+        entry.resolve({
+          vectors,
+          dims: msg.dims,
+          themes,
+          assignments,
+          coordinates,
+          truncated,
+          backend,
+          cacheFailed,
+          downloadedBytes,
+          modelId,
+        });
       } else if (msg.type === 'error') {
         entry.reject(new EmbeddingError(msg));
       }
@@ -72,12 +83,12 @@ export function createEmbedder({ onProgress = () => {} } = {}) {
      *           onStage?: (stage: string) => void, onEvent?: (event: object) => void }} [opts]
      * @returns {Promise<RunResult>}
      */
-    run(texts, { backend = 'wasm', cache = true, seed = 42, onStage, onEvent } = {}) {
+    run(texts, { backend = 'wasm', cache = true, seed = 42, onStage, onEvent, modelOverride, pipelineOptions } = {}) {
       if (!worker) start();
       const id = nextId++;
       return new Promise((resolve, reject) => {
         pending.set(id, { resolve, reject, onStage, onEvent });
-        worker.postMessage({ type: 'run', id, texts, backend, cache, seed });
+        worker.postMessage({ type: 'run', id, texts, backend, cache, seed, modelOverride, pipelineOptions });
       });
     },
     /** Test builds only: make the worker fail in a given way on the next call. */
