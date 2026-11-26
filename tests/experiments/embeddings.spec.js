@@ -10,8 +10,10 @@ const DATASETS = { sample: load('sample'), test: load('test'), stress: load('str
 const SEEDS = process.env.SEEDS ? process.env.SEEDS.split(',').map(Number) : [42];
 const DESIGNS = process.env.SEEDS
   ? [
-      { key: 'pca28', pipelineOptions: {} },
-      { key: 'tol.01', pipelineOptions: { kTolerance: 0.01 } },
+      { key: 'min6', pipelineOptions: { minNotesPerTheme: 6 } },
+      { key: 'min8', pipelineOptions: { minNotesPerTheme: 8 } },
+      { key: 'pca48', pipelineOptions: { reducedDimensions: 48 } },
+      { key: 'pca48min6', pipelineOptions: { reducedDimensions: 48, minNotesPerTheme: 6 } },
     ]
   : process.env.SWEEP
   ? [
