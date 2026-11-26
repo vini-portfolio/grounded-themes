@@ -88,13 +88,21 @@ export function scoreCandidates(rows, similarities, themeSize) {
     .sort((a, b) => b.combined - a.combined || a.phrase.localeCompare(b.phrase));
 }
 
-/** Top n phrases, skipping a phrase whose words are all inside one already chosen. */
+/** Crude singular form for comparing phrases ("cookies" and "cookie" match). */
+export function stem(word) {
+  if (word.length > 4 && word.endsWith('ies')) return `${word.slice(0, -3)}y`;
+  if (word.length > 3 && word.endsWith('es') && /(ch|sh|x|ss)es$/.test(word)) return word.slice(0, -2);
+  if (word.length > 3 && word.endsWith('s') && !word.endsWith('ss')) return word.slice(0, -1);
+  return word;
+}
+
+/** Top n phrases, skipping a phrase whose words (singular forms) all appear in one already chosen, or vice versa. */
 export function topKeyphrases(scored, n) {
   const chosen = [];
   for (const s of scored) {
-    const words = s.phrase.split(' ');
+    const words = s.phrase.split(' ').map(stem);
     const redundant = chosen.some((c) => {
-      const cw = c.phrase.split(' ');
+      const cw = c.phrase.split(' ').map(stem);
       return words.every((x) => cw.includes(x)) || cw.every((x) => words.includes(x));
     });
     if (!redundant) chosen.push(s);

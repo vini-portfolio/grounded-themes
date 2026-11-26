@@ -55,6 +55,14 @@ describe('keyphrase scoring', () => {
       { phrase: 'croissant', combined: 0.6 },
     ];
     expect(topKeyphrases(scored, 3).map((s) => s.phrase)).toEqual(['butter prices', 'margin', 'croissant']);
+    const plural = [
+      { phrase: 'cookies', combined: 0.9 },
+      { phrase: 'cookie', combined: 0.8 },
+      { phrase: 'berries', combined: 0.7 },
+      { phrase: 'berry tart', combined: 0.6 },
+      { phrase: 'boxes', combined: 0.5 },
+    ];
+    expect(topKeyphrases(plural, 3).map((s) => s.phrase)).toEqual(['cookies', 'berries', 'boxes']);
   });
 
   it('names a theme from its first two keyphrases in sentence case', () => {

@@ -8,6 +8,26 @@ const sample = JSON.parse(readFileSync(new URL('../../data/sample.json', import.
 const schema = JSON.parse(readFileSync(new URL('../../src/pipeline/events.schema.json', import.meta.url), 'utf8'));
 const validate = new Ajv2020({ allErrors: true, strict: false }).compile(schema);
 
+/** Adjusted Rand Index between two labelings (for the log only). */
+function adjustedRandIndex(a, b) {
+  const pairs = (x) => (x * (x - 1)) / 2;
+  const table = new Map();
+  const ra = new Map();
+  const rb = new Map();
+  a.forEach((x, i) => {
+    const key = `${x}|${b[i]}`;
+    table.set(key, (table.get(key) ?? 0) + 1);
+    ra.set(x, (ra.get(x) ?? 0) + 1);
+    rb.set(b[i], (rb.get(b[i]) ?? 0) + 1);
+  });
+  const index = [...table.values()].reduce((s, v) => s + pairs(v), 0);
+  const sa = [...ra.values()].reduce((s, v) => s + pairs(v), 0);
+  const sb = [...rb.values()].reduce((s, v) => s + pairs(v), 0);
+  const expected = (sa * sb) / pairs(a.length);
+  const max = (sa + sb) / 2;
+  return Math.round(((index - expected) / (max - expected)) * 1000) / 1000;
+}
+
 /** Records every text the status line shows. */
 async function recordStatus(page) {
   await page.evaluate(() => {
@@ -30,8 +50,10 @@ test.describe('themes', () => {
     // Report what the real model produced, for tuning (not asserted here).
     const summary = await page.evaluate(() => {
       const c = window.__gtState.events.find((e) => e.stage === 'cluster').payload;
-      return { selected: c.selected, merges: c.merges.length, labels: window.__gtState.themes.map((t) => `${t.label} (${t.noteIndexes.length})`) };
+      return { selected: c.selected, merges: c.merges.length, assignments: c.assignments, labels: window.__gtState.themes.map((t) => `${t.label} (${t.noteIndexes.length})`) };
     });
+    summary.ari = adjustedRandIndex(summary.assignments, sample.map((n) => n.theme));
+    delete summary.assignments;
     console.log(`demo sample themes: ${JSON.stringify(summary)}`);
     expect(count).toBeGreaterThanOrEqual(2);
     await expect(page.locator('.theme')).toHaveCount(count);
