@@ -1,13 +1,13 @@
 {
   "name": "2026-11-26-ci-min4-tol02",
-  "date": "2026-11-26T21:57:46.814Z",
-  "commit": "15b6810",
-  "ciRun": "vini-portfolio/grounded-themes/actions/runs/45899752823",
+  "date": "2026-11-26T23:15:32.032Z",
+  "commit": "0348d85",
+  "ciRun": "vini-portfolio/grounded-themes/actions/runs/45907930009",
   "reference": false,
   "machine": {
     "platform": "linux",
     "arch": "x64",
-    "cpu": "AMD EPYC 9V45 96-Core Processor",
+    "cpu": "AMD EPYC 9V74 80-Core Processor",
     "cores": 4,
     "memoryBytes": 16759431168
   },
@@ -45,7 +45,7 @@
     ],
     "cold": "fresh browser profile per run; each response delayed by its size at 50 Mbit/s after fetching (parallel downloads overlap, so this approximates a shared link rather than shaping traffic)",
     "warm": "model files cached; a new page per run (as on a repeat visit), so the model is loaded from cache each time; pipeline driven through a test hook",
-    "ui": "one run per dataset through the real interface (paste, click, wait until the themes render) to include rendering in timing and long tasks",
+    "ui": "one run per dataset through the real interface (paste, click, wait until the themes render) to include rendering; time counts from the paste, main-thread blocking from the click (filling the text box is the browser's own work and is reported separately)",
     "memory": "peak proportional set size (PSS, shared pages split) of the browser and all its processes, sampled every 100 ms",
     "longTasks": "main-thread blocking measured by a 20 ms heartbeat on the page: each gap between ticks beyond 20 ms counts as a task of that length (the Long Tasks API reports nothing in headless Chromium); validated by a deliberate 300 ms task before the runs",
     "backend": "WebAssembly (headless browsers have no GPU adapter)",
@@ -59,15 +59,15 @@
         "runs": [
           {
             "seed": 42,
-            "totalMs": 22334,
-            "loadMs": 20010,
+            "totalMs": 21719,
+            "loadMs": 19543,
             "stageMs": {
-              "embed": 1806.9,
-              "reduce": 14.8,
-              "cluster": 47.8,
-              "extract": 275.9,
+              "embed": 1527.9,
+              "reduce": 23.3,
+              "cluster": 79,
+              "extract": 364.3,
               "label": 0,
-              "project": 4.7
+              "project": 4.9
             },
             "downloadedBytes": 61641705,
             "themes": 5,
@@ -94,7 +94,7 @@
             },
             "ari": 0.8046727937105526,
             "nmi": 0.8383493091597665,
-            "peakMemoryBytes": 761182208,
+            "peakMemoryBytes": 762480640,
             "longTasksOver200": 0,
             "longestTaskMs": 0,
             "backend": "wasm"
@@ -102,40 +102,40 @@
         ],
         "summary": {
           "totalMs": {
-            "mean": 22334,
-            "min": 22334,
-            "max": 22334,
+            "mean": 21719,
+            "min": 21719,
+            "max": 21719,
             "n": 1
           },
           "loadMs": {
-            "mean": 20010,
-            "min": 20010,
-            "max": 20010,
+            "mean": 19543,
+            "min": 19543,
+            "max": 19543,
             "n": 1
           },
           "stageMs": {
             "embed": {
-              "mean": 1806.9,
-              "min": 1806.9,
-              "max": 1806.9,
+              "mean": 1527.9,
+              "min": 1527.9,
+              "max": 1527.9,
               "n": 1
             },
             "reduce": {
-              "mean": 14.8,
-              "min": 14.8,
-              "max": 14.8,
+              "mean": 23.3,
+              "min": 23.3,
+              "max": 23.3,
               "n": 1
             },
             "cluster": {
-              "mean": 47.8,
-              "min": 47.8,
-              "max": 47.8,
+              "mean": 79,
+              "min": 79,
+              "max": 79,
               "n": 1
             },
             "extract": {
-              "mean": 275.9,
-              "min": 275.9,
-              "max": 275.9,
+              "mean": 364.3,
+              "min": 364.3,
+              "max": 364.3,
               "n": 1
             },
             "label": {
@@ -145,9 +145,9 @@
               "n": 1
             },
             "project": {
-              "mean": 4.7,
-              "min": 4.7,
-              "max": 4.7,
+              "mean": 4.9,
+              "min": 4.9,
+              "max": 4.9,
               "n": 1
             }
           },
@@ -212,9 +212,9 @@
             "n": 1
           },
           "peakMemoryBytes": {
-            "mean": 761182208,
-            "min": 761182208,
-            "max": 761182208,
+            "mean": 762480640,
+            "min": 762480640,
+            "max": 762480640,
             "n": 1
           },
           "longTasksOver200": {
@@ -246,15 +246,15 @@
       "runs": [
         {
           "seed": 42,
-          "totalMs": 2910,
-          "loadMs": 960,
+          "totalMs": 3719,
+          "loadMs": 1046,
           "stageMs": {
-            "embed": 1534.7,
-            "reduce": 24.1,
-            "cluster": 70.2,
-            "extract": 281.2,
+            "embed": 2198.6,
+            "reduce": 15.3,
+            "cluster": 57.1,
+            "extract": 360,
             "label": 0,
-            "project": 4
+            "project": 4.8
           },
           "downloadedBytes": 0,
           "themes": 5,
@@ -281,22 +281,22 @@
           },
           "ari": 0.8046727937105526,
           "nmi": 0.8383493091597665,
-          "peakMemoryBytes": 842226688,
+          "peakMemoryBytes": 753251328,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
         },
         {
           "seed": 43,
-          "totalMs": 3372,
-          "loadMs": 977,
+          "totalMs": 3985,
+          "loadMs": 1083,
           "stageMs": {
-            "embed": 1776.4,
-            "reduce": 14.8,
-            "cluster": 65.3,
-            "extract": 499.6,
-            "label": 0.2,
-            "project": 5.2
+            "embed": 2114.6,
+            "reduce": 24.6,
+            "cluster": 77.1,
+            "extract": 644.7,
+            "label": 0.1,
+            "project": 6.1
           },
           "downloadedBytes": 0,
           "themes": 9,
@@ -323,22 +323,22 @@
           },
           "ari": 0.4673913043478261,
           "nmi": 0.6083201751210502,
-          "peakMemoryBytes": 841992192,
+          "peakMemoryBytes": 839453696,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
         },
         {
           "seed": 44,
-          "totalMs": 2975,
-          "loadMs": 946,
+          "totalMs": 3066,
+          "loadMs": 1109,
           "stageMs": {
-            "embed": 1609.1,
-            "reduce": 26.2,
-            "cluster": 63.7,
-            "extract": 289.6,
-            "label": 0,
-            "project": 5
+            "embed": 1404.8,
+            "reduce": 19.9,
+            "cluster": 91.6,
+            "extract": 397.2,
+            "label": 0.1,
+            "project": 6.7
           },
           "downloadedBytes": 0,
           "themes": 5,
@@ -365,22 +365,22 @@
           },
           "ari": 0.6874826687371749,
           "nmi": 0.7566089047025152,
-          "peakMemoryBytes": 850607104,
+          "peakMemoryBytes": 829897728,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
         },
         {
           "seed": 45,
-          "totalMs": 3054,
-          "loadMs": 996,
+          "totalMs": 3565,
+          "loadMs": 1049,
           "stageMs": {
-            "embed": 1712.5,
-            "reduce": 15.7,
-            "cluster": 67.3,
-            "extract": 224.2,
+            "embed": 2078.2,
+            "reduce": 20.3,
+            "cluster": 86.4,
+            "extract": 277.7,
             "label": 0,
-            "project": 5.2
+            "project": 17.2
           },
           "downloadedBytes": 0,
           "themes": 4,
@@ -407,22 +407,22 @@
           },
           "ari": 0.7011190624849911,
           "nmi": 0.8222956863202169,
-          "peakMemoryBytes": 828013568,
+          "peakMemoryBytes": 821148672,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
         },
         {
           "seed": 46,
-          "totalMs": 3446,
-          "loadMs": 1005,
+          "totalMs": 3927,
+          "loadMs": 1062,
           "stageMs": {
-            "embed": 1807.8,
-            "reduce": 23.2,
-            "cluster": 63.2,
-            "extract": 505.4,
-            "label": 0.2,
-            "project": 6
+            "embed": 2060.1,
+            "reduce": 18.9,
+            "cluster": 89.8,
+            "extract": 656.2,
+            "label": 0.1,
+            "project": 5.5
           },
           "downloadedBytes": 0,
           "themes": 9,
@@ -449,22 +449,22 @@
           },
           "ari": 0.4673913043478261,
           "nmi": 0.6083201751210502,
-          "peakMemoryBytes": 773299200,
+          "peakMemoryBytes": 818019328,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
         },
         {
           "seed": 47,
-          "totalMs": 3069,
-          "loadMs": 1104,
+          "totalMs": 3922,
+          "loadMs": 1085,
           "stageMs": {
-            "embed": 1190.1,
-            "reduce": 42.7,
-            "cluster": 137.8,
-            "extract": 549.9,
-            "label": 0,
-            "project": 5.6
+            "embed": 2065.9,
+            "reduce": 15.4,
+            "cluster": 82.4,
+            "extract": 632.6,
+            "label": 0.1,
+            "project": 4.9
           },
           "downloadedBytes": 0,
           "themes": 9,
@@ -491,22 +491,22 @@
           },
           "ari": 0.4673913043478261,
           "nmi": 0.6083201751210502,
-          "peakMemoryBytes": 854095872,
+          "peakMemoryBytes": 788605952,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
         },
         {
           "seed": 48,
-          "totalMs": 3478,
-          "loadMs": 1047,
+          "totalMs": 3723,
+          "loadMs": 1115,
           "stageMs": {
-            "embed": 1812.7,
-            "reduce": 14,
-            "cluster": 73.3,
-            "extract": 481.7,
+            "embed": 1807.4,
+            "reduce": 16.2,
+            "cluster": 91.4,
+            "extract": 652.5,
             "label": 0.1,
-            "project": 15
+            "project": 6.5
           },
           "downloadedBytes": 0,
           "themes": 9,
@@ -533,22 +533,22 @@
           },
           "ari": 0.4673913043478261,
           "nmi": 0.6083201751210502,
-          "peakMemoryBytes": 762473472,
+          "peakMemoryBytes": 843705344,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
         },
         {
           "seed": 49,
-          "totalMs": 3387,
-          "loadMs": 996,
+          "totalMs": 3475,
+          "loadMs": 1040,
           "stageMs": {
-            "embed": 1774.7,
-            "reduce": 18.1,
-            "cluster": 68.5,
-            "extract": 491.3,
+            "embed": 1580.3,
+            "reduce": 33,
+            "cluster": 139.2,
+            "extract": 643.1,
             "label": 0.1,
-            "project": 4.3
+            "project": 5
           },
           "downloadedBytes": 0,
           "themes": 9,
@@ -575,7 +575,7 @@
           },
           "ari": 0.4673913043478261,
           "nmi": 0.6083201751210502,
-          "peakMemoryBytes": 847551488,
+          "peakMemoryBytes": 849464320,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
@@ -583,14 +583,14 @@
         {
           "seed": 50,
           "totalMs": 3285,
-          "loadMs": 962,
+          "loadMs": 1069,
           "stageMs": {
-            "embed": 1650.2,
-            "reduce": 30.3,
-            "cluster": 54.8,
-            "extract": 547.6,
-            "label": 0.1,
-            "project": 4.7
+            "embed": 1303.4,
+            "reduce": 25.1,
+            "cluster": 86.2,
+            "extract": 761.5,
+            "label": 0,
+            "project": 5.6
           },
           "downloadedBytes": 0,
           "themes": 9,
@@ -617,20 +617,20 @@
           },
           "ari": 0.4673913043478261,
           "nmi": 0.6083201751210502,
-          "peakMemoryBytes": 853415936,
+          "peakMemoryBytes": 755549184,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
         },
         {
           "seed": 51,
-          "totalMs": 2985,
-          "loadMs": 1006,
+          "totalMs": 3512,
+          "loadMs": 1057,
           "stageMs": {
-            "embed": 1618.3,
-            "reduce": 22.5,
-            "cluster": 59.8,
-            "extract": 238.9,
+            "embed": 2038.6,
+            "reduce": 24.1,
+            "cluster": 67.6,
+            "extract": 284.3,
             "label": 0.1,
             "project": 5.5
           },
@@ -659,7 +659,7 @@
           },
           "ari": 0.6312234658433037,
           "nmi": 0.7378953735003239,
-          "peakMemoryBytes": 844512256,
+          "peakMemoryBytes": 838456320,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
@@ -667,52 +667,52 @@
       ],
       "summary": {
         "totalMs": {
-          "mean": 3196.1,
-          "min": 2910,
-          "max": 3478,
+          "mean": 3617.9,
+          "min": 3066,
+          "max": 3985,
           "n": 10
         },
         "loadMs": {
-          "mean": 999.9,
-          "min": 946,
-          "max": 1104,
+          "mean": 1071.5,
+          "min": 1040,
+          "max": 1115,
           "n": 10
         },
         "stageMs": {
           "embed": {
-            "mean": 1648.6500000000003,
-            "min": 1190.1,
-            "max": 1812.7,
+            "mean": 1865.1899999999998,
+            "min": 1303.4,
+            "max": 2198.6,
             "n": 10
           },
           "reduce": {
-            "mean": 23.160000000000004,
-            "min": 14,
-            "max": 42.7,
+            "mean": 21.279999999999998,
+            "min": 15.3,
+            "max": 33,
             "n": 10
           },
           "cluster": {
-            "mean": 72.38999999999999,
-            "min": 54.8,
-            "max": 137.8,
+            "mean": 86.88000000000001,
+            "min": 57.1,
+            "max": 139.2,
             "n": 10
           },
           "extract": {
-            "mean": 410.93999999999994,
-            "min": 224.2,
-            "max": 549.9,
+            "mean": 530.98,
+            "min": 277.7,
+            "max": 761.5,
             "n": 10
           },
           "label": {
-            "mean": 0.07999999999999999,
+            "mean": 0.06999999999999999,
             "min": 0,
-            "max": 0.2,
+            "max": 0.1,
             "n": 10
           },
           "project": {
-            "mean": 6.05,
-            "min": 4,
-            "max": 15,
+            "mean": 6.779999999999999,
+            "min": 4.8,
+            "max": 17.2,
             "n": 10
           }
         },
@@ -777,9 +777,9 @@
           "n": 10
         },
         "peakMemoryBytes": {
-          "mean": 829818777.6,
-          "min": 762473472,
-          "max": 854095872,
+          "mean": 813755187.2,
+          "min": 753251328,
+          "max": 849464320,
           "n": 10
         },
         "longTasksOver200": {
@@ -815,8 +815,10 @@
         ]
       },
       "ui": {
-        "totalMs": 3431,
-        "peakMemoryBytes": 862800896,
+        "blocks": [],
+        "inputBlockMs": 0,
+        "totalMs": 3470,
+        "peakMemoryBytes": 874730496,
         "longTasksOver200": 0,
         "longestTaskMs": 0
       }
@@ -828,15 +830,15 @@
         "runs": [
           {
             "seed": 42,
-            "totalMs": 20295,
-            "loadMs": 19232,
+            "totalMs": 20801,
+            "loadMs": 19906,
             "stageMs": {
-              "embed": 681.6,
-              "reduce": 5.1,
-              "cluster": 16.6,
-              "extract": 156.8,
+              "embed": 478.8,
+              "reduce": 6.5,
+              "cluster": 6.2,
+              "extract": 190.7,
               "label": 0.1,
-              "project": 2.1
+              "project": 2
             },
             "downloadedBytes": 61641705,
             "themes": 2,
@@ -863,7 +865,7 @@
             },
             "ari": 0.2857142857142857,
             "nmi": 0.5771596324111234,
-            "peakMemoryBytes": 857893888,
+            "peakMemoryBytes": 754869248,
             "longTasksOver200": 0,
             "longestTaskMs": 0,
             "backend": "wasm"
@@ -871,40 +873,40 @@
         ],
         "summary": {
           "totalMs": {
-            "mean": 20295,
-            "min": 20295,
-            "max": 20295,
+            "mean": 20801,
+            "min": 20801,
+            "max": 20801,
             "n": 1
           },
           "loadMs": {
-            "mean": 19232,
-            "min": 19232,
-            "max": 19232,
+            "mean": 19906,
+            "min": 19906,
+            "max": 19906,
             "n": 1
           },
           "stageMs": {
             "embed": {
-              "mean": 681.6,
-              "min": 681.6,
-              "max": 681.6,
+              "mean": 478.8,
+              "min": 478.8,
+              "max": 478.8,
               "n": 1
             },
             "reduce": {
-              "mean": 5.1,
-              "min": 5.1,
-              "max": 5.1,
+              "mean": 6.5,
+              "min": 6.5,
+              "max": 6.5,
               "n": 1
             },
             "cluster": {
-              "mean": 16.6,
-              "min": 16.6,
-              "max": 16.6,
+              "mean": 6.2,
+              "min": 6.2,
+              "max": 6.2,
               "n": 1
             },
             "extract": {
-              "mean": 156.8,
-              "min": 156.8,
-              "max": 156.8,
+              "mean": 190.7,
+              "min": 190.7,
+              "max": 190.7,
               "n": 1
             },
             "label": {
@@ -914,9 +916,9 @@
               "n": 1
             },
             "project": {
-              "mean": 2.1,
-              "min": 2.1,
-              "max": 2.1,
+              "mean": 2,
+              "min": 2,
+              "max": 2,
               "n": 1
             }
           },
@@ -981,9 +983,9 @@
             "n": 1
           },
           "peakMemoryBytes": {
-            "mean": 857893888,
-            "min": 857893888,
-            "max": 857893888,
+            "mean": 754869248,
+            "min": 754869248,
+            "max": 754869248,
             "n": 1
           },
           "longTasksOver200": {
@@ -1015,15 +1017,15 @@
       "runs": [
         {
           "seed": 42,
-          "totalMs": 1896,
-          "loadMs": 956,
+          "totalMs": 2428,
+          "loadMs": 1057,
           "stageMs": {
-            "embed": 678.1,
-            "reduce": 27.3,
-            "cluster": 26.9,
-            "extract": 151.7,
-            "label": 0,
-            "project": 24.6
+            "embed": 1063.5,
+            "reduce": 22,
+            "cluster": 38.5,
+            "extract": 206.9,
+            "label": 0.1,
+            "project": 2.8
           },
           "downloadedBytes": 0,
           "themes": 2,
@@ -1050,20 +1052,62 @@
           },
           "ari": 0.2857142857142857,
           "nmi": 0.5771596324111234,
-          "peakMemoryBytes": 842799104,
+          "peakMemoryBytes": 843400192,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
         },
         {
           "seed": 43,
-          "totalMs": 2199,
-          "loadMs": 968,
+          "totalMs": 2631,
+          "loadMs": 997,
           "stageMs": {
-            "embed": 793.4,
-            "reduce": 13.5,
-            "cluster": 24.7,
-            "extract": 363.1,
+            "embed": 1079.5,
+            "reduce": 5.7,
+            "cluster": 10.7,
+            "extract": 500.4,
+            "label": 0,
+            "project": 1.9
+          },
+          "downloadedBytes": 0,
+          "themes": 2,
+          "selected": {
+            "algorithm": "kmeans",
+            "k": 2,
+            "silhouette": 0.142221
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.151226,
+            "agglomerative": 0.155085
+          },
+          "bestK": {
+            "kmeans": 4,
+            "agglomerative": 4
+          },
+          "kAgreement": true,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 2
+          },
+          "ari": 0.25396825396825395,
+          "nmi": 0.4787358769176763,
+          "peakMemoryBytes": 841023488,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 44,
+          "totalMs": 2290,
+          "loadMs": 1103,
+          "stageMs": {
+            "embed": 986.2,
+            "reduce": 4.6,
+            "cluster": 4.9,
+            "extract": 153.5,
             "label": 0.1,
             "project": 2.1
           },
@@ -1092,64 +1136,22 @@
           },
           "ari": 0.25396825396825395,
           "nmi": 0.4787358769176763,
-          "peakMemoryBytes": 850212864,
-          "longTasksOver200": 0,
-          "longestTaskMs": 0,
-          "backend": "wasm"
-        },
-        {
-          "seed": 44,
-          "totalMs": 1600,
-          "loadMs": 979,
-          "stageMs": {
-            "embed": 383.8,
-            "reduce": 12.3,
-            "cluster": 22.2,
-            "extract": 167.2,
-            "label": 0.1,
-            "project": 4.3
-          },
-          "downloadedBytes": 0,
-          "themes": 2,
-          "selected": {
-            "algorithm": "kmeans",
-            "k": 2,
-            "silhouette": 0.142221
-          },
-          "merges": 0,
-          "silhouette": {
-            "kmeans": 0.151226,
-            "agglomerative": 0.155085
-          },
-          "bestK": {
-            "kmeans": 4,
-            "agglomerative": 4
-          },
-          "kAgreement": true,
-          "labels": {
-            "firstAttempt": 0,
-            "afterRetry": 0,
-            "fallback": 0,
-            "keyphraseOnly": 2
-          },
-          "ari": 0.25396825396825395,
-          "nmi": 0.4787358769176763,
-          "peakMemoryBytes": 688957440,
+          "peakMemoryBytes": 764960768,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
         },
         {
           "seed": 45,
-          "totalMs": 2212,
-          "loadMs": 1028,
+          "totalMs": 2497,
+          "loadMs": 1130,
           "stageMs": {
-            "embed": 732,
-            "reduce": 10.1,
-            "cluster": 18.3,
-            "extract": 383.1,
-            "label": 0.2,
-            "project": 5.2
+            "embed": 1128.4,
+            "reduce": 13.6,
+            "cluster": 15.6,
+            "extract": 169.6,
+            "label": 0,
+            "project": 2.3
           },
           "downloadedBytes": 0,
           "themes": 2,
@@ -1176,22 +1178,22 @@
           },
           "ari": 0.25396825396825395,
           "nmi": 0.4787358769176763,
-          "peakMemoryBytes": 852289536,
+          "peakMemoryBytes": 836608000,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
         },
         {
           "seed": 46,
-          "totalMs": 1574,
-          "loadMs": 987,
+          "totalMs": 2655,
+          "loadMs": 1094,
           "stageMs": {
-            "embed": 358.8,
-            "reduce": 9.8,
-            "cluster": 20.9,
-            "extract": 162.8,
-            "label": 0,
-            "project": 1.7
+            "embed": 1039.2,
+            "reduce": 23.5,
+            "cluster": 6.8,
+            "extract": 453.8,
+            "label": 0.1,
+            "project": 2.3
           },
           "downloadedBytes": 0,
           "themes": 2,
@@ -1218,22 +1220,22 @@
           },
           "ari": 0.25396825396825395,
           "nmi": 0.4787358769176763,
-          "peakMemoryBytes": 766838784,
+          "peakMemoryBytes": 800443392,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
         },
         {
           "seed": 47,
-          "totalMs": 1847,
-          "loadMs": 917,
+          "totalMs": 2520,
+          "loadMs": 1110,
           "stageMs": {
-            "embed": 707.1,
-            "reduce": 9.9,
-            "cluster": 40.4,
-            "extract": 137.2,
+            "embed": 1068.6,
+            "reduce": 18.5,
+            "cluster": 52.8,
+            "extract": 229.7,
             "label": 0.1,
-            "project": 1.8
+            "project": 2.2
           },
           "downloadedBytes": 0,
           "themes": 2,
@@ -1260,22 +1262,22 @@
           },
           "ari": 0.2857142857142857,
           "nmi": 0.5771596324111234,
-          "peakMemoryBytes": 853735424,
+          "peakMemoryBytes": 847143936,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
         },
         {
           "seed": 48,
-          "totalMs": 1571,
-          "loadMs": 925,
+          "totalMs": 2663,
+          "loadMs": 1091,
           "stageMs": {
-            "embed": 389.3,
-            "reduce": 23,
-            "cluster": 26.3,
-            "extract": 157.2,
-            "label": 0.1,
-            "project": 19.2
+            "embed": 1100.3,
+            "reduce": 6.5,
+            "cluster": 10.7,
+            "extract": 419,
+            "label": 0,
+            "project": 2.1
           },
           "downloadedBytes": 0,
           "themes": 2,
@@ -1302,22 +1304,22 @@
           },
           "ari": 0.2857142857142857,
           "nmi": 0.5771596324111234,
-          "peakMemoryBytes": 835409920,
+          "peakMemoryBytes": 781755392,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
         },
         {
           "seed": 49,
-          "totalMs": 2068,
-          "loadMs": 947,
+          "totalMs": 2175,
+          "loadMs": 1128,
           "stageMs": {
-            "embed": 722.7,
-            "reduce": 4.1,
+            "embed": 816,
+            "reduce": 4,
             "cluster": 6.1,
-            "extract": 352.2,
+            "extract": 182,
             "label": 0,
-            "project": 1.8
+            "project": 2.5
           },
           "downloadedBytes": 0,
           "themes": 2,
@@ -1344,22 +1346,22 @@
           },
           "ari": 0.25396825396825395,
           "nmi": 0.4787358769176763,
-          "peakMemoryBytes": 850814976,
+          "peakMemoryBytes": 768987136,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
         },
         {
           "seed": 50,
-          "totalMs": 1841,
-          "loadMs": 927,
+          "totalMs": 2394,
+          "loadMs": 1059,
           "stageMs": {
-            "embed": 697.2,
-            "reduce": 7.9,
-            "cluster": 42,
-            "extract": 133.5,
-            "label": 0,
-            "project": 1.7
+            "embed": 1054.8,
+            "reduce": 35,
+            "cluster": 7.1,
+            "extract": 199.3,
+            "label": 0.1,
+            "project": 2.8
           },
           "downloadedBytes": 0,
           "themes": 2,
@@ -1386,22 +1388,22 @@
           },
           "ari": 0.25396825396825395,
           "nmi": 0.4787358769176763,
-          "peakMemoryBytes": 852088832,
+          "peakMemoryBytes": 837394432,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
         },
         {
           "seed": 51,
-          "totalMs": 2015,
-          "loadMs": 941,
+          "totalMs": 2627,
+          "loadMs": 1033,
           "stageMs": {
-            "embed": 673.1,
-            "reduce": 27.1,
-            "cluster": 26.8,
-            "extract": 314,
-            "label": 0.1,
-            "project": 1.4
+            "embed": 1060.2,
+            "reduce": 12.5,
+            "cluster": 33.2,
+            "extract": 450.5,
+            "label": 0,
+            "project": 2.3
           },
           "downloadedBytes": 0,
           "themes": 2,
@@ -1428,7 +1430,7 @@
           },
           "ari": 0.25396825396825395,
           "nmi": 0.4787358769176763,
-          "peakMemoryBytes": 853108736,
+          "peakMemoryBytes": 845717504,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
@@ -1436,52 +1438,52 @@
       ],
       "summary": {
         "totalMs": {
-          "mean": 1882.3,
-          "min": 1571,
-          "max": 2212,
+          "mean": 2488,
+          "min": 2175,
+          "max": 2663,
           "n": 10
         },
         "loadMs": {
-          "mean": 957.5,
-          "min": 917,
-          "max": 1028,
+          "mean": 1080.2,
+          "min": 997,
+          "max": 1130,
           "n": 10
         },
         "stageMs": {
           "embed": {
-            "mean": 613.5500000000001,
-            "min": 358.8,
-            "max": 793.4,
+            "mean": 1039.67,
+            "min": 816,
+            "max": 1128.4,
             "n": 10
           },
           "reduce": {
-            "mean": 14.5,
-            "min": 4.1,
-            "max": 27.3,
+            "mean": 14.59,
+            "min": 4,
+            "max": 35,
             "n": 10
           },
           "cluster": {
-            "mean": 25.46,
-            "min": 6.1,
-            "max": 42,
+            "mean": 18.639999999999997,
+            "min": 4.9,
+            "max": 52.8,
             "n": 10
           },
           "extract": {
-            "mean": 232.2,
-            "min": 133.5,
-            "max": 383.1,
+            "mean": 296.46999999999997,
+            "min": 153.5,
+            "max": 500.4,
             "n": 10
           },
           "label": {
-            "mean": 0.06999999999999999,
+            "mean": 0.05,
             "min": 0,
-            "max": 0.2,
+            "max": 0.1,
             "n": 10
           },
           "project": {
-            "mean": 6.380000000000001,
-            "min": 1.4,
-            "max": 24.6,
+            "mean": 2.3299999999999996,
+            "min": 1.9,
+            "max": 2.8,
             "n": 10
           }
         },
@@ -1546,9 +1548,9 @@
           "n": 10
         },
         "peakMemoryBytes": {
-          "mean": 824625561.6,
-          "min": 688957440,
-          "max": 853735424,
+          "mean": 816743424,
+          "min": 764960768,
+          "max": 847143936,
           "n": 10
         },
         "longTasksOver200": {
@@ -1584,8 +1586,10 @@
         ]
       },
       "ui": {
-        "totalMs": 1893,
-        "peakMemoryBytes": 845267968,
+        "blocks": [],
+        "inputBlockMs": 0,
+        "totalMs": 2946,
+        "peakMemoryBytes": 780305408,
         "longTasksOver200": 0,
         "longestTaskMs": 0
       }
@@ -1597,15 +1601,15 @@
         "runs": [
           {
             "seed": 42,
-            "totalMs": 22638,
-            "loadMs": 19382,
+            "totalMs": 24391,
+            "loadMs": 20042,
             "stageMs": {
-              "embed": 2404.1,
-              "reduce": 60.4,
-              "cluster": 264.8,
-              "extract": 308.2,
-              "label": 0.1,
-              "project": 30.7
+              "embed": 3265.2,
+              "reduce": 82.9,
+              "cluster": 345.7,
+              "extract": 410.1,
+              "label": 0,
+              "project": 50.3
             },
             "downloadedBytes": 61641705,
             "themes": 7,
@@ -1632,7 +1636,7 @@
             },
             "ari": 0.2875246444381068,
             "nmi": 0.5430543865833372,
-            "peakMemoryBytes": 751536128,
+            "peakMemoryBytes": 846929920,
             "longTasksOver200": 0,
             "longestTaskMs": 0,
             "backend": "wasm"
@@ -1640,52 +1644,52 @@
         ],
         "summary": {
           "totalMs": {
-            "mean": 22638,
-            "min": 22638,
-            "max": 22638,
+            "mean": 24391,
+            "min": 24391,
+            "max": 24391,
             "n": 1
           },
           "loadMs": {
-            "mean": 19382,
-            "min": 19382,
-            "max": 19382,
+            "mean": 20042,
+            "min": 20042,
+            "max": 20042,
             "n": 1
           },
           "stageMs": {
             "embed": {
-              "mean": 2404.1,
-              "min": 2404.1,
-              "max": 2404.1,
+              "mean": 3265.2,
+              "min": 3265.2,
+              "max": 3265.2,
               "n": 1
             },
             "reduce": {
-              "mean": 60.4,
-              "min": 60.4,
-              "max": 60.4,
+              "mean": 82.9,
+              "min": 82.9,
+              "max": 82.9,
               "n": 1
             },
             "cluster": {
-              "mean": 264.8,
-              "min": 264.8,
-              "max": 264.8,
+              "mean": 345.7,
+              "min": 345.7,
+              "max": 345.7,
               "n": 1
             },
             "extract": {
-              "mean": 308.2,
-              "min": 308.2,
-              "max": 308.2,
+              "mean": 410.1,
+              "min": 410.1,
+              "max": 410.1,
               "n": 1
             },
             "label": {
-              "mean": 0.1,
-              "min": 0.1,
-              "max": 0.1,
+              "mean": 0,
+              "min": 0,
+              "max": 0,
               "n": 1
             },
             "project": {
-              "mean": 30.7,
-              "min": 30.7,
-              "max": 30.7,
+              "mean": 50.3,
+              "min": 50.3,
+              "max": 50.3,
               "n": 1
             }
           },
@@ -1750,9 +1754,9 @@
             "n": 1
           },
           "peakMemoryBytes": {
-            "mean": 751536128,
-            "min": 751536128,
-            "max": 751536128,
+            "mean": 846929920,
+            "min": 846929920,
+            "max": 846929920,
             "n": 1
           },
           "longTasksOver200": {
@@ -1784,15 +1788,15 @@
       "runs": [
         {
           "seed": 42,
-          "totalMs": 4518,
-          "loadMs": 960,
+          "totalMs": 5549,
+          "loadMs": 1017,
           "stageMs": {
-            "embed": 2847.6,
-            "reduce": 75.4,
-            "cluster": 254.2,
-            "extract": 316,
-            "label": 0,
-            "project": 32.7
+            "embed": 3592.8,
+            "reduce": 84.7,
+            "cluster": 356.8,
+            "extract": 407.2,
+            "label": 0.1,
+            "project": 45.3
           },
           "downloadedBytes": 0,
           "themes": 7,
@@ -1819,22 +1823,22 @@
           },
           "ari": 0.2875246444381068,
           "nmi": 0.5430543865833372,
-          "peakMemoryBytes": 766613504,
+          "peakMemoryBytes": 744031232,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
         },
         {
           "seed": 43,
-          "totalMs": 4106,
-          "loadMs": 921,
+          "totalMs": 5158,
+          "loadMs": 1104,
           "stageMs": {
-            "embed": 2674.7,
-            "reduce": 75.2,
-            "cluster": 273.7,
-            "extract": 75.9,
+            "embed": 3459.1,
+            "reduce": 88.8,
+            "cluster": 325.1,
+            "extract": 87.1,
             "label": 0.1,
-            "project": 53.8
+            "project": 56.7
           },
           "downloadedBytes": 0,
           "themes": 2,
@@ -1861,22 +1865,22 @@
           },
           "ari": 0.07619854424665322,
           "nmi": 0.24420979241515875,
-          "peakMemoryBytes": 830704640,
+          "peakMemoryBytes": 829075456,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
         },
         {
           "seed": 44,
-          "totalMs": 3520,
-          "loadMs": 897,
+          "totalMs": 5227,
+          "loadMs": 1057,
           "stageMs": {
-            "embed": 2165,
-            "reduce": 60.1,
-            "cluster": 255.4,
-            "extract": 79.1,
-            "label": 0.1,
-            "project": 31.2
+            "embed": 3522.9,
+            "reduce": 94.1,
+            "cluster": 372.5,
+            "extract": 95.2,
+            "label": 0,
+            "project": 50
           },
           "downloadedBytes": 0,
           "themes": 2,
@@ -1903,22 +1907,22 @@
           },
           "ari": 0.07619854424665322,
           "nmi": 0.24420979241515875,
-          "peakMemoryBytes": 849975296,
+          "peakMemoryBytes": 843046912,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
         },
         {
           "seed": 45,
-          "totalMs": 4796,
-          "loadMs": 1032,
+          "totalMs": 5634,
+          "loadMs": 1043,
           "stageMs": {
-            "embed": 2948.3,
-            "reduce": 73.7,
-            "cluster": 249.2,
-            "extract": 427.9,
+            "embed": 3481.5,
+            "reduce": 99,
+            "cluster": 357.6,
+            "extract": 560.7,
             "label": 0.1,
-            "project": 31.5
+            "project": 55.2
           },
           "downloadedBytes": 0,
           "themes": 9,
@@ -1945,22 +1949,22 @@
           },
           "ari": 0.3596210785964513,
           "nmi": 0.6074348663895011,
-          "peakMemoryBytes": 768276480,
+          "peakMemoryBytes": 812748800,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
         },
         {
           "seed": 46,
-          "totalMs": 4517,
-          "loadMs": 939,
+          "totalMs": 5380,
+          "loadMs": 1112,
           "stageMs": {
-            "embed": 2783.3,
-            "reduce": 72.8,
-            "cluster": 266.3,
-            "extract": 378.9,
-            "label": 0.2,
-            "project": 43.4
+            "embed": 3262.6,
+            "reduce": 91.9,
+            "cluster": 324.8,
+            "extract": 497.3,
+            "label": 0.1,
+            "project": 55
           },
           "downloadedBytes": 0,
           "themes": 9,
@@ -1987,22 +1991,22 @@
           },
           "ari": 0.37590520640197767,
           "nmi": 0.6232396393882961,
-          "peakMemoryBytes": 842315776,
+          "peakMemoryBytes": 846245888,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
         },
         {
           "seed": 47,
-          "totalMs": 4258,
-          "loadMs": 914,
+          "totalMs": 5196,
+          "loadMs": 1078,
           "stageMs": {
-            "embed": 2671.4,
-            "reduce": 75.1,
-            "cluster": 248,
-            "extract": 283.6,
+            "embed": 3242.3,
+            "reduce": 82.3,
+            "cluster": 346.2,
+            "extract": 358.9,
             "label": 0.1,
-            "project": 31.2
+            "project": 51.8
           },
           "downloadedBytes": 0,
           "themes": 6,
@@ -2029,22 +2033,22 @@
           },
           "ari": 0.23278901108717112,
           "nmi": 0.5040555031520144,
-          "peakMemoryBytes": 849606656,
+          "peakMemoryBytes": 849928192,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
         },
         {
           "seed": 48,
-          "totalMs": 4523,
-          "loadMs": 943,
+          "totalMs": 5511,
+          "loadMs": 1053,
           "stageMs": {
-            "embed": 2689.2,
-            "reduce": 88.4,
-            "cluster": 276.3,
-            "extract": 453.5,
-            "label": 0.1,
-            "project": 38.9
+            "embed": 3344.9,
+            "reduce": 93.2,
+            "cluster": 366.2,
+            "extract": 557.1,
+            "label": 0,
+            "project": 63.3
           },
           "downloadedBytes": 0,
           "themes": 8,
@@ -2071,22 +2075,22 @@
           },
           "ari": 0.3253240755236872,
           "nmi": 0.5800178776080674,
-          "peakMemoryBytes": 846419968,
+          "peakMemoryBytes": 850206720,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
         },
         {
           "seed": 49,
-          "totalMs": 4370,
-          "loadMs": 1026,
+          "totalMs": 5260,
+          "loadMs": 1054,
           "stageMs": {
-            "embed": 2600.9,
-            "reduce": 83.2,
-            "cluster": 261.1,
-            "extract": 331.6,
+            "embed": 3272,
+            "reduce": 77.9,
+            "cluster": 337,
+            "extract": 439.3,
             "label": 0.1,
-            "project": 31.8
+            "project": 45.2
           },
           "downloadedBytes": 0,
           "themes": 7,
@@ -2113,22 +2117,22 @@
           },
           "ari": 0.27154571750584344,
           "nmi": 0.5215211907187767,
-          "peakMemoryBytes": 844953600,
+          "peakMemoryBytes": 843198464,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
         },
         {
           "seed": 50,
-          "totalMs": 4495,
-          "loadMs": 927,
+          "totalMs": 4916,
+          "loadMs": 1084,
           "stageMs": {
-            "embed": 2879.2,
-            "reduce": 76.8,
-            "cluster": 262.8,
-            "extract": 283.7,
+            "embed": 2954.4,
+            "reduce": 83.4,
+            "cluster": 320.1,
+            "extract": 392.3,
             "label": 0.1,
-            "project": 32.2
+            "project": 45.4
           },
           "downloadedBytes": 0,
           "themes": 6,
@@ -2155,22 +2159,22 @@
           },
           "ari": 0.24783258739255476,
           "nmi": 0.5075104861600929,
-          "peakMemoryBytes": 808081408,
+          "peakMemoryBytes": 844853248,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
         },
         {
           "seed": 51,
-          "totalMs": 4366,
-          "loadMs": 963,
+          "totalMs": 5184,
+          "loadMs": 1031,
           "stageMs": {
-            "embed": 2938.7,
-            "reduce": 70.2,
-            "cluster": 245.1,
-            "extract": 83.2,
+            "embed": 3542.4,
+            "reduce": 91.2,
+            "cluster": 347.8,
+            "extract": 89.4,
             "label": 0.1,
-            "project": 32.4
+            "project": 46.4
           },
           "downloadedBytes": 0,
           "themes": 2,
@@ -2197,7 +2201,7 @@
           },
           "ari": 0.07619854424665322,
           "nmi": 0.24420979241515875,
-          "peakMemoryBytes": 755357696,
+          "peakMemoryBytes": 827506688,
           "longTasksOver200": 0,
           "longestTaskMs": 0,
           "backend": "wasm"
@@ -2205,52 +2209,52 @@
       ],
       "summary": {
         "totalMs": {
-          "mean": 4346.9,
-          "min": 3520,
-          "max": 4796,
+          "mean": 5301.5,
+          "min": 4916,
+          "max": 5634,
           "n": 10
         },
         "loadMs": {
-          "mean": 952.2,
-          "min": 897,
-          "max": 1032,
+          "mean": 1063.3,
+          "min": 1017,
+          "max": 1112,
           "n": 10
         },
         "stageMs": {
           "embed": {
-            "mean": 2719.83,
-            "min": 2165,
-            "max": 2948.3,
+            "mean": 3367.4900000000002,
+            "min": 2954.4,
+            "max": 3592.8,
             "n": 10
           },
           "reduce": {
-            "mean": 75.09,
-            "min": 60.1,
-            "max": 88.4,
+            "mean": 88.65,
+            "min": 77.9,
+            "max": 99,
             "n": 10
           },
           "cluster": {
-            "mean": 259.21,
-            "min": 245.1,
-            "max": 276.3,
+            "mean": 345.40999999999997,
+            "min": 320.1,
+            "max": 372.5,
             "n": 10
           },
           "extract": {
-            "mean": 271.34,
-            "min": 75.9,
-            "max": 453.5,
+            "mean": 348.45000000000005,
+            "min": 87.1,
+            "max": 560.7,
             "n": 10
           },
           "label": {
-            "mean": 0.09999999999999999,
+            "mean": 0.07999999999999999,
             "min": 0,
-            "max": 0.2,
+            "max": 0.1,
             "n": 10
           },
           "project": {
-            "mean": 35.91,
-            "min": 31.2,
-            "max": 53.8,
+            "mean": 51.42999999999999,
+            "min": 45.2,
+            "max": 63.3,
             "n": 10
           }
         },
@@ -2315,9 +2319,9 @@
           "n": 10
         },
         "peakMemoryBytes": {
-          "mean": 816230502.4,
-          "min": 755357696,
-          "max": 849975296,
+          "mean": 829084160,
+          "min": 744031232,
+          "max": 850206720,
           "n": 10
         },
         "longTasksOver200": {
@@ -2353,8 +2357,10 @@
         ]
       },
       "ui": {
-        "totalMs": 4532,
-        "peakMemoryBytes": 779865088,
+        "blocks": [],
+        "inputBlockMs": 50,
+        "totalMs": 6061,
+        "peakMemoryBytes": 868327424,
         "longTasksOver200": 0,
         "longestTaskMs": 0
       }
@@ -2369,36 +2375,38 @@
   },
   "maxNotes": {
     "notes": 500,
-    "totalMs": 8961,
-    "loadMs": 960,
+    "totalMs": 11055,
+    "loadMs": 1114,
     "stageMs": {
-      "embed": 6402.5,
-      "reduce": 249.4,
-      "cluster": 825.8,
-      "extract": 276.7,
+      "embed": 7817.4,
+      "reduce": 346,
+      "cluster": 1147.9,
+      "extract": 324.4,
       "label": 0.1,
-      "project": 209.4
+      "project": 266.7
     },
-    "peakMemoryBytes": 810723328,
+    "peakMemoryBytes": 842994688,
     "longTasksOver200": 0,
     "ui": {
-      "totalMs": 9543,
-      "peakMemoryBytes": 1109854208,
+      "blocks": [],
+      "inputBlockMs": 279,
+      "totalMs": 11585,
+      "peakMemoryBytes": 1125033984,
       "longTasksOver200": 0,
-      "longestTaskMs": 199
+      "longestTaskMs": 0
     }
   },
   "budgets": [
     {
       "budget": "Warm run, demo sample (mean)",
       "threshold": "≤ 20 s",
-      "measured": "3.2 s",
+      "measured": "3.6 s",
       "verdict": "pass"
     },
     {
       "budget": "Cold run, demo sample, 50 Mbit/s (mean)",
       "threshold": "≤ 90 s",
-      "measured": "22.3 s",
+      "measured": "21.7 s",
       "verdict": "pass"
     },
     {
@@ -2410,7 +2418,7 @@
     {
       "budget": "Peak memory, demo sample (laptop)",
       "threshold": "≤ 2 GB",
-      "measured": "0.80 GB (PSS)",
+      "measured": "0.81 GB (PSS)",
       "verdict": "pass"
     },
     {
@@ -2422,7 +2430,7 @@
     {
       "budget": "Warm run, 500 notes (through the interface)",
       "threshold": "≤ 40 s",
-      "measured": "9.5 s",
+      "measured": "11.6 s",
       "verdict": "pass"
     },
     {

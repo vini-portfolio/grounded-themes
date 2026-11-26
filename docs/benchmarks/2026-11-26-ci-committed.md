@@ -4,7 +4,8 @@
 
 | | |
 |---|---|
-| Date | 2026-11-26T20:59:10.630Z |
+| Date | 2026-11-26T22:57:28.170Z |
+| Commit | 0348d85 (CI run vini-portfolio/grounded-themes/actions/runs/45907930009) |
 | Machine | AMD EPYC 9V74 80-Core Processor, 4 cores, 16 GB, linux/x64 |
 | Browser | chromium 159.0.8154.6 (headless) |
 | Model | Xenova/bge-small-en-v1.5 @ ea104da (q8) |
@@ -16,11 +17,11 @@
 | Budget | Threshold | Measured | Verdict |
 |---|---|---|---|
 | Warm run, demo sample (mean) | ≤ 20 s | 3.5 s | pass |
-| Cold run, demo sample, 50 Mbit/s (mean) | ≤ 90 s | 22.0 s | pass |
+| Cold run, demo sample, 50 Mbit/s (mean) | ≤ 90 s | 21.9 s | pass |
 | Total model download | ≤ 300 MB | 58.8 MB | pass |
-| Peak memory, demo sample (laptop) | ≤ 2 GB | 0.80 GB (PSS) | pass |
+| Peak memory, demo sample (laptop) | ≤ 2 GB | 0.83 GB (PSS) | pass |
 | Peak memory (iPhone) | ≤ 1 GB | measured by hand with Safari Web Inspector | not measured |
-| Warm run, 500 notes (through the interface) | ≤ 40 s | 12.0 s | pass |
+| Warm run, 500 notes (through the interface) | ≤ 40 s | 12.5 s | pass |
 | Main-thread tasks over 200 ms (every run, including the interface runs) | 0 | 0 | pass |
 
 ## Clustering quality checks
@@ -36,51 +37,56 @@
 | Metric | sample | test | stress |
 |---|---|---|---|
 | Notes / true themes | 50 / 5 | 16 / 4 | 180 / 15 |
-| Total time (ms) | 3494 (3036–4624) | 2585 (2307–2722) | 5563 (5281–5894) |
-| Model load from cache (ms) | 1118 (1040–1304) | 1084 (1046–1134) | 1082 (1035–1141) |
-| Stage embed (ms) | 1902 (1459–2759) | 1089 (1012–1188) | 3270 (2986–3667) |
-| Stage reduce (ms) | 24 (16–38) | 11 (4–29) | 90 (80–101) |
-| Stage cluster (ms) | 51 (36–76) | 8 (3–20) | 341 (317–375) |
-| Stage extract (ms) | 358 (291–431) | 353 (160–514) | 691 (536–779) |
+| Total time (ms) | 3464 (2994–3894) | 2473 (1794–2640) | 5437 (5008–5771) |
+| Model load from cache (ms) | 1090 (1030–1272) | 1060 (1029–1105) | 1071 (996–1117) |
+| Stage embed (ms) | 1884 (1517–2122) | 1020 (481–1110) | 3181 (2744–3546) |
+| Stage reduce (ms) | 24 (16–42) | 13 (4–28) | 88 (78–96) |
+| Stage cluster (ms) | 52 (34–106) | 17 (3–58) | 330 (313–359) |
+| Stage extract (ms) | 373 (280–540) | 325 (173–450) | 685 (517–742) |
 | Stage label (ms) | 0 (0–0) | 0 (0–0) | 0 (0–0) |
-| Stage project (ms) | 6 (5–11) | 3 (1–14) | 53 (44–60) |
+| Stage project (ms) | 6 (5–7) | 2 (1–3) | 48 (44–65) |
 | Themes | 4.7 (4.0–6.0) | 2.0 (2.0–2.0) | 11.3 (8.0–12.0) |
 | Small themes merged | 0.0 (0.0–0.0) | 0.0 (0.0–0.0) | 0.0 (0.0–0.0) |
 | Best silhouette, k-means | 0.133 (0.124–0.146) | 0.133 (0.112–0.142) | 0.188 (0.182–0.197) |
 | Best silhouette, agglomerative | 0.116 (0.116–0.116) | 0.141 (0.141–0.141) | n/a |
+| k with the best silhouette, k-means | 4.7 (4.0–6.0) | 2.0 (2.0–2.0) | 11.3 (8.0–12.0) |
+| k with the best silhouette, agglomerative | 8.0 (8.0–8.0) | 2.0 (2.0–2.0) | n/a |
+| Selected configuration (algorithm × k: runs) | kmeans 5: 5; kmeans 4: 4; kmeans 6: 1 | agglomerative 2: 3; kmeans 2: 7 | kmeans 12: 6; kmeans 11: 3; kmeans 8: 1 |
 | Same best k for both algorithms (share of runs) | 0.000 (0.000–0.000) | 1.000 (1.000–1.000) | n/a |
 | ARI vs ground truth | 0.632 (0.522–0.805) | 0.263 (0.254–0.286) | 0.356 (0.323–0.413) |
 | Worst mean ARI over 3 consecutive runs | 0.561 | 0.254 | 0.332 |
 | NMI vs ground truth | 0.722 (0.642–0.838) | 0.508 (0.479–0.577) | 0.597 (0.563–0.644) |
 | Labels: generated first attempt / after retry / fallback | 0.0 / 0.0 / 0.0 | 0.0 / 0.0 / 0.0 | 0.0 / 0.0 / 0.0 |
-| Peak memory (GB) | 0.74 (0.70–0.80) | 0.76 (0.71–0.79) | 0.74 (0.69–0.81) |
+| Peak memory (GB) | 0.73 (0.69–0.82) | 0.75 (0.71–0.79) | 0.75 (0.70–0.79) |
 | Main-thread tasks over 200 ms | 0 (0–0) | 0 (0–0) | 0 (0–0) |
 
 ## Cold runs per dataset (mean, range)
 
 | Metric | sample | test | stress |
 |---|---|---|---|
-| Total time (ms) | 21988 (21683–22322) | 21464 (20942–21927) | 24732 (24440–24902) |
-| Download and model load (ms) | 19583 (19363–19722) | 20077 (19981–20195) | 20051 (20000–20109) |
-| Stage embed (ms) | 1785 (1340–2018) | 899 (504–1107) | 3269 (2990–3523) |
-| Stage reduce (ms) | 20 (18–22) | 14 (7–21) | 89 (85–92) |
-| Stage cluster (ms) | 42 (34–54) | 15 (5–31) | 348 (328–375) |
-| Stage extract (ms) | 367 (338–409) | 262 (158–403) | 734 (731–736) |
-| Stage label (ms) | 0 (0–0) | 2 (0–6) | 0 (0–0) |
-| Stage project (ms) | 5 (5–7) | 2 (2–3) | 55 (45–71) |
+| Total time (ms) | 21944 (21865–22064) | 21293 (20594–21855) | 24570 (24220–25091) |
+| Download and model load (ms) | 19486 (19426–19527) | 19921 (19669–20139) | 20039 (19949–20179) |
+| Stage embed (ms) | 1868 (1749–2050) | 887 (485–1101) | 3130 (2880–3492) |
+| Stage reduce (ms) | 20 (16–27) | 14 (4–24) | 87 (79–99) |
+| Stage cluster (ms) | 37 (34–43) | 20 (3–34) | 339 (336–344) |
+| Stage extract (ms) | 346 (340–353) | 253 (161–396) | 735 (719–747) |
+| Stage label (ms) | 0 (0–0) | 0 (0–0) | 0 (0–0) |
+| Stage project (ms) | 6 (5–7) | 2 (2–2) | 49 (45–57) |
 | Model files downloaded (MB) | 58.8 (58.8–58.8) | 58.8 (58.8–58.8) | 58.8 (58.8–58.8) |
-| Peak memory (GB) | 0.79 (0.77–0.79) | 0.76 (0.72–0.80) | 0.76 (0.71–0.79) |
+| Peak memory (GB) | 0.78 (0.70–0.83) | 0.75 (0.72–0.79) | 0.74 (0.72–0.78) |
 
 ## Through the interface (one run per dataset)
 
 | Metric | sample | test | stress |
 |---|---|---|---|
-| Total time, paste to rendered themes (ms) | 3908 | 1976 | 6034 |
+| Total time, paste to rendered themes (ms) | 3883 | 2407 | 6113 |
 | Main-thread tasks over 200 ms | 0 | 0 | 0 |
 | Longest main-thread task (ms) | 0 | 0 | 0 |
-| Peak memory (GB) | 0.80 | 0.75 | 0.81 |
+| Peak memory (GB) | 0.80 | 0.71 | 0.82 |
 
-Max notes (500): pipeline 11.5 s (cluster stage 1173 ms); through the interface 12.0 s, longest main-thread task 0 ms.
+Max notes (500): pipeline 11.3 s (cluster stage 1211 ms); through the interface 12.5 s, longest main-thread task 0 ms (measured from the click; the browser's own work filling the text box with 500 lines took up to 279 ms and is not counted).
+
+Long-task observer self-test: a deliberate 300 ms task was detected (290 ms).
 
 Generated labels are not implemented yet: every theme name is keyphrase-based, so label counts are 0.
 
@@ -88,8 +94,8 @@ Generated labels are not implemented yet: every theme name is keyphrase-based, s
 
 - cold: fresh browser profile per run; each response delayed by its size at 50 Mbit/s after fetching (parallel downloads overlap, so this approximates a shared link rather than shaping traffic)
 - warm: model files cached; a new page per run (as on a repeat visit), so the model is loaded from cache each time; pipeline driven through a test hook
-- ui: one run per dataset through the real interface (paste, click, wait until the themes render) to include rendering in timing and long tasks
+- ui: one run per dataset through the real interface (paste, click, wait until the themes render) to include rendering; time counts from the paste, main-thread blocking from the click (filling the text box is the browser's own work and is reported separately)
 - memory: peak proportional set size (PSS, shared pages split) of the browser and all its processes, sampled every 100 ms
-- longTasks: PerformanceObserver longtask entries on the page (main thread) during the run
+- longTasks: main-thread blocking measured by a 20 ms heartbeat on the page: each gap between ticks beyond 20 ms counts as a task of that length (the Long Tasks API reports nothing in headless Chromium); validated by a deliberate 300 ms task before the runs
 - backend: WebAssembly (headless browsers have no GPU adapter)
 - maxNotes: 500 notes: the 246 unique dataset notes repeated; timing only
