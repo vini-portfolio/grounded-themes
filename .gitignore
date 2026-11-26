@@ -9,3 +9,5 @@ coverage/
 playwright-report/
 test-results/
 public/ort/
+dist-e2e/
+.model-cache/
