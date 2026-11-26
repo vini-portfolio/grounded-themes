@@ -3,12 +3,16 @@
 // writes docs/benchmarks/<name>.json and <name>.md with timings, download size,
 // memory, long tasks, clustering quality and budget verdicts.
 //
-// Usage: npm run bench -- [--runs N] [--name NAME] [--reference] [--no-build] [--datasets a,b]
+// Usage: npm run bench -- [--runs N] [--cold-runs M] [--name NAME] [--reference]
+//                         [--no-build] [--datasets a,b] [--option key=value ...]
 //   --runs N       warm runs per dataset (default 3); run i uses seed 42 + i
+//   --cold-runs M  cold runs per dataset, each in a fresh browser profile (default 3)
 //   --reference    mark the result as measured on the reference setup (docs/adr/001-runtime.md)
-//   --name NAME    output file name (default: <date>-<platform>)
+//   --name NAME    output file name (default: today's date, YYYY-MM-DD)
+//   --option k=v   pipeline option to try instead of the constants (repeatable)
 import { execFileSync, spawn } from 'node:child_process';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import net from 'node:net';
 import os from 'node:os';
 import { chromium } from '@playwright/test';
 import { BUDGETS, THROTTLE_MBPS } from './lib/budgets.mjs';
@@ -22,40 +26,60 @@ const opt = (name, fallback) => {
   return i > -1 ? args[i + 1] : fallback;
 };
 const RUNS = Number(opt('runs', 3));
-// --option key=value (repeatable): pipeline options to try instead of the constants.
+const COLD_RUNS = Number(opt('cold-runs', 3));
+const REFERENCE = args.includes('--reference');
+const NAME = opt('name', new Date().toISOString().slice(0, 10));
 const PIPELINE_OPTIONS = Object.fromEntries(
   args.flatMap((a, i) => (a === '--option' ? [args[i + 1].split('=')] : [])).map(([k, v]) => [k, Number(v)]),
 );
-const REFERENCE = args.includes('--reference');
-const today = new Date().toISOString().slice(0, 10);
-const NAME = opt('name', `${today}-${os.platform()}-${os.arch()}`);
 const PORT = 4175;
 const BASE = `http://localhost:${PORT}`;
 const load = (n) => JSON.parse(readFileSync(`data/${n}.json`, 'utf8')).notes;
-const DATASETS = Object.fromEntries((opt('datasets', 'sample,test,stress')).split(',').map((n) => [n, load(n)]));
+const DATASETS = Object.fromEntries(opt('datasets', 'sample,test,stress').split(',').map((n) => [n, load(n)]));
 
-// Timing set: the approved notes repeated up to the maximum note count. Used
-// for the max-notes timing budget only, never for quality.
+// Timing set: the approved notes (246 unique) repeated up to the maximum note
+// count. Used for the max-notes timing budget only, never for quality.
 const allNotes = [...load('sample'), ...load('test'), ...load('stress')];
 const TIMING_SET = Array.from({ length: BUDGETS.maxNotes }, (_, i) => allNotes[i % allNotes.length].text);
 
-function log(...m) {
-  console.log('[bench]', ...m);
-}
+const log = (...m) => console.log('[bench]', ...m);
 
-/** Total RSS (bytes) of a process and all its descendants, from `ps`. */
-function treeRss(rootPid) {
+// ---------------------------------------------------------------- memory
+// Linux: proportional set size (shared pages split between processes) from
+// /proc/<pid>/smaps_rollup. Elsewhere: resident set size from ps, which counts
+// shared pages once per process and so overstates.
+const MEMORY_METHOD = existsSync('/proc/self/smaps_rollup') ? 'pss' : 'rss';
+
+function processTree(rootPid) {
   const out = execFileSync('ps', ['-A', '-o', 'pid=,ppid=,rss='], { encoding: 'utf8' });
   const rows = out.trim().split('\n').map((l) => l.trim().split(/\s+/).map(Number));
   const children = new Map();
   for (const [pid, ppid] of rows) children.set(ppid, [...(children.get(ppid) ?? []), pid]);
   const rss = new Map(rows.map(([pid, , r]) => [pid, r * 1024]));
-  let total = 0;
+  const pids = [];
   const stack = [rootPid];
   while (stack.length) {
     const p = stack.pop();
-    total += rss.get(p) ?? 0;
+    pids.push(p);
     stack.push(...(children.get(p) ?? []));
+  }
+  return { pids, rss };
+}
+
+function treeMemory(rootPid) {
+  const { pids, rss } = processTree(rootPid);
+  let total = 0;
+  for (const pid of pids) {
+    if (MEMORY_METHOD === 'pss') {
+      try {
+        const m = /^Pss:\s+(\d+) kB/m.exec(readFileSync(`/proc/${pid}/smaps_rollup`, 'utf8'));
+        total += m ? Number(m[1]) * 1024 : 0;
+        continue;
+      } catch {
+        // process exited or not readable: fall back to RSS for it
+      }
+    }
+    total += rss.get(pid) ?? 0;
   }
   return total;
 }
@@ -64,18 +88,25 @@ function sampleMemory(pid) {
   let peak = 0;
   const timer = setInterval(() => {
     try {
-      peak = Math.max(peak, treeRss(pid));
+      peak = Math.max(peak, treeMemory(pid));
     } catch {
       // ps can fail briefly while processes start or exit
     }
-  }, 200);
+  }, 100);
   return () => {
     clearInterval(timer);
     return peak;
   };
 }
 
-/** Delays every response by its size at the given bandwidth (simulated throttling). */
+// ---------------------------------------------------------------- network
+/**
+ * Approximate throttling: each response is delayed by its size at the given
+ * bandwidth after it has been fetched. Parallel downloads overlap, so this
+ * is an approximation of a shared 50 Mbit/s link, not true traffic shaping.
+ * Playwright routes dedicated-worker requests in Chromium, so model files
+ * downloaded by the worker are throttled too.
+ */
 async function throttle(context, mbps) {
   const bytesPerMs = (mbps * 1e6) / 8 / 1000;
   await context.route('**/*', async (route) => {
@@ -86,6 +117,23 @@ async function throttle(context, mbps) {
   });
 }
 
+async function waitForPort(port, timeoutMs = 30_000) {
+  const end = Date.now() + timeoutMs;
+  while (Date.now() < end) {
+    const ok = await new Promise((resolve) => {
+      const s = net.connect(port, '127.0.0.1', () => {
+        s.end();
+        resolve(true);
+      });
+      s.on('error', () => resolve(false));
+    });
+    if (ok) return;
+    await new Promise((r) => setTimeout(r, 200));
+  }
+  throw new Error(`preview server did not start on port ${port}`);
+}
+
+// ---------------------------------------------------------------- runs
 async function newPage(context) {
   const page = await context.newPage();
   await page.addInitScript(() => {
@@ -103,7 +151,8 @@ async function newPage(context) {
   return page;
 }
 
-async function runOnce(page, texts, seed, pid) {
+/** Runs the pipeline through the test hook (returns full stage data). */
+async function runPipelineOnce(page, texts, seed, pid) {
   await page.evaluate(() => (window.__longTasks = []));
   const stop = sampleMemory(pid);
   const r = await page.evaluate(
@@ -112,7 +161,26 @@ async function runOnce(page, texts, seed, pid) {
   );
   const peakMemoryBytes = stop();
   const longTasks = await page.evaluate(() => window.__longTasks);
-  return { ...r, peakMemoryBytes, longTasks };
+  return { ...r, seed, peakMemoryBytes, longTasks };
+}
+
+/** Runs through the real UI: paste, click, wait for themes to render. */
+async function runUiOnce(page, texts, pid) {
+  await page.evaluate(() => (window.__longTasks = []));
+  const stop = sampleMemory(pid);
+  const t0 = Date.now();
+  await page.getByLabel('Paste notes').fill(texts.join('\n'));
+  await page.getByRole('button', { name: 'Find themes' }).click();
+  await page.waitForSelector('#app[data-themes]', { timeout: 10 * 60_000 });
+  const totalMs = Date.now() - t0;
+  const peakMemoryBytes = stop();
+  const longTasks = await page.evaluate(() => window.__longTasks);
+  return {
+    totalMs,
+    peakMemoryBytes,
+    longTasksOver200: longTasks.filter((d) => d > BUDGETS.longTaskMs).length,
+    longestTaskMs: Math.round(Math.max(0, ...longTasks)),
+  };
 }
 
 function summarizeRun(r, notes) {
@@ -132,12 +200,13 @@ function summarizeRun(r, notes) {
     downloadedBytes: r.downloadedBytes,
     themes: Math.max(...r.assignments) + 1,
     selected: r.cluster,
+    merges: r.merges,
     silhouette: { kmeans: km?.silhouette ?? null, agglomerative: ag?.silhouette ?? null },
     bestK: { kmeans: km?.k ?? null, agglomerative: ag?.k ?? null },
     kAgreement: km && ag ? km.k === ag.k : null,
     labels: {
       firstAttempt: sources.filter((s) => s === 'generated').length,
-      afterRetry: 0,
+      afterRetry: 0, // TODO(labels): count labels accepted after a retry once generation exists
       fallback: sources.filter((s) => s === 'fallback').length,
       keyphraseOnly: sources.filter((s) => s === 'keyphrase').length,
     },
@@ -157,7 +226,9 @@ function aggregate(runs) {
     totalMs: pick((r) => r.totalMs),
     loadMs: pick((r) => r.loadMs),
     stageMs: Object.fromEntries(stages.map((s) => [s, pick((r) => r.stageMs[s])])),
+    downloadedBytes: pick((r) => r.downloadedBytes),
     themes: pick((r) => r.themes),
+    merges: pick((r) => r.merges),
     silhouetteKmeans: pick((r) => r.silhouette.kmeans),
     silhouetteAgglomerative: pick((r) => r.silhouette.agglomerative),
     kAgreementShare: pick((r) => (r.kAgreement === null ? null : r.kAgreement ? 1 : 0)),
@@ -171,24 +242,38 @@ function aggregate(runs) {
   };
 }
 
+/** Lowest mean ARI over any window of 3 consecutive runs. */
+function worstWindow(values, size = 3) {
+  let worst = null;
+  for (let i = 0; i + size <= values.length; i += 1) {
+    const m = values.slice(i, i + size).reduce((s, x) => s + x, 0) / size;
+    if (worst === null || m < worst.mean) worst = { mean: m, seeds: [i, i + size - 1] };
+  }
+  return worst;
+}
+
 async function main() {
   if (!args.includes('--no-build')) {
     log('building the test build');
     execFileSync('npm', ['run', 'build:e2e'], { stdio: 'inherit' });
   }
-  const server = spawn('npx', ['vite', 'preview', '--outDir', 'dist-e2e', '--port', String(PORT), '--strictPort'], {
+  const viteBin = 'node_modules/vite/bin/vite.js';
+  const server = spawn(process.execPath, [viteBin, 'preview', '--outDir', 'dist-e2e', '--port', String(PORT), '--strictPort'], {
     stdio: 'ignore',
   });
-  await new Promise((r) => setTimeout(r, 3000));
-  const browserServer = await chromium.launchServer({ headless: true });
-  const pid = browserServer.process().pid;
-  const browser = await chromium.connect(browserServer.wsEndpoint());
+  let browserServer;
+  let browser;
   const result = {
     name: NAME,
     date: new Date().toISOString(),
     reference: REFERENCE,
-    machine: { platform: os.platform(), arch: os.arch(), cpu: os.cpus()[0]?.model ?? 'unknown', cores: os.cpus().length, memoryBytes: os.totalmem() },
-    browser: `chromium ${browser.version()} (headless)`,
+    machine: {
+      platform: os.platform(),
+      arch: os.arch(),
+      cpu: os.cpus()[0]?.model ?? 'unknown',
+      cores: os.cpus().length,
+      memoryBytes: os.totalmem(),
+    },
     model: { id: EMBEDDING_MODEL.id, revision: EMBEDDING_MODEL.revision, dtype: EMBEDDING_MODEL.dtype },
     pipelineOptions: PIPELINE_OPTIONS,
     constants: {
@@ -201,122 +286,196 @@ async function main() {
     },
     method: {
       runs: RUNS,
+      coldRuns: COLD_RUNS,
       seeds: Array.from({ length: RUNS }, (_, i) => C.DEFAULT_SEED + i),
-      cold: `fresh browser profile, every response delayed by size / ${THROTTLE_MBPS} Mbit/s (simulated throttling), demo sample`,
-      warm: 'model files cached; a new page per run (as on a repeat visit), so the model is loaded from cache each time',
-      memory: 'peak resident memory of the browser and all its processes, sampled every 200 ms with ps',
-      longTasks: 'PerformanceObserver longtask entries on the page during the run',
+      cold: `fresh browser profile per run; each response delayed by its size at ${THROTTLE_MBPS} Mbit/s after fetching (parallel downloads overlap, so this approximates a shared link rather than shaping traffic)`,
+      warm: 'model files cached; a new page per run (as on a repeat visit), so the model is loaded from cache each time; pipeline driven through a test hook',
+      ui: 'one run per dataset through the real interface (paste, click, wait until the themes render) to include rendering in timing and long tasks',
+      memory:
+        MEMORY_METHOD === 'pss'
+          ? 'peak proportional set size (PSS, shared pages split) of the browser and all its processes, sampled every 100 ms'
+          : 'peak resident set size (RSS) of the browser and all its processes, sampled every 100 ms with ps; RSS counts shared pages in every process, so this overstates',
+      longTasks: 'PerformanceObserver longtask entries on the page (main thread) during the run',
       backend: 'WebAssembly (headless browsers have no GPU adapter)',
+      maxNotes: `${BUDGETS.maxNotes} notes: the ${new Set(allNotes.map((n) => n.text)).size} unique dataset notes repeated; timing only`,
     },
     datasets: {},
   };
   try {
-    // Cold run on the demo sample.
-    log('cold run (demo sample)');
-    const coldContext = await browser.newContext();
-    await throttle(coldContext, THROTTLE_MBPS);
-    const coldPage = await newPage(coldContext);
-    const cold = summarizeRun({ ...(await runOnce(coldPage, DATASETS.sample?.map((n) => n.text) ?? load('sample').map((n) => n.text), C.DEFAULT_SEED, pid)), seed: C.DEFAULT_SEED }, load('sample'));
-    await coldContext.close();
-    result.cold = cold;
+    await waitForPort(PORT);
+    browserServer = await chromium.launchServer({ headless: true });
+    const pid = browserServer.process().pid;
+    browser = await chromium.connect(browserServer.wsEndpoint());
+    result.browser = `chromium ${browser.version()} (headless)`;
 
-    // Warm runs: one context whose cache is warmed first.
-    const context = await browser.newContext();
-    const warmup = await newPage(context);
-    await runOnce(warmup, load('test').map((n) => n.text), C.DEFAULT_SEED, pid);
-    await warmup.close();
     for (const [name, notes] of Object.entries(DATASETS)) {
-      const runs = [];
+      const texts = notes.map((n) => n.text);
+      const cold = [];
+      for (let i = 0; i < COLD_RUNS; i += 1) {
+        log(`${name}: cold run ${i + 1}/${COLD_RUNS}`);
+        const ctx = await browser.newContext();
+        await throttle(ctx, THROTTLE_MBPS);
+        const page = await newPage(ctx);
+        cold.push(summarizeRun(await runPipelineOnce(page, texts, C.DEFAULT_SEED, pid), notes));
+        await ctx.close();
+      }
+      const ctx = await browser.newContext();
+      const warmup = await newPage(ctx);
+      await runPipelineOnce(warmup, texts.slice(0, 8), C.DEFAULT_SEED, pid);
+      await warmup.close();
+      const warm = [];
       for (let i = 0; i < RUNS; i += 1) {
         const seed = C.DEFAULT_SEED + i;
         log(`${name}: warm run ${i + 1}/${RUNS} (seed ${seed})`);
-        const page = await newPage(context);
-        runs.push(summarizeRun({ ...(await runOnce(page, notes.map((n) => n.text), seed, pid)), seed }, notes));
+        const page = await newPage(ctx);
+        warm.push(summarizeRun(await runPipelineOnce(page, texts, seed, pid), notes));
         await page.close();
       }
-      result.datasets[name] = { notes: notes.length, trueThemes: new Set(notes.map((n) => n.theme)).size, runs, summary: aggregate(runs) };
+      log(`${name}: run through the interface`);
+      const uiPage = await newPage(ctx);
+      const ui = await runUiOnce(uiPage, texts, pid);
+      await ctx.close();
+      result.datasets[name] = {
+        notes: notes.length,
+        trueThemes: new Set(notes.map((n) => n.theme)).size,
+        cold: { runs: cold, summary: aggregate(cold) },
+        runs: warm,
+        summary: aggregate(warm),
+        worstAriWindow: worstWindow(warm.map((r) => r.ari)),
+        ui,
+      };
     }
-    log(`timing set: ${TIMING_SET.length} notes`);
-    const page = await newPage(context);
-    const big = await runOnce(page, TIMING_SET, C.DEFAULT_SEED, pid);
-    result.maxNotes = { notes: TIMING_SET.length, totalMs: big.ms, loadMs: big.loadMs, stageMs: big.stageMs, peakMemoryBytes: big.peakMemoryBytes, longTasksOver200: big.longTasks.filter((d) => d > BUDGETS.longTaskMs).length };
-    await context.close();
+
+    log(`max notes: ${TIMING_SET.length}`);
+    const ctx = await browser.newContext();
+    const warmup = await newPage(ctx);
+    await runPipelineOnce(warmup, TIMING_SET.slice(0, 8), C.DEFAULT_SEED, pid);
+    await warmup.close();
+    const page = await newPage(ctx);
+    const big = await runPipelineOnce(page, TIMING_SET, C.DEFAULT_SEED, pid);
+    const uiPage = await newPage(ctx);
+    const bigUi = await runUiOnce(uiPage, TIMING_SET, pid);
+    result.maxNotes = {
+      notes: TIMING_SET.length,
+      totalMs: big.ms,
+      loadMs: big.loadMs,
+      stageMs: big.stageMs,
+      peakMemoryBytes: big.peakMemoryBytes,
+      longTasksOver200: big.longTasks.filter((d) => d > BUDGETS.longTaskMs).length,
+      ui: bigUi,
+    };
+    await ctx.close();
   } finally {
-    await browser.close();
-    await browserServer.close();
+    await browser?.close().catch(() => {});
+    await browserServer?.close().catch(() => {});
     server.kill();
   }
 
-  const sample = result.datasets.sample?.summary;
-  const verdict = (ok) => (ok ? 'pass' : 'fail');
-  result.budgets = [
-    { budget: 'Warm run, demo sample (mean)', threshold: `≤ ${BUDGETS.warmMs / 1000} s`, measured: sample ? `${(sample.totalMs.mean / 1000).toFixed(1)} s` : 'n/a', verdict: sample ? verdict(sample.totalMs.mean <= BUDGETS.warmMs) : 'n/a' },
-    { budget: `Cold run, demo sample, ${THROTTLE_MBPS} Mbit/s`, threshold: `≤ ${BUDGETS.coldMs / 1000} s`, measured: `${(result.cold.totalMs / 1000).toFixed(1)} s`, verdict: verdict(result.cold.totalMs <= BUDGETS.coldMs) },
-    { budget: 'Total model download', threshold: `≤ ${BUDGETS.downloadBytes / 1048576} MB`, measured: `${(result.cold.downloadedBytes / 1048576).toFixed(1)} MB`, verdict: verdict(result.cold.downloadedBytes <= BUDGETS.downloadBytes) },
-    { budget: 'Peak memory, demo sample (laptop)', threshold: `≤ ${BUDGETS.peakMemoryBytes / 1024 ** 3} GB`, measured: sample ? `${(sample.peakMemoryBytes.max / 1024 ** 3).toFixed(2)} GB` : 'n/a', verdict: sample ? verdict(sample.peakMemoryBytes.max <= BUDGETS.peakMemoryBytes) : 'n/a' },
-    { budget: 'Peak memory (iPhone)', threshold: '≤ 1 GB', measured: 'measured by hand with Safari Web Inspector', verdict: 'not measured' },
-    { budget: `Warm run, ${BUDGETS.maxNotes} notes`, threshold: `≤ ${BUDGETS.maxNotesWarmMs / 1000} s`, measured: `${(result.maxNotes.totalMs / 1000).toFixed(1)} s`, verdict: verdict(result.maxNotes.totalMs <= BUDGETS.maxNotesWarmMs) },
-    { budget: 'Main-thread tasks over 200 ms (demo sample runs)', threshold: '0', measured: sample ? String(sample.longTasksOver200.max) : 'n/a', verdict: sample ? verdict(sample.longTasksOver200.max === 0) : 'n/a' },
-  ];
-  if (sample) {
-    const sampleRuns = result.datasets.sample.runs.slice(0, 3);
-    result.quality = [
-      { check: 'Demo sample: 4–8 themes in each of the first 3 runs', measured: sampleRuns.map((r) => r.themes).join(', '), verdict: verdict(sampleRuns.every((r) => r.themes >= 4 && r.themes <= 8)) },
-      { check: 'Demo sample: mean ARI of the first 3 runs ≥ 0.6', measured: (stats(sampleRuns.map((r) => r.ari)).mean ?? 0).toFixed(3), verdict: verdict(stats(sampleRuns.map((r) => r.ari)).mean >= 0.6) },
-    ];
-  }
+  addVerdicts(result);
   mkdirSync('docs/benchmarks', { recursive: true });
   writeFileSync(`docs/benchmarks/${NAME}.json`, `${JSON.stringify(result, null, 2)}\n`);
   writeFileSync(`docs/benchmarks/${NAME}.md`, markdown(result));
   log(`wrote docs/benchmarks/${NAME}.json and .md`);
 }
 
+function addVerdicts(result) {
+  const sample = result.datasets.sample;
+  const verdict = (ok) => (ok ? 'pass' : 'fail');
+  const sec = (ms) => `${(ms / 1000).toFixed(1)} s`;
+  const b = [];
+  if (sample) {
+    const s = sample.summary;
+    b.push({ budget: 'Warm run, demo sample (mean)', threshold: `≤ ${BUDGETS.warmMs / 1000} s`, measured: sec(s.totalMs.mean), verdict: verdict(s.totalMs.mean <= BUDGETS.warmMs) });
+    const c = sample.cold.summary;
+    b.push({ budget: `Cold run, demo sample, ${THROTTLE_MBPS} Mbit/s (mean)`, threshold: `≤ ${BUDGETS.coldMs / 1000} s`, measured: sec(c.totalMs.mean), verdict: verdict(c.totalMs.mean <= BUDGETS.coldMs) });
+    b.push({ budget: 'Total model download', threshold: `≤ ${BUDGETS.downloadBytes / 1048576} MB`, measured: `${(c.downloadedBytes.max / 1048576).toFixed(1)} MB`, verdict: verdict(c.downloadedBytes.max <= BUDGETS.downloadBytes) });
+    const peak = Math.max(s.peakMemoryBytes.max, c.peakMemoryBytes.max, sample.ui.peakMemoryBytes);
+    b.push({ budget: 'Peak memory, demo sample (laptop)', threshold: `≤ ${BUDGETS.peakMemoryBytes / 1024 ** 3} GB`, measured: `${(peak / 1024 ** 3).toFixed(2)} GB (${MEMORY_METHOD.toUpperCase()})`, verdict: verdict(peak <= BUDGETS.peakMemoryBytes) });
+  }
+  b.push({ budget: 'Peak memory (iPhone)', threshold: '≤ 1 GB', measured: 'measured by hand with Safari Web Inspector', verdict: 'not measured' });
+  b.push({ budget: `Warm run, ${BUDGETS.maxNotes} notes (through the interface)`, threshold: `≤ ${BUDGETS.maxNotesWarmMs / 1000} s`, measured: sec(result.maxNotes.ui.totalMs), verdict: verdict(result.maxNotes.ui.totalMs <= BUDGETS.maxNotesWarmMs) });
+  const lt = Math.max(
+    ...Object.values(result.datasets).flatMap((d) => [d.summary.longTasksOver200.max, d.ui.longTasksOver200]),
+    result.maxNotes.ui.longTasksOver200,
+  );
+  b.push({ budget: 'Main-thread tasks over 200 ms (every run, including the interface runs)', threshold: '0', measured: String(lt), verdict: verdict(lt === 0) });
+  result.budgets = b;
+  if (sample) {
+    const runs = sample.runs;
+    const meanAri = sample.summary.ari.mean;
+    result.quality = [
+      { check: 'Demo sample: 4–8 themes in every warm run', measured: runs.map((r) => r.themes).join(', '), verdict: verdict(runs.every((r) => r.themes >= 4 && r.themes <= 8)) },
+      { check: `Demo sample: mean ARI over all ${runs.length} warm runs ≥ 0.6`, measured: meanAri.toFixed(3), verdict: verdict(meanAri >= 0.6) },
+      { check: 'Demo sample: worst mean ARI over 3 consecutive runs (for information)', measured: sample.worstAriWindow ? sample.worstAriWindow.mean.toFixed(3) : 'n/a', verdict: sample.worstAriWindow ? (sample.worstAriWindow.mean >= 0.6 ? 'pass' : 'below 0.6') : 'n/a' },
+    ];
+  }
+}
+
 const f1 = (x) => (x === null || x === undefined ? 'n/a' : Number(x).toFixed(1));
 const f3 = (x) => (x === null || x === undefined ? 'n/a' : Number(x).toFixed(3));
-const range = (s, fmt = f1) => (s.n ? `${fmt(s.mean)} (${fmt(s.min)}–${fmt(s.max)})` : 'n/a');
+const ms = (x) => String(Math.round(x));
+const range = (s, fmt = f1) => (s && s.n ? `${fmt(s.mean)} (${fmt(s.min)}–${fmt(s.max)})` : 'n/a');
 
 function markdown(r) {
-  const lines = [];
-  lines.push(`# Benchmark ${r.name}`, '');
-  lines.push(`${r.reference ? 'Measured on the reference setup in docs/adr/001-runtime.md.' : '**Not the reference setup**: indicative only; published figures come from reference runs.'}`, '');
-  lines.push('| | |', '|---|---|');
-  lines.push(`| Date | ${r.date} |`, `| Machine | ${r.machine.cpu}, ${r.machine.cores} cores, ${(r.machine.memoryBytes / 1024 ** 3).toFixed(0)} GB, ${r.machine.platform}/${r.machine.arch} |`);
-  lines.push(`| Browser | ${r.browser} |`, `| Model | ${r.model.id} @ ${r.model.revision.slice(0, 7)} (${r.model.dtype}) |`);
-  lines.push(`| Constants | ${Object.entries(r.constants).map(([k, v]) => `${k}=${v}`).join(', ')} |`);
+  const L = [];
+  L.push(`# Benchmark ${r.name}`, '');
+  L.push(r.reference ? 'Measured on the reference setup in docs/adr/001-runtime.md.' : '**Not the reference setup**: indicative only; published figures come from reference runs.', '');
+  L.push('| | |', '|---|---|');
+  L.push(`| Date | ${r.date} |`);
+  L.push(`| Machine | ${r.machine.cpu}, ${r.machine.cores} cores, ${(r.machine.memoryBytes / 1024 ** 3).toFixed(0)} GB, ${r.machine.platform}/${r.machine.arch} |`);
+  L.push(`| Browser | ${r.browser} |`, `| Model | ${r.model.id} @ ${r.model.revision.slice(0, 7)} (${r.model.dtype}) |`);
+  L.push(`| Constants | ${Object.entries(r.constants).map(([k, v]) => `${k}=${v}`).join(', ')} |`);
   if (Object.keys(r.pipelineOptions).length) {
-    lines.push(`| Options tried | ${Object.entries(r.pipelineOptions).map(([k, v]) => `${k}=${v}`).join(', ')} (instead of the constants) |`);
+    L.push(`| Options tried | ${Object.entries(r.pipelineOptions).map(([k, v]) => `${k}=${v}`).join(', ')} (instead of the constants) |`);
   }
-  lines.push(`| Runs | ${r.method.runs} warm runs per dataset, seeds ${r.method.seeds.join(', ')} |`, '');
-  lines.push('## Budgets', '', '| Budget | Threshold | Measured | Verdict |', '|---|---|---|---|');
-  for (const b of r.budgets) lines.push(`| ${b.budget} | ${b.threshold} | ${b.measured} | ${b.verdict} |`);
+  L.push(`| Runs | ${r.method.coldRuns} cold and ${r.method.runs} warm runs per dataset (warm seeds ${r.method.seeds.join(', ')}), one run through the interface per dataset |`, '');
+  L.push('## Budgets', '', '| Budget | Threshold | Measured | Verdict |', '|---|---|---|---|');
+  for (const b of r.budgets) L.push(`| ${b.budget} | ${b.threshold} | ${b.measured} | ${b.verdict} |`);
   if (r.quality) {
-    lines.push('', '## Clustering quality checks', '', '| Check | Measured | Verdict |', '|---|---|---|');
-    for (const q of r.quality) lines.push(`| ${q.check} | ${q.measured} | ${q.verdict} |`);
+    L.push('', '## Clustering quality checks', '', '| Check | Measured | Verdict |', '|---|---|---|');
+    for (const q of r.quality) L.push(`| ${q.check} | ${q.measured} | ${q.verdict} |`);
   }
-  lines.push('', '## Per dataset (mean, range over warm runs)', '');
-  lines.push('| Metric | ' + Object.keys(r.datasets).join(' | ') + ' |', '|---|' + Object.keys(r.datasets).map(() => '---|').join(''));
-  const row = (label, f) => lines.push(`| ${label} | ${Object.values(r.datasets).map((d) => f(d.summary, d)).join(' | ')} |`);
-  row('Notes / true themes', (s, d) => `${d.notes} / ${d.trueThemes}`);
-  row('Total time (ms)', (s) => range(s.totalMs, (x) => Math.round(x)));
-  row('Model load from cache (ms)', (s) => range(s.loadMs, (x) => Math.round(x)));
-  for (const stage of Object.keys(Object.values(r.datasets)[0].summary.stageMs)) {
-    row(`Stage ${stage} (ms)`, (s) => range(s.stageMs[stage], (x) => Math.round(x)));
-  }
-  row('Themes', (s) => range(s.themes));
-  row('Best silhouette, k-means', (s) => range(s.silhouetteKmeans, f3));
-  row('Best silhouette, agglomerative', (s) => range(s.silhouetteAgglomerative, f3));
-  row('Same best k for both algorithms (share of runs)', (s) => range(s.kAgreementShare, f3));
-  row('ARI vs ground truth', (s) => range(s.ari, f3));
-  row('NMI vs ground truth', (s) => range(s.nmi, f3));
-  row('Labels: generated first attempt / after retry / fallback', (s) => `${f1(s.labelFirstAttempt.mean)} / ${f1(s.labelAfterRetry.mean)} / ${f1(s.labelFallback.mean)}`);
-  row('Peak memory (GB)', (s) => range(s.peakMemoryBytes, (x) => (x / 1024 ** 3).toFixed(2)));
-  row('Main-thread tasks over 200 ms', (s) => range(s.longTasksOver200, (x) => String(x)));
-  lines.push('', `Cold run (demo sample): ${(r.cold.totalMs / 1000).toFixed(1)} s total, ${(r.cold.loadMs / 1000).toFixed(1)} s to download and load the model, ${(r.cold.downloadedBytes / 1048576).toFixed(1)} MB of model files.`);
-  lines.push(`Max-notes run: ${r.maxNotes.notes} notes in ${(r.maxNotes.totalMs / 1000).toFixed(1)} s (cluster stage ${Math.round(r.maxNotes.stageMs.cluster)} ms).`);
-  lines.push('', 'Generated labels are not implemented yet: every theme name is keyphrase-based, so label counts are 0.');
-  lines.push('', '## Method', '');
-  for (const [k, v] of Object.entries(r.method)) if (typeof v === 'string') lines.push(`- ${k}: ${v}`);
-  return `${lines.join('\n')}\n`;
+  const ds = Object.entries(r.datasets);
+  const header = () => {
+    L.push(`| Metric | ${ds.map(([n]) => n).join(' | ')} |`, `|---|${ds.map(() => '---|').join('')}`);
+  };
+  const row = (label, f) => L.push(`| ${label} | ${ds.map(([, d]) => f(d)).join(' | ')} |`);
+  L.push('', '## Warm runs per dataset (mean, range)', '');
+  header();
+  row('Notes / true themes', (d) => `${d.notes} / ${d.trueThemes}`);
+  row('Total time (ms)', (d) => range(d.summary.totalMs, ms));
+  row('Model load from cache (ms)', (d) => range(d.summary.loadMs, ms));
+  for (const stage of Object.keys(ds[0][1].summary.stageMs)) row(`Stage ${stage} (ms)`, (d) => range(d.summary.stageMs[stage], ms));
+  row('Themes', (d) => range(d.summary.themes));
+  row('Small themes merged', (d) => range(d.summary.merges));
+  row('Best silhouette, k-means', (d) => range(d.summary.silhouetteKmeans, f3));
+  row('Best silhouette, agglomerative', (d) => range(d.summary.silhouetteAgglomerative, f3));
+  row('Same best k for both algorithms (share of runs)', (d) => range(d.summary.kAgreementShare, f3));
+  row('ARI vs ground truth', (d) => range(d.summary.ari, f3));
+  row('Worst mean ARI over 3 consecutive runs', (d) => (d.worstAriWindow ? f3(d.worstAriWindow.mean) : 'n/a'));
+  row('NMI vs ground truth', (d) => range(d.summary.nmi, f3));
+  row('Labels: generated first attempt / after retry / fallback', (d) => `${f1(d.summary.labelFirstAttempt.mean)} / ${f1(d.summary.labelAfterRetry.mean)} / ${f1(d.summary.labelFallback.mean)}`);
+  row('Peak memory (GB)', (d) => range(d.summary.peakMemoryBytes, (x) => (x / 1024 ** 3).toFixed(2)));
+  row('Main-thread tasks over 200 ms', (d) => range(d.summary.longTasksOver200, ms));
+  L.push('', '## Cold runs per dataset (mean, range)', '');
+  header();
+  row('Total time (ms)', (d) => range(d.cold.summary.totalMs, ms));
+  row('Download and model load (ms)', (d) => range(d.cold.summary.loadMs, ms));
+  for (const stage of Object.keys(ds[0][1].cold.summary.stageMs)) row(`Stage ${stage} (ms)`, (d) => range(d.cold.summary.stageMs[stage], ms));
+  row('Model files downloaded (MB)', (d) => range(d.cold.summary.downloadedBytes, (x) => (x / 1048576).toFixed(1)));
+  row('Peak memory (GB)', (d) => range(d.cold.summary.peakMemoryBytes, (x) => (x / 1024 ** 3).toFixed(2)));
+  L.push('', '## Through the interface (one run per dataset)', '');
+  header();
+  row('Total time, paste to rendered themes (ms)', (d) => ms(d.ui.totalMs));
+  row('Main-thread tasks over 200 ms', (d) => String(d.ui.longTasksOver200));
+  row('Longest main-thread task (ms)', (d) => String(d.ui.longestTaskMs));
+  row('Peak memory (GB)', (d) => (d.ui.peakMemoryBytes / 1024 ** 3).toFixed(2));
+  const m = r.maxNotes;
+  L.push('', `Max notes (${m.notes}): pipeline ${(m.totalMs / 1000).toFixed(1)} s (cluster stage ${ms(m.stageMs.cluster)} ms); through the interface ${(m.ui.totalMs / 1000).toFixed(1)} s, longest main-thread task ${m.ui.longestTaskMs} ms.`);
+  L.push('', 'Generated labels are not implemented yet: every theme name is keyphrase-based, so label counts are 0.');
+  L.push('', '## Method', '');
+  for (const [k, v] of Object.entries(r.method)) if (typeof v === 'string') L.push(`- ${k}: ${v}`);
+  return `${L.join('\n')}\n`;
 }
 
 main().catch((err) => {

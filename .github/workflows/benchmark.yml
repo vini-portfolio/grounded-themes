@@ -10,7 +10,7 @@ permissions:
 jobs:
   bench:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -19,10 +19,24 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npx playwright install --with-deps chromium
-      - name: Benchmark with the current constants
-        run: npm run bench -- --runs 10 --name ci-current
-      - name: Benchmark with one theme per 6 notes at most
-        run: npm run bench -- --runs 10 --no-build --name ci-min6 --option minNotesPerTheme=6
-      - name: Print results
+      - name: Benchmark with the committed constants
+        run: npm run bench -- --runs 10 --cold-runs 3 --name ci-committed
+      - name: Alternatives (quality comparison)
+        run: |
+          npm run bench -- --no-build --runs 10 --cold-runs 1 --name ci-min4 --option minNotesPerTheme=4
+          npm run bench -- --no-build --runs 10 --cold-runs 1 --name ci-min5 --option minNotesPerTheme=5
+          npm run bench -- --no-build --runs 10 --cold-runs 1 --name ci-min4-tol01 --option minNotesPerTheme=4 --option kTolerance=0.01
+          npm run bench -- --no-build --runs 10 --cold-runs 1 --name ci-min4-tol02 --option minNotesPerTheme=4 --option kTolerance=0.02
+      - name: Repeatability (committed constants, second run)
+        run: |
+          npm run bench -- --no-build --runs 10 --cold-runs 3 --name ci-committed-repeat
+          npm run bench:compare -- docs/benchmarks/ci-committed.json docs/benchmarks/ci-committed-repeat.json || true
+      - uses: actions/upload-artifact@v4
         if: always()
-        run: for f in docs/benchmarks/ci-*.md; do echo "=== $f"; cat "$f"; done; for f in docs/benchmarks/ci-*.json; do echo "=== $f"; cat "$f"; done
+        with:
+          name: benchmarks
+          path: docs/benchmarks/ci-*
+          retention-days: 30
+      - name: Print summaries
+        if: always()
+        run: for f in docs/benchmarks/ci-*.md; do echo "=== $f"; cat "$f"; done

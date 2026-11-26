@@ -1,28 +1,40 @@
 // Rules for comparing two benchmark results (used by bench-compare.mjs and tests).
+// a is the baseline; b must be within the tolerances of a.
 export const TIMING_TOLERANCE = 0.25;
 export const RATE_TOLERANCE_POINTS = 10;
 
 export function compareBenchmarks(a, b) {
   const rows = [];
   const timing = (metric, x, y) => {
-    if (typeof x !== 'number' || typeof y !== 'number') return;
-    const ok = Math.abs(y - x) <= TIMING_TOLERANCE * Math.max(x, y);
-    rows.push({ metric, a: Math.round(x), b: Math.round(y), ok, rule: '±25%' });
+    if (typeof x !== 'number') return;
+    if (typeof y !== 'number') {
+      rows.push({ metric, a: Math.round(x), b: 'missing', ok: false, rule: '±25%' });
+      return;
+    }
+    const ok = Math.abs(y - x) <= TIMING_TOLERANCE * x;
+    rows.push({ metric, a: Math.round(x), b: Math.round(y), ok, rule: '±25% of baseline' });
   };
   const rate = (metric, x, y) => {
     if (typeof x !== 'number' || typeof y !== 'number') return;
     const ok = Math.abs(y - x) * 100 <= RATE_TOLERANCE_POINTS;
     rows.push({ metric, a: `${(x * 100).toFixed(1)}%`, b: `${(y * 100).toFixed(1)}%`, ok, rule: '±10 points' });
   };
+  const passRate = (s) => (s?.themes?.mean ? (s.labelFirstAttempt.mean + s.labelAfterRetry.mean) / s.themes.mean : null);
   for (const name of Object.keys(a.datasets ?? {})) {
-    const sa = a.datasets[name]?.summary;
-    const sb = b.datasets?.[name]?.summary;
-    if (!sa || !sb) continue;
-    timing(`${name} total ms`, sa.totalMs.mean, sb.totalMs.mean);
-    for (const stage of Object.keys(sa.stageMs)) timing(`${name} ${stage} ms`, sa.stageMs[stage].mean, sb.stageMs[stage]?.mean);
-    const passRate = (s, themes) => (themes ? (s.labelFirstAttempt.mean + s.labelAfterRetry.mean) / themes : null);
-    rate(`${name} label pass rate`, passRate(sa, sa.themes.mean), passRate(sb, sb.themes.mean));
+    const da = a.datasets[name];
+    const db = b.datasets?.[name];
+    if (!db) {
+      rows.push({ metric: `${name} dataset`, a: 'present', b: 'missing', ok: false, rule: 'same datasets' });
+      continue;
+    }
+    timing(`${name} warm total ms`, da.summary.totalMs.mean, db.summary.totalMs.mean);
+    timing(`${name} warm model load ms`, da.summary.loadMs?.mean, db.summary.loadMs?.mean);
+    for (const stage of Object.keys(da.summary.stageMs)) {
+      timing(`${name} warm ${stage} ms`, da.summary.stageMs[stage].mean, db.summary.stageMs?.[stage]?.mean);
+    }
+    if (da.cold) timing(`${name} cold total ms`, da.cold.summary.totalMs.mean, db.cold?.summary.totalMs.mean);
+    rate(`${name} label pass rate`, passRate(da.summary), passRate(db.summary));
   }
-  timing('cold total ms', a.cold?.totalMs, b.cold?.totalMs);
+  if (a.maxNotes) timing('max notes total ms', a.maxNotes.totalMs, b.maxNotes?.totalMs);
   return { ok: rows.every((r) => r.ok), rows };
 }
