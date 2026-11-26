@@ -1,0 +1,18 @@
+{
+  "name": "grounded-themes",
+  "version": "0.1.0",
+  "private": true,
+  "description": "On-device NLP pipeline that turns research notes into themes and shows its work.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "devDependencies": {
+    "vite": "^8.3.8"
+  }
+}
