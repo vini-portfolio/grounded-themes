@@ -141,11 +141,21 @@ async function newPage(context) {
     // ticks much longer than 20 ms means the thread was busy for that long.
     // (The Long Tasks API reports nothing in headless Chromium.)
     window.__longTasks = [];
+    window.__longTaskContext = [];
     let last = performance.now();
     setInterval(() => {
       const now = performance.now();
       const gap = now - last - 20;
-      if (gap > 50) window.__longTasks.push(gap);
+      if (gap > 50) {
+        window.__longTasks.push(gap);
+        // Where the page was when the block ended, to locate it (status line, themes shown).
+        const app = document.getElementById('app');
+        window.__longTaskContext.push({
+          ms: Math.round(gap),
+          status: document.querySelector('[role=status]')?.textContent?.slice(0, 60) ?? '',
+          themes: app?.dataset.themes ?? null,
+        });
+      }
       last = now;
     }, 20);
   });
@@ -171,6 +181,7 @@ async function runPipelineOnce(page, texts, seed, pid) {
 async function runUiOnce(page, texts, pid) {
   await page.evaluate((o) => {
     window.__longTasks = [];
+    window.__longTaskContext = [];
     window.__gtPipelineOptions = o;
   }, PIPELINE_OPTIONS);
   const stop = sampleMemory(pid);
@@ -181,7 +192,9 @@ async function runUiOnce(page, texts, pid) {
   const totalMs = Date.now() - t0;
   const peakMemoryBytes = stop();
   const longTasks = await page.evaluate(() => window.__longTasks);
+  const blocks = await page.evaluate((limit) => window.__longTaskContext.filter((c) => c.ms > limit), BUDGETS.longTaskMs);
   return {
+    blocks,
     totalMs,
     peakMemoryBytes,
     longTasksOver200: longTasks.filter((d) => d > BUDGETS.longTaskMs).length,
@@ -527,6 +540,8 @@ function markdown(r) {
   row('Peak memory (GB)', (d) => (d.ui.peakMemoryBytes / 1024 ** 3).toFixed(2));
   const m = r.maxNotes;
   L.push('', `Max notes (${m.notes}): pipeline ${(m.totalMs / 1000).toFixed(1)} s (cluster stage ${ms(m.stageMs.cluster)} ms); through the interface ${(m.ui.totalMs / 1000).toFixed(1)} s, longest main-thread task ${m.ui.longestTaskMs} ms.`);
+  for (const b of [...ds.flatMap(([n, d]) => (d.ui.blocks ?? []).map((x) => [n, x])), ...(m.ui.blocks ?? []).map((x) => [`${m.notes} notes`, x])])
+    L.push(`- Main-thread block over ${BUDGETS.longTaskMs} ms (${b[0]}, interface run): ${b[1].ms} ms, ending while the status read "${b[1].status}"${b[1].themes ? `, ${b[1].themes} themes shown` : ''}.`);
   L.push('', `Long-task observer self-test: ${r.longTaskSelfTest?.detected ? `a deliberate 300 ms task was detected (${r.longTaskSelfTest.entries.join(', ')} ms)` : 'failed; long-task figures are not reliable'}.`);
   if (Object.keys(r.pipelineOptions).length) L.push('', 'The options tried apply to every run, including the runs through the interface.');
   L.push('', 'Generated labels are not implemented yet: every theme name is keyphrase-based, so label counts are 0.');
