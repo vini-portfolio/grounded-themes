@@ -14,7 +14,7 @@ test.describe('failure handling', () => {
     page.on('dialog', () => (dialogs += 1));
     await page.goto('/');
     await paste(page);
-    await page.getByRole('button', { name: 'Find similar notes' }).click();
+    await page.getByRole('button', { name: 'Find themes' }).click();
     const alert = page.getByRole('alert');
     await expect(alert).toContainText('huggingface.co', { timeout: 60_000 });
     await expect(page.getByLabel('Paste notes')).toBeEditable();
@@ -54,7 +54,7 @@ test.describe('failure handling', () => {
         window.__gtState.backend = 'webgpu';
         window.__gtInjectFault(k);
       }, kind);
-      await page.getByRole('button', { name: 'Find similar notes' }).click();
+      await page.getByRole('button', { name: 'Find themes' }).click();
       const alert = page.getByRole('alert');
       await expect(alert).toContainText(text, { timeout: 60_000 });
       await alert.getByRole('button', { name: 'Retry' }).click();

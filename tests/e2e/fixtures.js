@@ -58,7 +58,7 @@ export { expect };
 /** Pastes notes, runs, and waits for the embedding result. */
 export async function embedNotes(page, lines) {
   await page.getByLabel('Paste notes').fill(lines.join('\n'));
-  await page.getByRole('button', { name: 'Find similar notes' }).click();
+  await page.getByRole('button', { name: 'Find themes' }).click();
   await expect(page.locator('#app')).toHaveAttribute('data-embedded', /\d+/, { timeout: 120_000 });
 }
 

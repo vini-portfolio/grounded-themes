@@ -1,0 +1,117 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://grounded-themes.vercel.app/schemas/stage-event.v1.json",
+  "title": "Pipeline stage event (version 1)",
+  "type": "object",
+  "required": ["stage", "version", "durationMs", "payload"],
+  "properties": {
+    "stage": { "enum": ["embed", "reduce", "cluster", "extract", "label", "project"] },
+    "version": { "const": 1 },
+    "durationMs": { "type": "number", "minimum": 0 },
+    "payload": { "type": "object" }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "stage": { "const": "embed" } } },
+      "then": { "properties": { "payload": {
+        "type": "object", "additionalProperties": false,
+        "required": ["count", "dims", "truncated", "backend"],
+        "properties": {
+          "count": { "type": "integer", "minimum": 2 },
+          "dims": { "type": "integer", "minimum": 1 },
+          "truncated": { "type": "integer", "minimum": 0 },
+          "backend": { "enum": ["webgpu", "wasm", "unknown"] }
+        } } } }
+    },
+    {
+      "if": { "properties": { "stage": { "const": "reduce" } } },
+      "then": { "properties": { "payload": {
+        "type": "object", "additionalProperties": false,
+        "required": ["inputDims", "outputDims", "explainedVarianceRatio"],
+        "properties": {
+          "inputDims": { "type": "integer", "minimum": 1 },
+          "outputDims": { "type": "integer", "minimum": 1 },
+          "explainedVarianceRatio": { "type": "number", "minimum": 0, "maximum": 1 }
+        } } } }
+    },
+    {
+      "if": { "properties": { "stage": { "const": "cluster" } } },
+      "then": { "properties": { "payload": {
+        "type": "object", "additionalProperties": false,
+        "required": ["kRange", "scores", "selected", "agglomerativeSkipped", "disagreements", "merges", "themeCount", "assignments"],
+        "properties": {
+          "kRange": { "type": "array", "items": { "type": "integer", "minimum": 2 } },
+          "scores": { "type": "array", "items": { "$ref": "#/$defs/score" } },
+          "selected": { "oneOf": [{ "$ref": "#/$defs/score" }, { "type": "null" }] },
+          "agglomerativeSkipped": { "type": "boolean" },
+          "disagreements": { "type": "array", "items": { "type": "integer", "minimum": 0 } },
+          "merges": { "type": "array", "items": {
+            "type": "object", "additionalProperties": false, "required": ["from", "into", "similarity"],
+            "properties": {
+              "from": { "type": "array", "items": { "type": "integer", "minimum": 0 }, "minItems": 1 },
+              "into": { "type": "array", "items": { "type": "integer", "minimum": 0 }, "minItems": 1 },
+              "similarity": { "type": "number", "minimum": -1, "maximum": 1 }
+            } } },
+          "themeCount": { "type": "integer", "minimum": 1 },
+          "assignments": { "type": "array", "items": { "type": "integer", "minimum": 0 } }
+        } } } }
+    },
+    {
+      "if": { "properties": { "stage": { "const": "extract" } } },
+      "then": { "properties": { "payload": {
+        "type": "object", "additionalProperties": false, "required": ["themes"],
+        "properties": { "themes": { "type": "array", "items": {
+          "type": "object", "additionalProperties": false,
+          "required": ["theme", "size", "tfidfApplicable", "candidates", "keyphrases"],
+          "properties": {
+            "theme": { "type": "integer", "minimum": 0 },
+            "size": { "type": "integer", "minimum": 1 },
+            "tfidfApplicable": { "type": "boolean" },
+            "candidates": { "type": "array", "items": {
+              "type": "object", "additionalProperties": false,
+              "required": ["phrase", "similarity", "coverage", "tfidf", "bigramBoost", "combined"],
+              "properties": {
+                "phrase": { "type": "string", "minLength": 1 },
+                "similarity": { "type": "number", "minimum": -1, "maximum": 1 },
+                "coverage": { "type": "number", "minimum": 0, "maximum": 1 },
+                "tfidf": { "type": ["number", "null"], "minimum": 0 },
+                "bigramBoost": { "type": "number", "minimum": 0 },
+                "combined": { "type": "number" }
+              } } },
+            "keyphrases": { "type": "array", "items": { "type": "string" }, "maxItems": 3 }
+          } } } } } } }
+    },
+    {
+      "if": { "properties": { "stage": { "const": "label" } } },
+      "then": { "properties": { "payload": {
+        "type": "object", "additionalProperties": false, "required": ["themes"],
+        "properties": { "themes": { "type": "array", "items": {
+          "type": "object", "additionalProperties": false, "required": ["theme", "label", "source", "attempts"],
+          "properties": {
+            "theme": { "type": "integer", "minimum": 0 },
+            "label": { "type": "string", "minLength": 1 },
+            "source": { "enum": ["keyphrase", "generated", "fallback"] },
+            "attempts": { "type": "array" }
+          } } } } } } }
+    },
+    {
+      "if": { "properties": { "stage": { "const": "project" } } },
+      "then": { "properties": { "payload": {
+        "type": "object", "additionalProperties": false, "required": ["coordinates", "explainedVarianceRatio"],
+        "properties": {
+          "coordinates": { "type": "array", "items": { "type": "array", "items": { "type": "number" }, "minItems": 2, "maxItems": 2 } },
+          "explainedVarianceRatio": { "type": "number", "minimum": 0, "maximum": 1 }
+        } } } }
+    }
+  ],
+  "$defs": {
+    "score": {
+      "type": "object", "additionalProperties": false, "required": ["algorithm", "k", "silhouette"],
+      "properties": {
+        "algorithm": { "enum": ["kmeans", "agglomerative"] },
+        "k": { "type": "integer", "minimum": 2 },
+        "silhouette": { "type": "number", "minimum": -1, "maximum": 1 }
+      }
+    }
+  }
+}
