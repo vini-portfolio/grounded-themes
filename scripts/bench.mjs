@@ -121,7 +121,7 @@ async function waitForPort(port, timeoutMs = 30_000) {
   const end = Date.now() + timeoutMs;
   while (Date.now() < end) {
     const ok = await new Promise((resolve) => {
-      const s = net.connect(port, '127.0.0.1', () => {
+      const s = net.connect(port, 'localhost', () => {
         s.end();
         resolve(true);
       });
