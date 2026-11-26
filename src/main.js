@@ -64,7 +64,15 @@ function showError(error) {
     message = 'Something went wrong while processing the notes.';
     actions.push(h('button', { type: 'button', onclick: () => run() }, ['Retry']));
   }
-  replace(errorBox, h('div', { class: 'error', role: 'alert' }, [h('p', {}, [message]), ...actions]));
+  console.error('Grounded Themes:', kind, error);
+  replace(
+    errorBox,
+    h('div', { class: 'error', role: 'alert' }, [
+      h('p', {}, [message]),
+      ...actions,
+      h('details', {}, [h('summary', {}, ['Technical details']), h('code', {}, [`${kind}: ${error?.message ?? error}`])]),
+    ]),
+  );
   status.textContent = '';
 }
 

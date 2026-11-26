@@ -6,7 +6,7 @@
 // Messages out: { type: 'progress', file, loaded, total }
 //               { type: 'result', id, vectors: Float32Array, dims, count, truncated, backend }
 //               { type: 'error', id, kind, hosts, message }
-import { env, pipeline } from '@huggingface/transformers';
+import { AutoModel, AutoTokenizer, env, mean_pooling } from '@huggingface/transformers';
 import { classifyError } from './errors.js';
 import { EMBEDDING_MODEL, MAX_TOKENS, MODEL_HOST, ortPaths } from './runtime-config.js';
 
@@ -36,29 +36,28 @@ env.fetch = async (input, init) => {
   }
 };
 
-let extractor = null;
-let loadedBackend = null;
-let loadedCache = null;
+let loaded = null; // { tokenizer, model, backend, cache }
 
+const progressCallback = (p) => {
+  if (p.status === 'progress') {
+    self.postMessage({ type: 'progress', file: p.file, loaded: p.loaded ?? 0, total: p.total ?? 0 });
+  }
+};
+
+// Tokenizer and model are loaded directly (not through pipeline()) so every
+// request, including config lookups, uses the pinned revision.
 async function load(backend, cache) {
-  if (extractor && loadedBackend === backend && loadedCache === cache) return extractor;
-  if (extractor) await extractor.dispose?.();
+  if (loaded && loaded.backend === backend && loaded.cache === cache) return loaded;
+  if (loaded) await loaded.model.dispose?.();
   env.useBrowserCache = cache;
   env.useWasmCache = cache;
-  extractor = await pipeline('feature-extraction', EMBEDDING_MODEL.id, {
-    revision: EMBEDDING_MODEL.revision,
-    dtype: EMBEDDING_MODEL.dtype,
-    device: backend,
-    progress_callback: (p) => {
-      if (p.status === 'progress') {
-        self.postMessage({ type: 'progress', file: p.file, loaded: p.loaded ?? 0, total: p.total ?? 0 });
-      }
-    },
-  });
-  extractor.tokenizer.model_max_length = MAX_TOKENS;
-  loadedBackend = backend;
-  loadedCache = cache;
-  return extractor;
+  const options = { revision: EMBEDDING_MODEL.revision, progress_callback: progressCallback };
+  const [tokenizer, model] = await Promise.all([
+    AutoTokenizer.from_pretrained(EMBEDDING_MODEL.id, options),
+    AutoModel.from_pretrained(EMBEDDING_MODEL.id, { ...options, dtype: EMBEDDING_MODEL.dtype, device: backend }),
+  ]);
+  loaded = { tokenizer, model, backend, cache };
+  return loaded;
 }
 
 function maybeFault(stage) {
@@ -91,19 +90,24 @@ async function embed({ id, texts, backend = 'wasm', cache = true }) {
   failedHosts.clear();
   try {
     maybeFault('load');
-    const model = await load(backend, cache);
+    const { tokenizer, model } = await load(backend, cache);
     maybeFault('embed');
     let truncated = 0;
     for (const text of texts) {
-      if (model.tokenizer.encode(text).length > MAX_TOKENS) truncated += 1;
+      if (tokenizer.encode(text).length > MAX_TOKENS) truncated += 1;
     }
-    const output = await model(texts, { pooling: 'mean', normalize: true });
-    const vectors = new Float32Array(output.data);
-    const [count, dims] = output.dims;
+    const inputs = tokenizer(texts, { padding: true, truncation: true, max_length: MAX_TOKENS });
+    const { last_hidden_state: hidden } = await model(inputs);
+    const pooled = mean_pooling(hidden, inputs.attention_mask).normalize(2, -1);
+    const vectors = new Float32Array(pooled.data);
+    const [count, dims] = pooled.dims;
     self.postMessage({ type: 'result', id, vectors, dims, count, truncated, backend }, [vectors.buffer]);
   } catch (err) {
     if (String(err?.message).includes('crash pending')) return;
-    const kind = classifyError(err);
+    // Any failure while a request to the model host failed is a network
+    // problem, whatever the library wrapped it in.
+    let kind = classifyError(err);
+    if (failedHosts.size > 0 && kind === 'unknown') kind = 'network';
     if (kind === 'network' && failedHosts.size === 0) failedHosts.add(new URL(MODEL_HOST).host);
     self.postMessage({ type: 'error', id, kind, hosts: [...failedHosts], message: String(err?.message ?? err) });
   }

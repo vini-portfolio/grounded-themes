@@ -1,4 +1,5 @@
 import { coldTest as test, embedNotes, expect } from './fixtures.js';
+import { EMBEDDING_MODEL } from '../../src/worker/runtime-config.js';
 
 const MODEL_HOSTS = [/^huggingface\.co$/, /(^|\.)hf\.co$/, /(^|\.)huggingface\.co$/];
 const MARKER = 'zebra-quokka-7731';
@@ -35,9 +36,12 @@ test.describe('@privacy network behavior', () => {
     }
     expect(offSite.length).toBeGreaterThan(0); // the cold run really downloaded the model
     for (const url of offSite) {
-      expect(url.pathname, `non-model request ${url.href}`).toMatch(
-        /(\/resolve\/[0-9a-f]{40}\/|\.onnx|config\.json|tokenizer|special_tokens_map|vocab|\/xet-|\/api\/)/,
-      );
+      if (url.host === 'huggingface.co') {
+        // Every request to the hub names the pinned revision, never a branch.
+        expect(url.pathname, `unpinned request ${url.href}`).toContain(
+          `/${EMBEDDING_MODEL.id}/resolve/${EMBEDDING_MODEL.revision}/`,
+        );
+      }
     }
     const ortRequests = requests.filter((r) => r.url().includes('ort-wasm-simd-threaded'));
     expect(ortRequests.length).toBeGreaterThan(0);
