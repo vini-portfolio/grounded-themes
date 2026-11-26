@@ -4,7 +4,7 @@ Three synthetic datasets used for the demo, tests and benchmarks. Every note car
 
 | File | Notes | Themes | Subject areas | Noisy notes | Used for |
 |---|---|---|---|---|---|
-| `sample.json` | 50 | 5 | bakery menu brainstorm | 0 | the demo ("Run on the sample") and quality benchmarks |
+| `sample.json` | 50 | 5 | bakery menu brainstorm | 0 | the demo sample and quality benchmarks |
 | `test.json` | 16 | 4 | bakery menu brainstorm | 0 | fast automated tests |
 | `stress.json` | 180 | 15 | bakery menu brainstorm, café service, catering | 46 (26%) | scale and robustness: more notes than the agglomerative-clustering limit, neighbouring topics, messy text |
 
@@ -29,6 +29,6 @@ Themes:
 | Owner | Vinicius Morais |
 | Method | Drafted with AI assistance from the written brief below, then reviewed and approved by the owner |
 | Brief | Subject area: bakery menu brainstorm. Themes: new recipes, failed attempts, client favorites, seasonal products, plus pricing and costs. Stress set adds two neighbouring subject areas, café service and catering, with five themes each and at least 20% noisy notes. |
-| Approval | Recorded in the pull request that adds these files |
+| Approval | Pending: the owner approves in the pull request that adds these files; the date is recorded here on approval |
 
 `npm run check:data` validates the files: counts, required fields, unique IDs and texts, theme and domain counts, and the noisy-note share.

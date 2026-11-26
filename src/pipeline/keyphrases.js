@@ -21,20 +21,24 @@ export const STOPWORDS = new Set(
   around another anything everyone people time times day days week weeks today yesterday`.split(/\s+/),
 );
 
-/** Lowercase word tokens (letters, digits, inner apostrophes and hyphens). */
+/** Lowercase word tokens (letters in any script, digits, inner apostrophes and hyphens). */
 export function tokenize(text) {
-  return (String(text).toLowerCase().match(/[a-z0-9]+(?:['’-][a-z0-9]+)*/g) ?? []).map((t) => t.replace(/['’]/g, ''));
+  return (String(text).toLowerCase().match(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu) ?? []).map((t) =>
+    t.replace(/['’]/g, ''),
+  );
 }
 
-const isContent = (t) => t.length >= 3 && !STOPWORDS.has(t) && !/^\d+$/.test(t);
+const isContent = (t) => t.length >= 3 && !STOPWORDS.has(t) && !/^\p{N}+$/u.test(t);
 
-/** Distinct unigram and bigram candidates of one note. */
+/** Distinct unigram and bigram candidates of one note. Bigrams don't cross sentence punctuation. */
 export function candidatesOf(text) {
-  const toks = tokenize(text);
   const out = new Set();
-  for (let i = 0; i < toks.length; i += 1) {
-    if (isContent(toks[i])) out.add(toks[i]);
-    if (i + 1 < toks.length && isContent(toks[i]) && isContent(toks[i + 1])) out.add(`${toks[i]} ${toks[i + 1]}`);
+  for (const part of String(text).split(/[.,;:!?()[\]"…]+/)) {
+    const toks = tokenize(part);
+    for (let i = 0; i < toks.length; i += 1) {
+      if (isContent(toks[i])) out.add(toks[i]);
+      if (i + 1 < toks.length && isContent(toks[i]) && isContent(toks[i + 1])) out.add(`${toks[i]} ${toks[i + 1]}`);
+    }
   }
   return out;
 }
@@ -60,7 +64,7 @@ export function candidateStats(themeTexts) {
       const idf = Math.log((1 + T) / (1 + themesWith.get(phrase))) + 1;
       return { phrase, notes, coverage, tfidf: coverage * idf };
     });
-    // Pre-filter: phrases in more than one note first, then by TF-IDF.
+    // Pre-filter: highest TF-IDF first, then the phrase in more notes, then alphabetical.
     rows.sort((a, b) => b.tfidf - a.tfidf || b.notes - a.notes || a.phrase.localeCompare(b.phrase));
     return rows.slice(0, CANDIDATES_PER_THEME);
   });
@@ -99,7 +103,11 @@ export function sameWord(a, b) {
   );
 }
 
-/** Top n phrases, skipping a phrase whose words all appear (allowing plurals) in one already chosen, or vice versa. */
+/**
+ * Top n phrases by combined score, skipping a phrase whose words all appear
+ * (allowing plurals) in one already chosen, or vice versa, so the keyphrases
+ * passed to labeling are distinct.
+ */
 export function topKeyphrases(scored, n) {
   const chosen = [];
   for (const s of scored) {

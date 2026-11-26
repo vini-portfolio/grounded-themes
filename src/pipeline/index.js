@@ -38,6 +38,9 @@ export async function runPipeline({ texts, embed, seed = C.DEFAULT_SEED, onStage
   let t = now();
   const embedded = await embed(texts);
   const vectors = embedded.vectors;
+  if (!vectors.every((v) => v.length && Array.prototype.every.call(v, Number.isFinite))) {
+    throw new RangeError('embedding produced non-finite values');
+  }
   emit('embed', t, {
     count: vectors.length,
     dims: embedded.dims,
@@ -72,6 +75,8 @@ export async function runPipeline({ texts, embed, seed = C.DEFAULT_SEED, onStage
     scores: chosen.scores.map((s) => ({ ...s, silhouette: round(s.silhouette) })),
     selected: chosen.selected ? { ...chosen.selected, silhouette: round(chosen.selected.silhouette) } : null,
     agglomerativeSkipped: chosen.skipAgglomerative,
+    // Indexes of notes the two algorithms group differently at the selected k,
+    // before small themes are merged.
     disagreements: chosen.disagreements,
     merges: merges.map((m) => ({ ...m, similarity: round(m.similarity) })),
     themeCount: k,
@@ -117,12 +122,25 @@ export async function runPipeline({ texts, embed, seed = C.DEFAULT_SEED, onStage
   // Label (interim: keyphrase names until generated labels are added)
   onStage('label');
   t = now();
-  for (const th of themes) th.label = keyphraseName(th.keyphrases);
+  const used = new Map();
+  for (const th of themes) {
+    const base = keyphraseName(th.keyphrases);
+    const n = (used.get(base) ?? 0) + 1;
+    used.set(base, n);
+    th.label = n === 1 ? base : `${base} ${n}`;
+  }
   emit('label', t, {
-    themes: themes.map((th) => ({ theme: th.index, label: th.label, source: 'keyphrase', attempts: [] })),
+    themes: themes.map((th) => ({
+      theme: th.index,
+      label: th.label,
+      source: 'keyphrase',
+      keyphrases: th.keyphrases,
+      attempts: [],
+    })),
   });
 
-  // Project to 2-D for the map
+  // Project to 2-D for the map (its own PCA of the full embeddings, not of
+  // the 28-dimension reduction used for clustering).
   onStage('project');
   t = now();
   const projection = pca(vectors, 2);

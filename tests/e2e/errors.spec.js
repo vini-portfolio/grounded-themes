@@ -11,13 +11,17 @@ test.describe('failure handling', () => {
     const block = (route) => route.abort('internetdisconnected');
     await context.route('https://huggingface.co/**', block);
     let dialogs = 0;
+    const errors = [];
     page.on('dialog', () => (dialogs += 1));
+    page.on('console', (m) => m.type() === 'error' && errors.push(m.text()));
     await page.goto('/');
     await paste(page);
     await page.getByRole('button', { name: 'Find themes' }).click();
     const alert = page.getByRole('alert');
     await expect(alert).toContainText('huggingface.co', { timeout: 60_000 });
     await expect(page.getByLabel('Paste notes')).toBeEditable();
+    // Errors still reach the console in production builds.
+    expect(errors.some((e) => e.includes('Grounded Themes: network'))).toBe(true);
     await context.unroute('https://huggingface.co/**', block);
     await alert.getByRole('button', { name: 'Retry' }).click();
     await expect(page.locator('#app')).toHaveAttribute('data-embedded', '3', { timeout: 120_000 });

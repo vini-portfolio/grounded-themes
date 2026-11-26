@@ -1,6 +1,6 @@
 // Pipeline constants: the single source for values that docs and tests cite.
-// Changing one is a design decision: update docs/ARCHITECTURE.md with the
-// benchmark result that justifies it.
+// Changing one is a design decision: update docs/adr/001-runtime.md (pipeline
+// constants) with the benchmark result that justifies it.
 
 /** Dimensions kept by principal component analysis before clustering. */
 export const REDUCED_DIMENSIONS = 28;

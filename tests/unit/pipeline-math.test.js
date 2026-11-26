@@ -1,5 +1,6 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { agglomerative, kRange, mergeSmallClusters, selectClustering, sphericalKMeans } from '../../src/pipeline/cluster.js';
+import { agglomerative, distinctCount, kRange, mergeSmallClusters, selectClustering, sphericalKMeans } from '../../src/pipeline/cluster.js';
 import { pca } from '../../src/pipeline/reduce.js';
 import { createRng } from '../../src/pipeline/rng.js';
 import { silhouette } from '../../src/pipeline/silhouette.js';
@@ -52,8 +53,38 @@ describe('principal component analysis', () => {
   });
 });
 
+describe('PCA against a reference implementation', () => {
+  const ref = JSON.parse(readFileSync(new URL('../fixtures/pca-reference.json', import.meta.url), 'utf8'));
+  for (const name of ['wide', 'tall']) {
+    it(`matches numpy SVD within 1e-6 (${name}: Gram and covariance paths)`, () => {
+      const { rows, k, scores, explainedVarianceRatio } = ref[name];
+      const out = pca(rows, k);
+      expect(out.components).toBe(k);
+      expect(out.explainedVarianceRatio).toBeCloseTo(explainedVarianceRatio, 6);
+      for (let c = 0; c < k; c += 1) {
+        // Component signs are arbitrary: align each component once, then compare every point.
+        const sign = Math.sign(out.projected[0][c]) === Math.sign(scores[0][c]) ? 1 : -1;
+        for (let i = 0; i < rows.length; i += 1) {
+          expect(Math.abs(sign * out.projected[i][c] - scores[i][c])).toBeLessThan(1e-6);
+        }
+      }
+    });
+  }
+});
+
 describe('silhouette', () => {
-  it('matches a hand-computed value', () => {
+  it('matches a value computed by hand', () => {
+    // Points at 0, 1 and 4 on a line embedded as unit vectors at those angles (degrees).
+    const rad = (deg) => (deg * Math.PI) / 180;
+    const pts = [0, 10, 90].map((d) => [Math.cos(rad(d)), Math.sin(rad(d))]);
+    const d = (a, b) => 1 - Math.cos(rad(b - a));
+    // Clusters {0, 10} and {90}: the singleton scores 0.
+    const s0 = (d(0, 90) - d(0, 10)) / Math.max(d(0, 10), d(0, 90));
+    const s1 = (d(10, 90) - d(0, 10)) / Math.max(d(0, 10), d(10, 90));
+    expect(silhouette(pts, [0, 0, 1])).toBeCloseTo((s0 + s1 + 0) / 3, 12);
+  });
+
+  it('scores good, bad and single-cluster partitions sensibly', () => {
     // Two tight pairs pointing in opposite-ish directions.
     const rows = [
       [1, 0],
@@ -105,6 +136,15 @@ describe('clustering', () => {
     });
     expect(res.skipAgglomerative).toBe(true);
     expect(res.scores.every((s) => s.algorithm === 'kmeans')).toBe(true);
+  });
+
+  it('converges quickly on duplicate notes and never uses more clusters than distinct points', () => {
+    const dup = Array.from({ length: 200 }, (_, i) => (i % 4 === 0 ? [1, 0, 0] : i % 4 === 1 ? [0, 1, 0] : [0, 0, 1]));
+    expect(distinctCount(dup)).toBe(3);
+    const t = performance.now();
+    const labels = sphericalKMeans(dup, 8, createRng(1), { runs: 30, maxIter: 100 });
+    expect(performance.now() - t).toBeLessThan(2000);
+    expect(Math.max(...labels) + 1).toBeLessThanOrEqual(3);
   });
 
   it('merges clusters below the minimum size into the nearest cluster and records it', () => {

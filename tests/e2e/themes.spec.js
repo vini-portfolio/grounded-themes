@@ -65,7 +65,14 @@ test.describe('themes', () => {
     expect(events.map((e) => e.stage)).toEqual(STAGES);
     for (const e of events) expect(validate(e), JSON.stringify(validate.errors)).toBe(true);
     const shown = await page.evaluate(() => window.__statusLog);
-    for (const name of ['Embedding notes…', 'Clustering into themes…', 'Extracting keyphrases…']) {
+    for (const name of [
+      'Embedding notes…',
+      'Reducing dimensions…',
+      'Clustering into themes…',
+      'Extracting keyphrases…',
+      'Naming themes…',
+      'Placing notes on the map…',
+    ]) {
       expect(shown).toContain(name);
     }
   });

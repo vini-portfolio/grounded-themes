@@ -22,10 +22,17 @@ function centroids(u, labels, k) {
  * best of `runs` by total similarity to centroids.
  * @returns {number[]} labels
  */
+/** Number of distinct vectors (exact duplicates counted once). */
+export function distinctCount(rows) {
+  return new Set(rows.map((r) => Array.prototype.join.call(r, ','))).size;
+}
+
 export function sphericalKMeans(rows, k, rng, { runs = 30, maxIter = 100 } = {}) {
   const u = rows.map(unit);
   const n = u.length;
   if (k >= n) return u.map((_, i) => i);
+  // More clusters than distinct points can't converge: cap k.
+  k = Math.min(k, distinctCount(u));
   let best = null;
   let bestScore = -Infinity;
   for (let run = 0; run < runs; run += 1) {
@@ -48,8 +55,7 @@ export function sphericalKMeans(rows, k, rng, { runs = 30, maxIter = 100 } = {})
     let labels = new Array(n).fill(-1);
     let cents = centers;
     for (let iter = 0; iter < maxIter; iter += 1) {
-      let changed = false;
-      const next = u.map((v, i) => {
+      const next = u.map((v) => {
         let bestC = 0;
         let bestS = -Infinity;
         for (let c = 0; c < k; c += 1) {
@@ -59,26 +65,31 @@ export function sphericalKMeans(rows, k, rng, { runs = 30, maxIter = 100 } = {})
             bestC = c;
           }
         }
-        if (bestC !== labels[i]) changed = true;
         return bestC;
       });
-      labels = next;
-      // Re-seed empty clusters with the point farthest from its centroid.
+      // Re-seed an empty cluster with the point farthest from its centroid,
+      // taken only from a cluster that has more than one member.
+      const sizes = new Array(k).fill(0);
+      for (const l of next) sizes[l] += 1;
       for (let c = 0; c < k; c += 1) {
-        if (!labels.includes(c)) {
-          let far = 0;
-          let farS = Infinity;
-          labels.forEach((l, i) => {
-            const s = dot(u[i], cents[l]);
-            if (s < farS) {
-              farS = s;
-              far = i;
-            }
-          });
-          labels[far] = c;
-          changed = true;
-        }
+        if (sizes[c] > 0) continue;
+        let far = -1;
+        let farS = Infinity;
+        next.forEach((l, i) => {
+          if (sizes[l] < 2) return;
+          const s = dot(u[i], cents[l]);
+          if (s < farS) {
+            farS = s;
+            far = i;
+          }
+        });
+        if (far < 0) break;
+        sizes[next[far]] -= 1;
+        next[far] = c;
+        sizes[c] = 1;
       }
+      const changed = next.some((l, i) => l !== labels[i]);
+      labels = next;
       cents = centroids(u, labels, k);
       if (!changed) break;
     }

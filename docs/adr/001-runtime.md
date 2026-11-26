@@ -47,6 +47,21 @@ Reference setup:
 
 Measurement methods: memory from Chrome DevTools Protocol process metrics (cross-origin isolation is off, so `performance.measureUserAgentSpecificMemory` is unavailable) and Safari Web Inspector on the iPhone; cold runs throttled to 50 Mbit/s through DevTools Protocol network emulation.
 
+## Pipeline constants
+
+Defined once in `src/pipeline/constants.js`; documentation and tests read them from there.
+
+| Constant | Value | Meaning |
+|---|---|---|
+| `REDUCED_DIMENSIONS` | 28 | dimensions kept by PCA before clustering |
+| `K_MAX` | 12 | largest number of themes considered |
+| `MIN_NOTES_PER_THEME` | 4 | k range ends at floor(n / 4) |
+| `MIN_CLUSTER_SIZE` | 3 | smaller themes are merged into the nearest one |
+| `AGGLOMERATIVE_MAX_N` | 150 | agglomerative clustering is skipped above this many notes |
+| `KMEANS_RUNS` | 30 | k-means initializations per k; the best is kept |
+
+These are starting values; the benchmark slice tunes them against the datasets and records the results here.
+
 ## Hosting
 
 The runtime WebAssembly files are 14–27 MB each, under the static host's per-file limits; model weights are never committed or self-hosted.

@@ -8,6 +8,9 @@ describe('keyphrase candidates', () => {
     expect([...c].sort()).toEqual(['fridays', 'loaf', 'sourdough', 'sourdough loaf', 'waitlist'].sort());
     expect([...candidatesOf('the and of a to')]).toEqual([]);
     expect(tokenize("didn't rise")).toEqual(['didnt', 'rise']);
+    expect(tokenize('Café crème brûlée')).toEqual(['café', 'crème', 'brûlée']);
+    // No bigram across sentence punctuation.
+    expect(candidatesOf('Great croissant. Butter prices up').has('croissant butter')).toBe(false);
   });
 
   it('computes coverage and contrastive TF-IDF per theme', () => {
@@ -30,13 +33,19 @@ describe('keyphrase scoring', () => {
     { phrase: 'margin', coverage: 0.25, tfidf: 0.2 },
   ];
 
-  it('combines similarity, coverage, TF-IDF and the bigram boost', () => {
+  it('combines similarity, coverage, TF-IDF and the bigram boost (stored expected values)', () => {
     const scored = scoreCandidates(rows, [0.8, 0.7, 0.3], 4);
-    const w = KEYPHRASE_WEIGHTS;
-    const top = scored.find((s) => s.phrase === 'butter');
-    expect(top.combined).toBeCloseTo((w.similarity * 0.8 + w.coverage * 0.5 + w.tfidf * 1) / 1, 10);
-    const bigram = scored.find((s) => s.phrase === 'butter prices');
-    expect(bigram.bigramBoost).toBe(BIGRAM_BOOST);
+    expect(KEYPHRASE_WEIGHTS).toEqual({ similarity: 0.5, coverage: 0.3, tfidf: 0.2 });
+    expect(BIGRAM_BOOST).toBe(0.05);
+    // butter: 0.5*0.8 + 0.3*0.5 + 0.2*(0.6/0.6) = 0.75
+    // butter prices: 0.5*0.7 + 0.3*0.25 + 0.2*(0.4/0.6) + 0.05 = 0.608333…
+    // margin: 0.5*0.3 + 0.3*0.25 + 0.2*(0.2/0.6) = 0.291666…
+    expect(scored.map((s) => s.phrase)).toEqual(['butter', 'butter prices', 'margin']);
+    expect(scored[0].combined).toBeCloseTo(0.75, 10);
+    expect(scored[1].combined).toBeCloseTo(0.6083333333, 9);
+    expect(scored[2].combined).toBeCloseTo(0.2916666667, 9);
+    expect(scored[1].bigramBoost).toBe(0.05);
+    expect(scored[0].bigramBoost).toBe(0);
   });
 
   it('omits TF-IDF for themes under three notes', () => {

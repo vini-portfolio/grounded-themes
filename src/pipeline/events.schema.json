@@ -44,7 +44,7 @@
           "scores": { "type": "array", "items": { "$ref": "#/$defs/score" } },
           "selected": { "oneOf": [{ "$ref": "#/$defs/score" }, { "type": "null" }] },
           "agglomerativeSkipped": { "type": "boolean" },
-          "disagreements": { "type": "array", "items": { "type": "integer", "minimum": 0 } },
+          "disagreements": { "description": "notes the two algorithms group differently at the selected k, before merging", "type": "array", "items": { "type": "integer", "minimum": 0 } },
           "merges": { "type": "array", "items": {
             "type": "object", "additionalProperties": false, "required": ["from", "into", "similarity"],
             "properties": {
@@ -86,10 +86,11 @@
       "then": { "properties": { "payload": {
         "type": "object", "additionalProperties": false, "required": ["themes"],
         "properties": { "themes": { "type": "array", "items": {
-          "type": "object", "additionalProperties": false, "required": ["theme", "label", "source", "attempts"],
+          "type": "object", "additionalProperties": false, "required": ["theme", "label", "source", "keyphrases", "attempts"],
           "properties": {
             "theme": { "type": "integer", "minimum": 0 },
             "label": { "type": "string", "minLength": 1 },
+            "keyphrases": { "type": "array", "items": { "type": "string" }, "maxItems": 3 },
             "source": { "enum": ["keyphrase", "generated", "fallback"] },
             "attempts": { "type": "array" }
           } } } } } } }
