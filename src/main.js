@@ -68,6 +68,9 @@ if (import.meta.env.VITE_FAULT_HOOKS === '1') {
       modelId: r.modelId,
       backend: r.backend,
       cluster: events.find((e) => e.stage === 'cluster').payload.selected,
+      clusterScores: events.find((e) => e.stage === 'cluster').payload.scores,
+      labelSources: events.find((e) => e.stage === 'label').payload.themes.map((t) => t.source),
+      loadMs: r.loadMs,
       stageMs: Object.fromEntries(events.map((e) => [e.stage, e.durationMs])),
     };
   };

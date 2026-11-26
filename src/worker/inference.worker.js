@@ -244,7 +244,9 @@ async function run({ id, texts, backend = 'wasm', cache = true, seed, modelOverr
       for (const k of PIPELINE_OPTION_NAMES) if (pipelineOptions?.[k] !== undefined) testOptions[k] = pipelineOptions[k];
     }
     downloadedBytes = 0;
+    const loadStart = performance.now();
     await prepare(backend, cache);
+    const loadMs = Math.round(performance.now() - loadStart);
     let noteTruncated = 0;
     let first = true;
     const result = await runPipeline({
@@ -276,6 +278,7 @@ async function run({ id, texts, backend = 'wasm', cache = true, seed, modelOverr
         backend,
         cacheFailed,
         downloadedBytes,
+        loadMs,
         modelId: model.id,
       },
       [flat.buffer],

@@ -1,0 +1,28 @@
+name: Benchmark
+on:
+  workflow_dispatch:
+  push:
+    branches: ['bench/**']
+
+permissions:
+  contents: read
+
+jobs:
+  bench:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - name: Benchmark with the current constants
+        run: npm run bench -- --runs 10 --name ci-current
+      - name: Benchmark with one theme per 6 notes at most
+        run: npm run bench -- --runs 10 --no-build --name ci-min6 --option minNotesPerTheme=6
+      - name: Print results
+        if: always()
+        run: for f in docs/benchmarks/ci-*.md; do echo "=== $f"; cat "$f"; done; for f in docs/benchmarks/ci-*.json; do echo "=== $f"; cat "$f"; done
