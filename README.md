@@ -20,7 +20,25 @@ Grounded Themes is a reimplementation, built from scratch, of my earlier prototy
 | Explore | Shows the themes, their notes and a 2-D semantic map |
 | Evaluate | Reproducible benchmark of timings and label quality |
 
-Design notes: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Design notes: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Runtime decisions: [docs/adr/001-runtime.md](docs/adr/001-runtime.md).
+
+## What works today
+
+Paste notes (one per line) and see, for any note, the five most similar notes by cosine similarity. Embeddings are computed in a Web Worker on your device.
+
+## Network
+
+- All code, including the ONNX Runtime WebAssembly files, is served by this site.
+- Model files are downloaded once from the Hugging Face Hub (`huggingface.co` and its file CDN) and then cached by your browser.
+- Note text is never sent anywhere. A browser test checks every request of a cold run for this.
+
+## Models and licenses
+
+| Model | Revision | License | Source |
+|---|---|---|---|
+| Xenova/all-MiniLM-L6-v2 (ONNX, q8) | `751bff3` | Apache-2.0 (upstream sentence-transformers/all-MiniLM-L6-v2) | [Hugging Face](https://huggingface.co/Xenova/all-MiniLM-L6-v2) |
+
+Third-party libraries: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ## Run locally
 
@@ -28,7 +46,7 @@ Requires Node.js 22 or later.
 
 ```bash
 npm ci
-npm run dev
+npm run dev   # copies the ONNX Runtime files into public/ort first
 ```
 
 ## Checks
@@ -37,7 +55,8 @@ npm run dev
 |---|---|
 | `npm run lint` | ESLint |
 | `npm run test:unit` | Unit tests (Vitest), no network |
-| `npm run test:e2e` | Browser tests (Playwright) against the production build |
+| `npm run test:e2e` | Browser tests (Playwright) against a production build with test-only fault hooks |
+| `npm run check:dist` | Checks the production build: runtime files present, no test-only hooks |
 | `npm run check:weights` | Fails if a model weight file or any file over 10 MB is committed |
 
 ## License
