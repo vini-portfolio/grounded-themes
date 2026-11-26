@@ -10,6 +10,10 @@ describe('seeded random number generator', () => {
     expect(seqA).toEqual(seqB);
   });
 
+  it('matches the reference mulberry32 output', () => {
+    expect(createRng(0)()).toBe(0.26642920868471265);
+  });
+
   it('produces different sequences for different seeds', () => {
     const a = Array.from({ length: 10 }, createRng(1));
     const b = Array.from({ length: 10 }, createRng(2));

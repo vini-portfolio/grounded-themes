@@ -22,8 +22,7 @@ export default defineConfig({
         launchOptions: process.env.CHROME_PATH ? { executablePath: process.env.CHROME_PATH } : {},
       },
     },
-    { name: 'firefox', use: { ...devices['Desktop Firefox'] } },
-    { name: 'webkit', use: { ...devices['Desktop Safari'] } },
+    // Firefox and WebKit projects are added with the cross-browser work.
   ],
   webServer: {
     command: `npm run build && npm run preview -- --port ${PORT} --strictPort`,

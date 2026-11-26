@@ -15,6 +15,10 @@ export default [
     },
   },
   {
+    files: ['src/**/*.worker.js'],
+    languageOptions: { globals: { ...globals.worker } },
+  },
+  {
     files: ['scripts/**/*.mjs', '*.config.js', 'tests/**/*.js'],
     languageOptions: { globals: { ...globals.node } },
     rules: { 'no-console': 'off' },
