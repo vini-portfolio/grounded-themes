@@ -6,7 +6,7 @@
 // Messages out: { type: 'progress', file, loaded, total }
 //               { type: 'result', id, vectors: Float32Array, dims, count, truncated, backend }
 //               { type: 'error', id, kind, hosts, message }
-import { AutoModel, AutoTokenizer, env, mean_pooling } from '@huggingface/transformers';
+import { AutoModel, BertTokenizer, env, mean_pooling } from '@huggingface/transformers';
 import { classifyError } from './errors.js';
 import { EMBEDDING_MODEL, MAX_TOKENS, MODEL_HOST, ortPaths } from './runtime-config.js';
 
@@ -59,8 +59,33 @@ env.fetch = async (input, init) => {
 
 let loaded = null; // { tokenizer, model, backend, cache }
 
-// Tokenizer and model are loaded directly (not through pipeline()) so every
-// request, including config lookups, uses the pinned revision.
+const TOKENIZER_CACHE = 'grounded-themes-tokenizer';
+
+// The tokenizer files are fetched here, at the pinned revision, because the
+// library's tokenizer loader first checks for tokenizer_config.json on the
+// main branch, on every load, ignoring the requested revision.
+async function fetchModelJSON(file, cache) {
+  const url = `${MODEL_HOST}${EMBEDDING_MODEL.id}/resolve/${EMBEDDING_MODEL.revision}/${file}`;
+  const store = cache && 'caches' in self ? await caches.open(TOKENIZER_CACHE) : null;
+  let res = store ? await store.match(url) : undefined;
+  if (!res) {
+    res = await env.fetch(url);
+    if (!res.ok) throw new Error(`model file ${file}: HTTP ${res.status}`);
+    if (store) await store.put(url, res.clone());
+  }
+  return res.json();
+}
+
+async function loadTokenizer(cache) {
+  const [json, config] = await Promise.all([
+    fetchModelJSON('tokenizer.json', cache),
+    fetchModelJSON('tokenizer_config.json', cache),
+  ]);
+  return new BertTokenizer(json, config);
+}
+
+// The model is loaded directly (not through pipeline()) so its requests,
+// including config lookups, use the pinned revision.
 async function load(backend, cache) {
   if (loaded && loaded.backend === backend && loaded.cache === cache) return loaded;
   if (loaded) await loaded.model.dispose?.();
@@ -68,7 +93,7 @@ async function load(backend, cache) {
   env.useWasmCache = cache;
   const options = { revision: EMBEDDING_MODEL.revision };
   const [tokenizer, model] = await Promise.all([
-    AutoTokenizer.from_pretrained(EMBEDDING_MODEL.id, options),
+    loadTokenizer(cache),
     AutoModel.from_pretrained(EMBEDDING_MODEL.id, { ...options, dtype: EMBEDDING_MODEL.dtype, device: backend }),
   ]);
   loaded = { tokenizer, model, backend, cache };
