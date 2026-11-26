@@ -1,0 +1,405 @@
+{
+  "name": "Bakery menu brainstorm (demo sample)",
+  "notes": [
+    {
+      "id": "s001",
+      "text": "What if we tried a cardamom and orange morning bun?",
+      "theme": "new recipes",
+      "domain": "bakery menu brainstorm",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "s002",
+      "text": "The gluten free brioche collapsed in the middle again",
+      "theme": "failed attempts",
+      "domain": "bakery menu brainstorm",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "s003",
+      "text": "Regulars keep asking when the almond croissant is back",
+      "theme": "client favorites",
+      "domain": "bakery menu brainstorm",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "s004",
+      "text": "Pumpkin spice loaf for October with a cream cheese swirl",
+      "theme": "seasonal products",
+      "domain": "bakery menu brainstorm",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "s005",
+      "text": "Butter went up again, the croissant margin is getting thin",
+      "theme": "pricing and costs",
+      "domain": "bakery menu brainstorm",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "s006",
+      "text": "Idea: savory scone with sharp cheddar, chives and black pepper",
+      "theme": "new recipes",
+      "domain": "bakery menu brainstorm",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "s007",
+      "text": "Macarons cracked on top, the oven runs hotter than the dial says",
+      "theme": "failed attempts",
+      "domain": "bakery menu brainstorm",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "s008",
+      "text": "The cinnamon roll sells out before ten every Saturday",
+      "theme": "client favorites",
+      "domain": "bakery menu brainstorm",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "s009",
+      "text": "Strawberry rhubarb galette when the farm stand has rhubarb in spring",
+      "theme": "seasonal products",
+      "domain": "bakery menu brainstorm",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "s010",
+      "text": "Should the sourdough loaf go from seven to eight dollars?",
+      "theme": "pricing and costs",
+      "domain": "bakery menu brainstorm",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "s011",
+      "text": "Test a brown butter chocolate chip cookie with flaky salt on top",
+      "theme": "new recipes",
+      "domain": "bakery menu brainstorm",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "s012",
+      "text": "Second batch of bagels came out flat after the overnight proof",
+      "theme": "failed attempts",
+      "domain": "bakery menu brainstorm",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "s013",
+      "text": "Customers love the sea salt chocolate cookie, best seller this month",
+      "theme": "client favorites",
+      "domain": "bakery menu brainstorm",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "s014",
+      "text": "Gingerbread cookies and stollen for the December holiday box",
+      "theme": "seasonal products",
+      "domain": "bakery menu brainstorm",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "s015",
+      "text": "Pistachio paste costs too much to use on an everyday item",
+      "theme": "pricing and costs",
+      "domain": "bakery menu brainstorm",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "s016",
+      "text": "Could we make a sourdough focaccia topped with roasted grapes and rosemary?",
+      "theme": "new recipes",
+      "domain": "bakery menu brainstorm",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "s017",
+      "text": "Choux pastry was too wet and never puffed up",
+      "theme": "failed attempts",
+      "domain": "bakery menu brainstorm",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "s018",
+      "text": "Several people requested the banana bread with walnuts again",
+      "theme": "client favorites",
+      "domain": "bakery menu brainstorm",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "s019",
+      "text": "Peach cobbler muffins for late summer while peaches are cheap",
+      "theme": "seasonal products",
+      "domain": "bakery menu brainstorm",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "s020",
+      "text": "Bundle a coffee and pastry deal to raise the average ticket",
+      "theme": "pricing and costs",
+      "domain": "bakery menu brainstorm",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "s021",
+      "text": "Pistachio cream filled croissant as a weekend special",
+      "theme": "new recipes",
+      "domain": "bakery menu brainstorm",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "s022",
+      "text": "Burnt the bottoms of the cinnamon rolls, need a second sheet pan under them",
+      "theme": "failed attempts",
+      "domain": "bakery menu brainstorm",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "s023",
+      "text": "The morning crowd always orders the ham and cheese croissant",
+      "theme": "client favorites",
+      "domain": "bakery menu brainstorm",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "s024",
+      "text": "Hot cross buns for the week before Easter",
+      "theme": "seasonal products",
+      "domain": "bakery menu brainstorm",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "s025",
+      "text": "Vanilla beans doubled in price, switch to a good extract for the muffins",
+      "theme": "pricing and costs",
+      "domain": "bakery menu brainstorm",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "s026",
+      "text": "Try a miso caramel glaze on the plain sticky buns",
+      "theme": "new recipes",
+      "domain": "bakery menu brainstorm",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "s027",
+      "text": "The vegan butter made the croissant layers greasy instead of flaky",
+      "theme": "failed attempts",
+      "domain": "bakery menu brainstorm",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "s028",
+      "text": "Kids at the school pickup go straight for the sprinkle sugar cookies",
+      "theme": "client favorites",
+      "domain": "bakery menu brainstorm",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "s029",
+      "text": "Apple cider donuts for the fall harvest weekend",
+      "theme": "seasonal products",
+      "domain": "bakery menu brainstorm",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "s030",
+      "text": "Price the custom cakes by serving instead of by size",
+      "theme": "pricing and costs",
+      "domain": "bakery menu brainstorm",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "s031",
+      "text": "Rye and caraway loaf for the sandwich counter",
+      "theme": "new recipes",
+      "domain": "bakery menu brainstorm",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "s032",
+      "text": "Lemon curd split when we tried to make it in a bigger pot",
+      "theme": "failed attempts",
+      "domain": "bakery menu brainstorm",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "s033",
+      "text": "Office orders always include a dozen of the blueberry muffins",
+      "theme": "client favorites",
+      "domain": "bakery menu brainstorm",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "s034",
+      "text": "Cranberry orange scones through Thanksgiving week",
+      "theme": "seasonal products",
+      "domain": "bakery menu brainstorm",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "s035",
+      "text": "Day old bread at half price would cut what we throw away",
+      "theme": "pricing and costs",
+      "domain": "bakery menu brainstorm",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "s036",
+      "text": "Matcha swirl pound cake, maybe with a white chocolate drizzle",
+      "theme": "new recipes",
+      "domain": "bakery menu brainstorm",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "s037",
+      "text": "Sourdough came out gummy, the starter was not active enough",
+      "theme": "failed attempts",
+      "domain": "bakery menu brainstorm",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "s038",
+      "text": "Our sourdough loaf has a waitlist on Fridays",
+      "theme": "client favorites",
+      "domain": "bakery menu brainstorm",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "s039",
+      "text": "Light lemon blueberry bars for the hottest summer months",
+      "theme": "seasonal products",
+      "domain": "bakery menu brainstorm",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "s040",
+      "text": "Cost out the hand pies before we put them on the menu",
+      "theme": "pricing and costs",
+      "domain": "bakery menu brainstorm",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "s041",
+      "text": "Olive oil lemon cake that happens to be dairy free",
+      "theme": "new recipes",
+      "domain": "bakery menu brainstorm",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "s042",
+      "text": "Meringue wept overnight because the kitchen was too humid",
+      "theme": "failed attempts",
+      "domain": "bakery menu brainstorm",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "s043",
+      "text": "People photograph the raspberry tart more than anything else on the counter",
+      "theme": "client favorites",
+      "domain": "bakery menu brainstorm",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "s044",
+      "text": "King cake in January and February for Mardi Gras",
+      "theme": "seasonal products",
+      "domain": "bakery menu brainstorm",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "s045",
+      "text": "Egg prices make the quiche barely profitable right now",
+      "theme": "pricing and costs",
+      "domain": "bakery menu brainstorm",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "s046",
+      "text": "Hand pies filled with spiced lentils for a savory lunch option",
+      "theme": "new recipes",
+      "domain": "bakery menu brainstorm",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "s047",
+      "text": "Rye loaf was dense as a brick, way too much water in the dough",
+      "theme": "failed attempts",
+      "domain": "bakery menu brainstorm",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "s048",
+      "text": "A customer said the carrot cake is the reason she drives across town",
+      "theme": "client favorites",
+      "domain": "bakery menu brainstorm",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "s049",
+      "text": "Pecan pie by the slice for November only",
+      "theme": "seasonal products",
+      "domain": "bakery menu brainstorm",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "s050",
+      "text": "Charge extra for gluten free versions to cover the separate prep",
+      "theme": "pricing and costs",
+      "domain": "bakery menu brainstorm",
+      "author": "P3",
+      "noisy": false
+    }
+  ]
+}

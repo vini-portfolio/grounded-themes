@@ -1,0 +1,1445 @@
+{
+  "name": "Bakery, café and catering notes (stress set)",
+  "notes": [
+    {
+      "id": "x001",
+      "text": "Maybe a chai spiced cinnamon roll with brown sugar icing",
+      "theme": "bakery: new recipes",
+      "domain": "bakery menu brainstorm",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "x002",
+      "text": "Brioche overproofed and deflated when we scored it",
+      "theme": "bakery: failed attempts",
+      "domain": "bakery menu brainstorm",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "x003",
+      "text": "Customers keep coming back for the morning glory muffin",
+      "theme": "bakery: client favorites",
+      "domain": "bakery menu brainstorm",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "x004",
+      "text": "Pumpkin cheesecake bars for the fall menu",
+      "theme": "bakery: seasonal products",
+      "domain": "bakery menu brainstorm",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "x005",
+      "text": "Flour supplier raised prices ten percent this quarter",
+      "theme": "bakery: pricing and costs",
+      "domain": "bakery menu brainstorm",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "x006",
+      "text": "The line at the register was out the door at 8am",
+      "theme": "cafe: wait times",
+      "domain": "café service",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "x007",
+      "text": "The barista remembered my name and my usual order",
+      "theme": "cafe: staff friendliness",
+      "domain": "café service",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "x008",
+      "text": "Not enough outlets for laptops",
+      "theme": "cafe: seating and ambience",
+      "domain": "café service",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "x009",
+      "text": "Got whole milk instead of the oat milk I asked for",
+      "theme": "cafe: order accuracy",
+      "domain": "café service",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "x010",
+      "text": "The app crashed when I tried to pay",
+      "theme": "cafe: payment and app",
+      "domain": "café service",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "x011",
+      "text": "Client wants pastries for 80 people at a Friday breakfast meeting",
+      "theme": "catering: event orders",
+      "domain": "catering",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "x012",
+      "text": "Delivery van arrived late to the office breakfast",
+      "theme": "catering: delivery logistics",
+      "domain": "catering",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "x013",
+      "text": "Client needs ten gluten free portions clearly labeled",
+      "theme": "catering: dietary requests",
+      "domain": "catering",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "x014",
+      "text": "Client says our catering quote is higher than a competitor",
+      "theme": "catering: quotes and pricing",
+      "domain": "catering",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "x015",
+      "text": "The dessert table looked beautiful, guests loved it",
+      "theme": "catering: setup feedback",
+      "domain": "catering",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "x016",
+      "text": "Try savory muffins w/ spinach + feta",
+      "theme": "bakery: new recipes",
+      "domain": "bakery menu brainstorm",
+      "author": "P5",
+      "noisy": true
+    },
+    {
+      "id": "x017",
+      "text": "Pie crust slumped down the side of the tin in the oven",
+      "theme": "bakery: failed attempts",
+      "domain": "bakery menu brainstorm",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "x018",
+      "text": "Almond croissants sold out by 9am again",
+      "theme": "bakery: client favorites",
+      "domain": "bakery menu brainstorm",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "x019",
+      "text": "Strawberry shortcake cups when local berries come in",
+      "theme": "bakery: seasonal products",
+      "domain": "bakery menu brainstorm",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "x020",
+      "text": "Need to reprice the croissants, butter is expensive",
+      "theme": "bakery: pricing and costs",
+      "domain": "bakery menu brainstorm",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "x021",
+      "text": "Waited fifteen minutes for a latte this morning",
+      "theme": "cafe: wait times",
+      "domain": "café service",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "x022",
+      "text": "Staff were rude when I asked for oat milk",
+      "theme": "cafe: staff friendliness",
+      "domain": "café service",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "x023",
+      "text": "The music is way too loud to have a conversation",
+      "theme": "cafe: seating and ambience",
+      "domain": "café service",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "x024",
+      "text": "They forgot the extra shot in my latte",
+      "theme": "cafe: order accuracy",
+      "domain": "café service",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "x025",
+      "text": "Loyalty points never showed up in my account",
+      "theme": "cafe: payment and app",
+      "domain": "café service",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "x026",
+      "text": "Wedding shower order: two dozen mini tarts and a cake",
+      "theme": "catering: event orders",
+      "domain": "catering",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "x027",
+      "text": "Need a second driver for Saturday events",
+      "theme": "catering: delivery logistics",
+      "domain": "catering",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "x028",
+      "text": "Several guests are vegan, can we do vegan pastries?",
+      "theme": "catering: dietary requests",
+      "domain": "catering",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "x029",
+      "text": "Set a minimum order for weekend catering",
+      "theme": "catering: quotes and pricing",
+      "domain": "catering",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "x030",
+      "text": "Client said the platters were too small for the crowd",
+      "theme": "catering: setup feedback",
+      "domain": "catering",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "x031",
+      "text": "Coconut lime tea cake for the brunch menu",
+      "theme": "bakery: new recipes",
+      "domain": "bakery menu brainstorm",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "x032",
+      "text": "macarons hollow again, ugh",
+      "theme": "bakery: failed attempts",
+      "domain": "bakery menu brainstorm",
+      "author": "P3",
+      "noisy": true
+    },
+    {
+      "id": "x033",
+      "text": "ppl love the brown butter cookie",
+      "theme": "bakery: client favorites",
+      "domain": "bakery menu brainstorm",
+      "author": "P4",
+      "noisy": true
+    },
+    {
+      "id": "x034",
+      "text": "holiday cookie tins for december",
+      "theme": "bakery: seasonal products",
+      "domain": "bakery menu brainstorm",
+      "author": "P5",
+      "noisy": true
+    },
+    {
+      "id": "x035",
+      "text": "cost per muffin is about 90 cents now",
+      "theme": "bakery: pricing and costs",
+      "domain": "bakery menu brainstorm",
+      "author": "P6",
+      "noisy": true
+    },
+    {
+      "id": "x036",
+      "text": "slow service during the lunch rush",
+      "theme": "cafe: wait times",
+      "domain": "café service",
+      "author": "P1",
+      "noisy": true
+    },
+    {
+      "id": "x037",
+      "text": "Super friendly team, always smiling",
+      "theme": "cafe: staff friendliness",
+      "domain": "café service",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "x038",
+      "text": "Love the big windows and natural light",
+      "theme": "cafe: seating and ambience",
+      "domain": "café service",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "x039",
+      "text": "my name was spelled wrong and someone else took my drink",
+      "theme": "cafe: order accuracy",
+      "domain": "café service",
+      "author": "P4",
+      "noisy": true
+    },
+    {
+      "id": "x040",
+      "text": "card reader was down so cash only",
+      "theme": "cafe: payment and app",
+      "domain": "café service",
+      "author": "P5",
+      "noisy": true
+    },
+    {
+      "id": "x041",
+      "text": "corporate lunch order for 40, sandwiches + cookies",
+      "theme": "catering: event orders",
+      "domain": "catering",
+      "author": "P6",
+      "noisy": true
+    },
+    {
+      "id": "x042",
+      "text": "cakes slid around in the van, need non slip mats",
+      "theme": "catering: delivery logistics",
+      "domain": "catering",
+      "author": "P1",
+      "noisy": true
+    },
+    {
+      "id": "x043",
+      "text": "nut free order for a school event",
+      "theme": "catering: dietary requests",
+      "domain": "catering",
+      "author": "P2",
+      "noisy": true
+    },
+    {
+      "id": "x044",
+      "text": "quote for 100 people: pastries + coffee",
+      "theme": "catering: quotes and pricing",
+      "domain": "catering",
+      "author": "P3",
+      "noisy": true
+    },
+    {
+      "id": "x045",
+      "text": "coffee urns ran out halfway through the event",
+      "theme": "catering: setup feedback",
+      "domain": "catering",
+      "author": "P4",
+      "noisy": true
+    },
+    {
+      "id": "x046",
+      "text": "Thinking about a cheddar apple turnover",
+      "theme": "bakery: new recipes",
+      "domain": "bakery menu brainstorm",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "x047",
+      "text": "The tart shells got soggy under the custard",
+      "theme": "bakery: failed attempts",
+      "domain": "bakery menu brainstorm",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "x048",
+      "text": "The cheddar scone is a hit with the office crowd",
+      "theme": "bakery: client favorites",
+      "domain": "bakery menu brainstorm",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "x049",
+      "text": "Apple crumble pie starting in September",
+      "theme": "bakery: seasonal products",
+      "domain": "bakery menu brainstorm",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "x050",
+      "text": "Should we charge more for the large cakes?",
+      "theme": "bakery: pricing and costs",
+      "domain": "bakery menu brainstorm",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "x051",
+      "text": "Mobile orders get made before the people waiting in line",
+      "theme": "cafe: wait times",
+      "domain": "café service",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "x052",
+      "text": "cashier didnt say hi or thank you",
+      "theme": "cafe: staff friendliness",
+      "domain": "café service",
+      "author": "P5",
+      "noisy": true
+    },
+    {
+      "id": "x053",
+      "text": "tables are always sticky",
+      "theme": "cafe: seating and ambience",
+      "domain": "café service",
+      "author": "P6",
+      "noisy": true
+    },
+    {
+      "id": "x054",
+      "text": "Asked for no sugar and it was sweet",
+      "theme": "cafe: order accuracy",
+      "domain": "café service",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "x055",
+      "text": "Love that I can order ahead in the app",
+      "theme": "cafe: payment and app",
+      "domain": "café service",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "x056",
+      "text": "Need a quote for a weekly office breakfast delivery",
+      "theme": "catering: event orders",
+      "domain": "catering",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "x057",
+      "text": "The client's building has no parking for unloading",
+      "theme": "catering: delivery logistics",
+      "domain": "catering",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "x058",
+      "text": "Need ingredient labels for allergy checks",
+      "theme": "catering: dietary requests",
+      "domain": "catering",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "x059",
+      "text": "Should we charge a setup fee for events?",
+      "theme": "catering: quotes and pricing",
+      "domain": "catering",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "x060",
+      "text": "Signage for each item helped guests a lot",
+      "theme": "catering: setup feedback",
+      "domain": "catering",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "x061",
+      "text": "Hazelnut praline eclair as a showpiece",
+      "theme": "bakery: new recipes",
+      "domain": "bakery menu brainstorm",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "x062",
+      "text": "Ciabatta came out with no big holes, too dry",
+      "theme": "bakery: failed attempts",
+      "domain": "bakery menu brainstorm",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "x063",
+      "text": "Regular asked if we can make the carrot cake every day",
+      "theme": "bakery: client favorites",
+      "domain": "bakery menu brainstorm",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "x064",
+      "text": "Valentine heart shortbread with pink sugar",
+      "theme": "bakery: seasonal products",
+      "domain": "bakery menu brainstorm",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "x065",
+      "text": "Chocolate costs are eating the cookie margin",
+      "theme": "bakery: pricing and costs",
+      "domain": "bakery menu brainstorm",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "x066",
+      "text": "Took forever to get my breakfast sandwich",
+      "theme": "cafe: wait times",
+      "domain": "café service",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "x067",
+      "text": "The new hire was patient explaining the menu",
+      "theme": "cafe: staff friendliness",
+      "domain": "café service",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "x068",
+      "text": "Hard to find a seat on weekend mornings",
+      "theme": "cafe: seating and ambience",
+      "domain": "café service",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "x069",
+      "text": "Order was missing the croissant I paid for",
+      "theme": "cafe: order accuracy",
+      "domain": "café service",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "x070",
+      "text": "The app charged me twice for one coffee",
+      "theme": "cafe: payment and app",
+      "domain": "café service",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "x071",
+      "text": "Birthday party wants a cupcake tower for 50",
+      "theme": "catering: event orders",
+      "domain": "catering",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "x072",
+      "text": "Coffee went cold during the long drive to the venue",
+      "theme": "catering: delivery logistics",
+      "domain": "catering",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "x073",
+      "text": "Wedding couple asked for dairy free cake options",
+      "theme": "catering: dietary requests",
+      "domain": "catering",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "x074",
+      "text": "Offer a discount for recurring weekly orders",
+      "theme": "catering: quotes and pricing",
+      "domain": "catering",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "x075",
+      "text": "Need more serving tongs and napkins next time",
+      "theme": "catering: setup feedback",
+      "domain": "catering",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "x076",
+      "text": "new idea: date and walnut breakfast loaf",
+      "theme": "bakery: new recipes",
+      "domain": "bakery menu brainstorm",
+      "author": "P5",
+      "noisy": true
+    },
+    {
+      "id": "x077",
+      "text": "danish butter leaked out of the dough during proof",
+      "theme": "bakery: failed attempts",
+      "domain": "bakery menu brainstorm",
+      "author": "P6",
+      "noisy": true
+    },
+    {
+      "id": "x078",
+      "text": "Kids love the rainbow sprinkle cupcake",
+      "theme": "bakery: client favorites",
+      "domain": "bakery menu brainstorm",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "x079",
+      "text": "Spring lemon lavender cake",
+      "theme": "bakery: seasonal products",
+      "domain": "bakery menu brainstorm",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "x080",
+      "text": "Offer a dozen discount to move more donuts",
+      "theme": "bakery: pricing and costs",
+      "domain": "bakery menu brainstorm",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "x081",
+      "text": "Only one barista on during the busiest hour",
+      "theme": "cafe: wait times",
+      "domain": "café service",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "x082",
+      "text": "Staff seemed annoyed when we asked questions",
+      "theme": "cafe: staff friendliness",
+      "domain": "café service",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "x083",
+      "text": "The chairs are uncomfortable for long work sessions",
+      "theme": "cafe: seating and ambience",
+      "domain": "café service",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "x084",
+      "text": "Wrong size drink, I ordered a large",
+      "theme": "cafe: order accuracy",
+      "domain": "café service",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "x085",
+      "text": "Tap to pay does not work at the second register",
+      "theme": "cafe: payment and app",
+      "domain": "café service",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "x086",
+      "text": "Conference organizer asking about boxed lunches for 200",
+      "theme": "catering: event orders",
+      "domain": "catering",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "x087",
+      "text": "Delivery window was too tight with traffic downtown",
+      "theme": "catering: delivery logistics",
+      "domain": "catering",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "x088",
+      "text": "Halal sandwich options for the conference lunch",
+      "theme": "catering: dietary requests",
+      "domain": "catering",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "x089",
+      "text": "Deposit of fifty percent to confirm large orders",
+      "theme": "catering: quotes and pricing",
+      "domain": "catering",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "x090",
+      "text": "The display stands made the cupcakes look great",
+      "theme": "catering: setup feedback",
+      "domain": "catering",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "x091",
+      "text": "Sweet potato rolls made with a little maple in the dough",
+      "theme": "bakery: new recipes",
+      "domain": "bakery menu brainstorm",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "x092",
+      "text": "Glaze on the donuts turned see-through after an hour",
+      "theme": "bakery: failed attempts",
+      "domain": "bakery menu brainstorm",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "x093",
+      "text": "The country loaf is our best seller on Saturdays",
+      "theme": "bakery: client favorites",
+      "domain": "bakery menu brainstorm",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "x094",
+      "text": "Peppermint brownies for the winter holidays",
+      "theme": "bakery: seasonal products",
+      "domain": "bakery menu brainstorm",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "x095",
+      "text": "Packaging costs went up, the boxes are pricey",
+      "theme": "bakery: pricing and costs",
+      "domain": "bakery menu brainstorm",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "x096",
+      "text": "Drinks come out quickly but the food takes ages",
+      "theme": "cafe: wait times",
+      "domain": "café service",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "x097",
+      "text": "Lovely service, they made my kid a babyccino",
+      "theme": "cafe: staff friendliness",
+      "domain": "café service",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "x098",
+      "text": "Cozy corner with the armchairs is my favorite spot",
+      "theme": "cafe: seating and ambience",
+      "domain": "café service",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "x099",
+      "text": "The sandwich came with cheese even though I said no cheese",
+      "theme": "cafe: order accuracy",
+      "domain": "café service",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "x100",
+      "text": "Please add Apple Pay to the app",
+      "theme": "cafe: payment and app",
+      "domain": "café service",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "x101",
+      "text": "Order for a school bake sale, 10 dozen cookies",
+      "theme": "catering: event orders",
+      "domain": "catering",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "x102",
+      "text": "Driver could not find the loading dock",
+      "theme": "catering: delivery logistics",
+      "domain": "catering",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "x103",
+      "text": "Low sugar desserts for a diabetes awareness event",
+      "theme": "catering: dietary requests",
+      "domain": "catering",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "x104",
+      "text": "Client wants an itemized quote before approving",
+      "theme": "catering: quotes and pricing",
+      "domain": "catering",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "x105",
+      "text": "setup took too long, guests arrived first",
+      "theme": "catering: setup feedback",
+      "domain": "catering",
+      "author": "P4",
+      "noisy": true
+    },
+    {
+      "id": "x106",
+      "text": "Cardamon bun knots, swedish style??",
+      "theme": "bakery: new recipes",
+      "domain": "bakery menu brainstorm",
+      "author": "P5",
+      "noisy": true
+    },
+    {
+      "id": "x107",
+      "text": "Cake domed and cracked, oven too hot",
+      "theme": "bakery: failed attempts",
+      "domain": "bakery menu brainstorm",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "x108",
+      "text": "lemon bars always gone by lunch",
+      "theme": "bakery: client favorites",
+      "domain": "bakery menu brainstorm",
+      "author": "P1",
+      "noisy": true
+    },
+    {
+      "id": "x109",
+      "text": "summer peach galettes while they last",
+      "theme": "bakery: seasonal products",
+      "domain": "bakery menu brainstorm",
+      "author": "P2",
+      "noisy": true
+    },
+    {
+      "id": "x110",
+      "text": "Compare wholesale price vs retail for the cafe accounts",
+      "theme": "bakery: pricing and costs",
+      "domain": "bakery menu brainstorm",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "x111",
+      "text": "had to wait 20 min for a pour over",
+      "theme": "cafe: wait times",
+      "domain": "café service",
+      "author": "P4",
+      "noisy": true
+    },
+    {
+      "id": "x112",
+      "text": "nobody greeted us when we walked in",
+      "theme": "cafe: staff friendliness",
+      "domain": "café service",
+      "author": "P5",
+      "noisy": true
+    },
+    {
+      "id": "x113",
+      "text": "too cold inside, AC blasting",
+      "theme": "cafe: seating and ambience",
+      "domain": "café service",
+      "author": "P6",
+      "noisy": true
+    },
+    {
+      "id": "x114",
+      "text": "mobile order had the wrong syrup",
+      "theme": "cafe: order accuracy",
+      "domain": "café service",
+      "author": "P1",
+      "noisy": true
+    },
+    {
+      "id": "x115",
+      "text": "rewards program is confusing",
+      "theme": "cafe: payment and app",
+      "domain": "café service",
+      "author": "P2",
+      "noisy": true
+    },
+    {
+      "id": "x116",
+      "text": "rehearsal dinner dessert table request",
+      "theme": "catering: event orders",
+      "domain": "catering",
+      "author": "P3",
+      "noisy": true
+    },
+    {
+      "id": "x117",
+      "text": "need insulated bags for the hot food",
+      "theme": "catering: delivery logistics",
+      "domain": "catering",
+      "author": "P4",
+      "noisy": true
+    },
+    {
+      "id": "x118",
+      "text": "kosher certified pastries request",
+      "theme": "catering: dietary requests",
+      "domain": "catering",
+      "author": "P5",
+      "noisy": true
+    },
+    {
+      "id": "x119",
+      "text": "price per head for the breakfast package",
+      "theme": "catering: quotes and pricing",
+      "domain": "catering",
+      "author": "P6",
+      "noisy": true
+    },
+    {
+      "id": "x120",
+      "text": "Client happy, already booked the next event",
+      "theme": "catering: setup feedback",
+      "domain": "catering",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "x121",
+      "text": "Blood orange olive oil muffins",
+      "theme": "bakery: new recipes",
+      "domain": "bakery menu brainstorm",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "x122",
+      "text": "Focaccia stuck to the pan, not enough oil",
+      "theme": "bakery: failed attempts",
+      "domain": "bakery menu brainstorm",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "x123",
+      "text": "Several reviews mention our cinnamon rolls by name",
+      "theme": "bakery: client favorites",
+      "domain": "bakery menu brainstorm",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "x124",
+      "text": "Hot cocoa cookies with marshmallow for snow days",
+      "theme": "bakery: seasonal products",
+      "domain": "bakery menu brainstorm",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "x125",
+      "text": "half price bread at closing to cut waste",
+      "theme": "bakery: pricing and costs",
+      "domain": "bakery menu brainstorm",
+      "author": "P6",
+      "noisy": true
+    },
+    {
+      "id": "x126",
+      "text": "The queue moves faster since they added a second register",
+      "theme": "cafe: wait times",
+      "domain": "café service",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "x127",
+      "text": "The manager came over to check on us, very kind",
+      "theme": "cafe: staff friendliness",
+      "domain": "café service",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "x128",
+      "text": "The patio is lovely when the weather is nice",
+      "theme": "cafe: seating and ambience",
+      "domain": "café service",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "x129",
+      "text": "They gave me decaf when I asked for regular",
+      "theme": "cafe: order accuracy",
+      "domain": "café service",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "x130",
+      "text": "The app says my order is ready when it isn't",
+      "theme": "cafe: payment and app",
+      "domain": "café service",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "x131",
+      "text": "Holiday party order: cookie platters for three offices",
+      "theme": "catering: event orders",
+      "domain": "catering",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "x132",
+      "text": "Route the morning deliveries so the furthest goes first",
+      "theme": "catering: delivery logistics",
+      "domain": "catering",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "x133",
+      "text": "Keep the gluten free items separate on the platter",
+      "theme": "catering: dietary requests",
+      "domain": "catering",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "x134",
+      "text": "Rush orders under 48 hours should cost more",
+      "theme": "catering: quotes and pricing",
+      "domain": "catering",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "x135",
+      "text": "Leftover pastries, we brought too much",
+      "theme": "catering: setup feedback",
+      "domain": "catering",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "x136",
+      "text": "Za'atar and olive oil flatbread for lunch",
+      "theme": "bakery: new recipes",
+      "domain": "bakery menu brainstorm",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "x137",
+      "text": "bagels wrinkly after boiling, overproofed??",
+      "theme": "bakery: failed attempts",
+      "domain": "bakery menu brainstorm",
+      "author": "P6",
+      "noisy": true
+    },
+    {
+      "id": "x138",
+      "text": "The ham and gruyere croissant has a loyal following",
+      "theme": "bakery: client favorites",
+      "domain": "bakery menu brainstorm",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "x139",
+      "text": "Cranberry walnut bread through November",
+      "theme": "bakery: seasonal products",
+      "domain": "bakery menu brainstorm",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "x140",
+      "text": "Specialty flours cost twice as much as regular",
+      "theme": "bakery: pricing and costs",
+      "domain": "bakery menu brainstorm",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "x141",
+      "text": "Customers leaving the line because it is so long",
+      "theme": "cafe: wait times",
+      "domain": "café service",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "x142",
+      "text": "Barista was helpful picking a coffee for me",
+      "theme": "cafe: staff friendliness",
+      "domain": "café service",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "x143",
+      "text": "Bathroom needs cleaning more often",
+      "theme": "cafe: seating and ambience",
+      "domain": "café service",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "x144",
+      "text": "Received someone else's breakfast order",
+      "theme": "cafe: order accuracy",
+      "domain": "café service",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "x145",
+      "text": "Gift card balance is wrong in the app",
+      "theme": "cafe: payment and app",
+      "domain": "café service",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "x146",
+      "text": "Church event wants coffee service and pastries for 60",
+      "theme": "catering: event orders",
+      "domain": "catering",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "x147",
+      "text": "Van AC broke and the buttercream started melting",
+      "theme": "catering: delivery logistics",
+      "domain": "catering",
+      "author": "P4",
+      "noisy": true
+    },
+    {
+      "id": "x148",
+      "text": "Guest with a sesame allergy, check the breads",
+      "theme": "catering: dietary requests",
+      "domain": "catering",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "x149",
+      "text": "Include delivery in the price or list it separately?",
+      "theme": "catering: quotes and pricing",
+      "domain": "catering",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "x150",
+      "text": "The tablecloth did not match the event colors",
+      "theme": "catering: setup feedback",
+      "domain": "catering",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "x151",
+      "text": "Raspberry rose croissant, pink glaze",
+      "theme": "bakery: new recipes",
+      "domain": "bakery menu brainstorm",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "x152",
+      "text": "The chocolate seized when water got in the bowl",
+      "theme": "bakery: failed attempts",
+      "domain": "bakery menu brainstorm",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "x153",
+      "text": "Everyone wants the banana bread warm",
+      "theme": "bakery: client favorites",
+      "domain": "bakery menu brainstorm",
+      "author": "P4",
+      "noisy": false
+    },
+    {
+      "id": "x154",
+      "text": "Easter carrot cake cupcakes",
+      "theme": "bakery: seasonal products",
+      "domain": "bakery menu brainstorm",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "x155",
+      "text": "Raise the price of the sourdough by a dollar",
+      "theme": "bakery: pricing and costs",
+      "domain": "bakery menu brainstorm",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "x156",
+      "text": "Wait time for a table on Sunday was half an hour",
+      "theme": "cafe: wait times",
+      "domain": "café service",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "x157",
+      "text": "staff chatting with each other and ignoring customers",
+      "theme": "cafe: staff friendliness",
+      "domain": "café service",
+      "author": "P2",
+      "noisy": true
+    },
+    {
+      "id": "x158",
+      "text": "nice plants and decor, very calm vibe",
+      "theme": "cafe: seating and ambience",
+      "domain": "café service",
+      "author": "P3",
+      "noisy": true
+    },
+    {
+      "id": "x159",
+      "text": "forgot to heat up my muffin",
+      "theme": "cafe: order accuracy",
+      "domain": "café service",
+      "author": "P4",
+      "noisy": true
+    },
+    {
+      "id": "x160",
+      "text": "checkout in the app takes too many steps",
+      "theme": "cafe: payment and app",
+      "domain": "café service",
+      "author": "P5",
+      "noisy": true
+    },
+    {
+      "id": "x161",
+      "text": "Graduation party sheet cake order for Saturday",
+      "theme": "catering: event orders",
+      "domain": "catering",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "x162",
+      "text": "Delivery fee should depend on distance",
+      "theme": "catering: delivery logistics",
+      "domain": "catering",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "x163",
+      "text": "Can we label which items contain eggs?",
+      "theme": "catering: dietary requests",
+      "domain": "catering",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "x164",
+      "text": "Cancellation policy for big event orders",
+      "theme": "catering: quotes and pricing",
+      "domain": "catering",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "x165",
+      "text": "great feedback on the mini quiches",
+      "theme": "catering: setup feedback",
+      "domain": "catering",
+      "author": "P4",
+      "noisy": true
+    },
+    {
+      "id": "x166",
+      "text": "chocolate rye cookie, test w/ less sugar",
+      "theme": "bakery: new recipes",
+      "domain": "bakery menu brainstorm",
+      "author": "P5",
+      "noisy": true
+    },
+    {
+      "id": "x167",
+      "text": "Scones spread flat, the butter was too warm",
+      "theme": "bakery: failed attempts",
+      "domain": "bakery menu brainstorm",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "x168",
+      "text": "Blueberry muffin = top seller this week",
+      "theme": "bakery: client favorites",
+      "domain": "bakery menu brainstorm",
+      "author": "P1",
+      "noisy": true
+    },
+    {
+      "id": "x169",
+      "text": "fourth of july berry tarts",
+      "theme": "bakery: seasonal products",
+      "domain": "bakery menu brainstorm",
+      "author": "P2",
+      "noisy": true
+    },
+    {
+      "id": "x170",
+      "text": "Labor cost on laminated dough is high, worth it?",
+      "theme": "bakery: pricing and costs",
+      "domain": "bakery menu brainstorm",
+      "author": "P3",
+      "noisy": false
+    },
+    {
+      "id": "x171",
+      "text": "the morning rush is chaos, need more staff",
+      "theme": "cafe: wait times",
+      "domain": "café service",
+      "author": "P4",
+      "noisy": true
+    },
+    {
+      "id": "x172",
+      "text": "Warm welcome every time I come in",
+      "theme": "cafe: staff friendliness",
+      "domain": "café service",
+      "author": "P5",
+      "noisy": false
+    },
+    {
+      "id": "x173",
+      "text": "Wifi drops every half hour",
+      "theme": "cafe: seating and ambience",
+      "domain": "café service",
+      "author": "P6",
+      "noisy": false
+    },
+    {
+      "id": "x174",
+      "text": "Got a hot drink when I ordered it iced",
+      "theme": "cafe: order accuracy",
+      "domain": "café service",
+      "author": "P1",
+      "noisy": false
+    },
+    {
+      "id": "x175",
+      "text": "Receipt email never arrives after I pay",
+      "theme": "cafe: payment and app",
+      "domain": "café service",
+      "author": "P2",
+      "noisy": false
+    },
+    {
+      "id": "x176",
+      "text": "big order for a charity gala, petit fours",
+      "theme": "catering: event orders",
+      "domain": "catering",
+      "author": "P3",
+      "noisy": true
+    },
+    {
+      "id": "x177",
+      "text": "boxes got crushed on the way, need sturdier ones",
+      "theme": "catering: delivery logistics",
+      "domain": "catering",
+      "author": "P4",
+      "noisy": true
+    },
+    {
+      "id": "x178",
+      "text": "vegetarian boxed lunch option needed",
+      "theme": "catering: dietary requests",
+      "domain": "catering",
+      "author": "P5",
+      "noisy": true
+    },
+    {
+      "id": "x179",
+      "text": "budget is tight, can we do a smaller platter?",
+      "theme": "catering: quotes and pricing",
+      "domain": "catering",
+      "author": "P6",
+      "noisy": true
+    },
+    {
+      "id": "x180",
+      "text": "Guests could not tell which items were vegan",
+      "theme": "catering: setup feedback",
+      "domain": "catering",
+      "author": "P1",
+      "noisy": false
+    }
+  ]
+}
