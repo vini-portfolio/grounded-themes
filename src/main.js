@@ -1,5 +1,5 @@
 import './styles.css';
-import { createEmbedder, EmbeddingError, webgpuAvailable } from './embedding-client.js';
+import { createEmbedder, detectBackend, EmbeddingError } from './embedding-client.js';
 import { parsePastedNotes } from './io/paste.js';
 import { nearestNeighbors } from './similarity.js';
 import { h, replace } from './ui/dom.js';
@@ -15,7 +15,7 @@ export function webAssemblySupported() {
   }
 }
 
-const state = { notes: [], vectors: [], selected: null, cache: true, backend: webgpuAvailable() ? 'webgpu' : 'wasm' };
+const state = { notes: [], vectors: [], selected: null, cache: true, backend: null };
 const status = h('p', { class: 'status', role: 'status', 'aria-live': 'polite' });
 const errorBox = h('div', { class: 'error-slot' });
 const notesList = h('ol', { class: 'notes', 'aria-label': 'Notes' });
@@ -115,6 +115,7 @@ async function run() {
   runButton.disabled = true;
   status.textContent = 'Loading the model…';
   try {
+    state.backend ??= await detectBackend();
     const result = await embedder.embed(notes.map((n) => n.text), { backend: state.backend, cache: state.cache });
     state.vectors = result.vectors;
     const truncatedNote = result.truncated

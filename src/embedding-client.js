@@ -15,8 +15,18 @@ export class EmbeddingError extends Error {
   }
 }
 
-export function webgpuAvailable() {
-  return typeof navigator !== 'undefined' && 'gpu' in navigator;
+/**
+ * Resolves to 'webgpu' only when a WebGPU adapter is actually available
+ * (headless and some locked-down browsers expose navigator.gpu without one).
+ * @returns {Promise<'webgpu' | 'wasm'>}
+ */
+export async function detectBackend() {
+  try {
+    const adapter = await navigator.gpu?.requestAdapter();
+    return adapter ? 'webgpu' : 'wasm';
+  } catch {
+    return 'wasm';
+  }
 }
 
 export function createEmbedder({ onProgress = () => {} } = {}) {
@@ -56,7 +66,7 @@ export function createEmbedder({ onProgress = () => {} } = {}) {
      * @param {{ backend?: 'webgpu' | 'wasm', cache?: boolean }} [opts]
      * @returns {Promise<EmbedResult>}
      */
-    embed(texts, { backend = webgpuAvailable() ? 'webgpu' : 'wasm', cache = true } = {}) {
+    embed(texts, { backend = 'wasm', cache = true } = {}) {
       if (!worker) start();
       const id = nextId++;
       return new Promise((resolve, reject) => {

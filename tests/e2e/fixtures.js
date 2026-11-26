@@ -9,7 +9,22 @@ import { join } from 'node:path';
 
 const CACHE = process.env.MODEL_CACHE_DIR;
 
-export const test = base.extend({
+const withConsole = base.extend({
+  page: async ({ page }, use, testInfo) => {
+    const lines = [];
+    page.on('console', (m) => lines.push(`[${m.type()}] ${m.text()}`));
+    page.on('pageerror', (e) => lines.push(`[pageerror] ${e.message}`));
+    page.on('requestfailed', (r) => lines.push(`[requestfailed] ${r.url()} ${r.failure()?.errorText}`));
+    await use(page);
+    if (testInfo.status !== testInfo.expectedStatus) {
+      const status = await page.getByRole('status').textContent().catch(() => '');
+      const alert = await page.getByRole('alert').allTextContents().catch(() => []);
+      console.log(`--- ${testInfo.title}\nstatus: ${status}\nalert: ${alert.join(' | ')}\n${lines.slice(-40).join('\n')}`);
+    }
+  },
+});
+
+export const test = withConsole.extend({
   context: async ({ context }, use) => {
     if (CACHE) {
       mkdirSync(CACHE, { recursive: true });
@@ -37,7 +52,7 @@ export const test = base.extend({
   },
 });
 
-export const coldTest = base;
+export const coldTest = withConsole;
 export { expect };
 
 /** Pastes notes, runs, and waits for the embedding result. */
