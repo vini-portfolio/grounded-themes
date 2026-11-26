@@ -113,25 +113,41 @@ function showError(error) {
   status.textContent = '';
 }
 
-function renderNotes() {
-  replace(
-    notesList,
-    ...state.notes.map((note, i) =>
-      h('li', {}, [
-        h(
-          'button',
-          {
-            type: 'button',
-            class: 'note',
-            'aria-pressed': String(state.selected === i),
-            disabled: state.vectors.length !== state.notes.length,
-            onclick: () => select(i),
-          },
-          [note.text],
-        ),
-      ]),
+const RENDER_CHUNK = 100;
+let renderGeneration = 0;
+
+function noteItem(note, i) {
+  return h('li', {}, [
+    h(
+      'button',
+      {
+        type: 'button',
+        class: 'note',
+        'aria-pressed': String(state.selected === i),
+        disabled: state.vectors.length !== state.notes.length,
+        onclick: () => select(i),
+      },
+      [note.text],
     ),
-  );
+  ]);
+}
+
+/**
+ * Renders the note list. The first chunk renders immediately; the rest in
+ * later tasks, so long lists don't block the main thread in one go.
+ */
+function renderNotes() {
+  const generation = ++renderGeneration;
+  const notes = state.notes;
+  replace(notesList, ...notes.slice(0, RENDER_CHUNK).map((n, i) => noteItem(n, i)));
+  const next = (start) => {
+    if (generation !== renderGeneration || start >= notes.length) return;
+    const frag = document.createDocumentFragment();
+    for (let i = start; i < Math.min(start + RENDER_CHUNK, notes.length); i += 1) frag.append(noteItem(notes[i], i));
+    notesList.append(frag);
+    setTimeout(() => next(start + RENDER_CHUNK));
+  };
+  setTimeout(() => next(RENDER_CHUNK));
 }
 
 function renderThemes() {
@@ -212,8 +228,9 @@ async function run() {
     });
     state.vectors = result.vectors;
     state.themes = result.themes;
-    renderNotes();
     renderThemes();
+    // Re-render the (now enabled) note list in a later task, after the themes.
+    setTimeout(renderNotes);
     app.dataset.themes = String(result.themes.length);
     app.dataset.backend = result.backend;
     const truncatedNote = result.truncated

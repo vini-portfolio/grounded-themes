@@ -22,6 +22,7 @@ jobs:
       - name: Benchmark with the committed constants
         run: npm run bench -- --runs 10 --cold-runs 3 --name ci-committed
       - name: Alternatives behind the committed setting (docs/ARCHITECTURE.md)
+        if: ${{ !contains(github.event.head_commit.message, '[no-alt]') }}
         run: |
           npm run bench -- --no-build --runs 10 --cold-runs 1 --name ci-min4 --option minNotesPerTheme=4
           npm run bench -- --no-build --runs 10 --cold-runs 1 --name ci-min5 --option minNotesPerTheme=5
