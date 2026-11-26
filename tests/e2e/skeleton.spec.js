@@ -75,7 +75,7 @@ test.describe('paste and compare notes', () => {
     // Start the run and read the note buttons in the same task, before any
     // embedding result can arrive.
     const disabled = await page.evaluate(() => {
-      [...document.querySelectorAll('button')].find((b) => b.textContent === 'Find similar notes').click();
+      [...document.querySelectorAll('button')].find((b) => b.textContent === 'Find themes').click();
       return [...document.querySelectorAll('.note')].map((b) => b.disabled);
     });
     expect(disabled).toEqual([true, true]);

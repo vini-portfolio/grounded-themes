@@ -3,6 +3,7 @@ import { createEmbedder, detectBackend, EmbeddingError } from './embedding-clien
 import { parsePastedNotes } from './io/paste.js';
 import { nearestNeighbors } from './similarity.js';
 import { h, replace } from './ui/dom.js';
+import { debug } from './debug.js';
 
 const app = document.querySelector('#app');
 const workspace = document.querySelector('#workspace');
@@ -15,11 +16,21 @@ export function webAssemblySupported() {
   }
 }
 
-const state = { notes: [], vectors: [], selected: null, cache: true, backend: null };
+const state = { notes: [], vectors: [], themes: [], events: [], selected: null, cache: true, backend: null };
+
+const STAGE_NAMES = {
+  embed: 'Embedding notes',
+  reduce: 'Reducing dimensions',
+  cluster: 'Clustering into themes',
+  extract: 'Extracting keyphrases',
+  label: 'Naming themes',
+  project: 'Placing notes on the map',
+};
 const status = h('p', { class: 'status', role: 'status', 'aria-live': 'polite' });
 const errorBox = h('div', { class: 'error-slot' });
 const notesList = h('ol', { class: 'notes', 'aria-label': 'Notes' });
 const neighborsPanel = h('section', { class: 'neighbors', 'aria-label': 'Most similar notes' });
+const themesPanel = h('section', { class: 'themes', 'aria-label': 'Themes' });
 
 const progress = new Map();
 const embedder = createEmbedder({
@@ -41,7 +52,7 @@ if (import.meta.env.VITE_FAULT_HOOKS === '1') {
 }
 
 const input = h('textarea', { id: 'notes-input', rows: '8', placeholder: 'One note per line' });
-const runButton = h('button', { type: 'button', onclick: () => run() }, ['Find similar notes']);
+const runButton = h('button', { type: 'button', onclick: () => run() }, ['Find themes']);
 
 function showError(error) {
   const kind = error instanceof EmbeddingError ? error.kind : 'unknown';
@@ -97,6 +108,29 @@ function renderNotes() {
   );
 }
 
+function renderThemes() {
+  if (!state.themes.length) return replace(themesPanel);
+  replace(
+    themesPanel,
+    h('h2', {}, ['Themes']),
+    h(
+      'ol',
+      { class: 'theme-list' },
+      state.themes.map((theme) =>
+        h('li', { class: 'theme' }, [
+          h('h3', {}, [theme.label]),
+          h('p', { class: 'keyphrases' }, [`Keyphrases: ${theme.keyphrases.join(', ')}`]),
+          h(
+            'ul',
+            { class: 'theme-notes' },
+            theme.noteIndexes.map((i) => h('li', {}, [state.notes[i].text])),
+          ),
+        ]),
+      ),
+    ),
+  );
+}
+
 function select(i) {
   if (state.vectors.length !== state.notes.length) return; // embeddings not ready for these notes
   state.selected = i;
@@ -125,22 +159,40 @@ async function run() {
   }
   state.notes = notes;
   state.vectors = [];
+  state.themes = [];
+  state.events = [];
   state.selected = null;
   delete app.dataset.embedded;
+  delete app.dataset.themes;
   replace(neighborsPanel);
+  replace(themesPanel);
   renderNotes();
   runButton.disabled = true;
   status.textContent = 'Loading the model…';
   try {
     state.backend ??= await detectBackend();
-    const result = await embedder.embed(notes.map((n) => n.text), { backend: state.backend, cache: state.cache });
+    const result = await embedder.run(notes.map((n) => n.text), {
+      backend: state.backend,
+      cache: state.cache,
+      onStage: (stage) => {
+        status.textContent = `${STAGE_NAMES[stage] ?? stage}…`;
+      },
+      onEvent: (event) => {
+        state.events.push(event);
+        debug(`stage ${event.stage} took ${event.durationMs} ms`, event.payload);
+      },
+    });
     state.vectors = result.vectors;
+    state.themes = result.themes;
     renderNotes();
+    renderThemes();
+    app.dataset.themes = String(result.themes.length);
     app.dataset.backend = result.backend;
     const truncatedNote = result.truncated
       ? ` ${result.truncated} long ${result.truncated === 1 ? 'note was' : 'notes were'} shortened to the model's input limit.`
       : '';
-    status.textContent = `${notes.length} notes embedded on this device.${truncatedNote} Select a note to see its closest matches.`;
+    const themeCount = `${result.themes.length} ${result.themes.length === 1 ? 'theme' : 'themes'}`;
+    status.textContent = `${notes.length} notes embedded on this device and grouped into ${themeCount}.${truncatedNote} Select a note to see its closest matches.`;
     if (result.cacheFailed && state.cache) {
       replace(
         errorBox,
@@ -172,6 +224,7 @@ if (webAssemblySupported()) {
     h('div', { class: 'actions' }, [runButton]),
     status,
     errorBox,
+    themesPanel,
     notesList,
     neighborsPanel,
   );

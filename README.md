@@ -24,7 +24,9 @@ Design notes: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Runtime decisions: [
 
 ## What works today
 
-Paste notes (one per line) and see, for any note, the five most similar notes by cosine similarity. Embeddings are computed in a Web Worker on your device.
+Paste notes (one per line) and Grounded Themes groups them into themes on your device: it embeds each note, reduces the vectors with principal component analysis, compares spherical k-means with agglomerative clustering and picks the number of themes by silhouette score, then names each theme from its most distinctive keyphrases. Select any note to see its five closest matches. Everything runs in a Web Worker in your browser.
+
+Theme names are keyphrase-based for now; validated generated labels come next.
 
 ## Network
 
@@ -56,6 +58,7 @@ npm run dev   # copies the ONNX Runtime files into public/ort first
 | `npm run lint` | ESLint |
 | `npm run test:unit` | Unit tests (Vitest), no network |
 | `npm run test:e2e` | Browser tests (Playwright) against a production build with test-only fault hooks |
+| `npm run check:data` | Validates the datasets in `data/` |
 | `npm run check:dist` | Checks the production build: runtime files present, no test-only hooks |
 | `npm run check:weights` | Fails if a model weight file or any file over 10 MB is committed |
 
