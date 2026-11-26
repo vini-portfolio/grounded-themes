@@ -88,22 +88,26 @@ export function scoreCandidates(rows, similarities, themeSize) {
     .sort((a, b) => b.combined - a.combined || a.phrase.localeCompare(b.phrase));
 }
 
-/** Crude singular form for comparing phrases ("cookies" and "cookie" match). */
-export function stem(word) {
-  if (word.length > 4 && word.endsWith('ies')) return `${word.slice(0, -3)}y`;
-  if (word.length > 3 && word.endsWith('es') && /(ch|sh|x|ss)es$/.test(word)) return word.slice(0, -2);
-  if (word.length > 3 && word.endsWith('s') && !word.endsWith('ss')) return word.slice(0, -1);
-  return word;
+/** True when two words are the same word, allowing for a plural ("cookie"/"cookies", "berry"/"berries", "box"/"boxes"). */
+export function sameWord(a, b) {
+  if (a === b) return true;
+  const [short, long] = a.length <= b.length ? [a, b] : [b, a];
+  return (
+    long === `${short}s` ||
+    long === `${short}es` ||
+    (short.endsWith('y') && long === `${short.slice(0, -1)}ies`)
+  );
 }
 
-/** Top n phrases, skipping a phrase whose words (singular forms) all appear in one already chosen, or vice versa. */
+/** Top n phrases, skipping a phrase whose words all appear (allowing plurals) in one already chosen, or vice versa. */
 export function topKeyphrases(scored, n) {
   const chosen = [];
   for (const s of scored) {
-    const words = s.phrase.split(' ').map(stem);
+    const words = s.phrase.split(' ');
     const redundant = chosen.some((c) => {
-      const cw = c.phrase.split(' ').map(stem);
-      return words.every((x) => cw.includes(x)) || cw.every((x) => words.includes(x));
+      const cw = c.phrase.split(' ');
+      const inside = (xs, ys) => xs.every((x) => ys.some((y) => sameWord(x, y)));
+      return inside(words, cw) || inside(cw, words);
     });
     if (!redundant) chosen.push(s);
     if (chosen.length === n) break;
