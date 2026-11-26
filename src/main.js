@@ -50,13 +50,14 @@ if (import.meta.env.VITE_FAULT_HOOKS === '1') {
   window.__gtInjectFault = (kind) => embedder.injectFault(kind);
   window.__gtState = state;
   // Runs the pipeline with another embedding model or design, for comparisons.
-  window.__gtExperiment = async (texts, { model, pipelineOptions, backend } = {}) => {
+  window.__gtExperiment = async (texts, { model, pipelineOptions, backend, seed } = {}) => {
     const t0 = performance.now();
     const events = [];
     const r = await embedder.run(texts, {
       backend: backend ?? (state.backend ??= await detectBackend()),
       modelOverride: model,
       pipelineOptions,
+      seed: seed ?? 42,
       onEvent: (e) => events.push(e),
     });
     return {

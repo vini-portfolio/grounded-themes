@@ -7,7 +7,13 @@ import { adjustedRandIndex, normalizedMutualInfo } from './metrics.js';
 
 const load = (name) => JSON.parse(readFileSync(new URL(`../../data/${name}.json`, import.meta.url), 'utf8')).notes;
 const DATASETS = { sample: load('sample'), test: load('test'), stress: load('stress') };
-const DESIGNS = process.env.SWEEP
+const SEEDS = process.env.SEEDS ? process.env.SEEDS.split(',').map(Number) : [42];
+const DESIGNS = process.env.SEEDS
+  ? [
+      { key: 'pca28', pipelineOptions: {} },
+      { key: 'tol.01', pipelineOptions: { kTolerance: 0.01 } },
+    ]
+  : process.env.SWEEP
   ? [
       { key: 'pca28', pipelineOptions: {} },
       { key: 'pca16', pipelineOptions: { reducedDimensions: 16 } },
@@ -29,16 +35,17 @@ for (const model of CANDIDATES.filter((m) => !only || only.includes(m.key))) {
     test.setTimeout(20 * 60_000);
     await page.goto('/');
     for (const design of DESIGNS) {
-      for (const [name, notes] of Object.entries(DATASETS)) {
+      for (const [name, notes] of Object.entries(DATASETS)) for (const seed of SEEDS) {
         const r = await page.evaluate(
-          ([texts, m, opts]) => window.__gtExperiment(texts, { model: m, pipelineOptions: opts, backend: 'wasm' }),
-          [notes.map((n) => n.text), model, design.pipelineOptions],
+          ([texts, m, opts, sd]) => window.__gtExperiment(texts, { model: m, pipelineOptions: opts, backend: 'wasm', seed: sd }),
+          [notes.map((n) => n.text), model, design.pipelineOptions, seed],
         );
         const truth = notes.map((n) => n.theme);
         const row = {
           model: model.key,
           design: design.key,
           dataset: name,
+          seed,
           themes: Math.max(...r.assignments) + 1,
           trueThemes: new Set(truth).size,
           ari: Number(adjustedRandIndex(r.assignments, truth).toFixed(3)),

@@ -20,5 +20,6 @@ jobs:
       - run: npx playwright install --with-deps chromium
       - run: npm run experiment:embeddings
         env:
-          MODELS: ${{ contains(github.event.head_commit.message, '[sweep]') && 'bge-small,e5-small,gte-small' || '' }}
+          MODELS: ${{ contains(github.event.head_commit.message, '[sweep]') && 'bge-small,e5-small,gte-small' || contains(github.event.head_commit.message, '[seeds]') && 'bge-small' || '' }}
+          SEEDS: ${{ contains(github.event.head_commit.message, '[seeds]') && '1,2,3,4,5,42' || '' }}
           SWEEP: ${{ contains(github.event.head_commit.message, '[sweep]') && '1' || '' }}
