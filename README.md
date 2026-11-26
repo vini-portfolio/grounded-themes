@@ -58,6 +58,8 @@ npm run dev   # copies the ONNX Runtime files into public/ort first
 | `npm run lint` | ESLint |
 | `npm run test:unit` | Unit tests (Vitest), no network |
 | `npm run test:e2e` | Browser tests (Playwright) against a production build with test-only fault hooks |
+| `npm run bench -- --runs 10` | Benchmark: timings, download size, memory, long tasks and clustering quality per dataset, with budget verdicts, to `docs/benchmarks/` |
+| `npm run bench:compare -- a.json b.json` | Checks two benchmark results agree (timings ±25%, label pass rates ±10 points) |
 | `npm run check:data` | Validates the datasets in `data/` |
 | `npm run check:dist` | Checks the production build: runtime files present, no test-only hooks |
 | `npm run check:weights` | Fails if a model weight file or any file over 10 MB is committed |

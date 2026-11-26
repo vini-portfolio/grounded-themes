@@ -55,12 +55,12 @@ Defined once in `src/pipeline/constants.js`; documentation and tests read them f
 |---|---|---|
 | `REDUCED_DIMENSIONS` | 28 | dimensions kept by PCA before clustering |
 | `K_MAX` | 12 | largest number of themes considered |
-| `MIN_NOTES_PER_THEME` | 4 | k range ends at floor(n / 4) |
+| `MIN_NOTES_PER_THEME` | 6 | k range ends at floor(n / 6); was 4, changed after the 2026-11-26 benchmark (see docs/ARCHITECTURE.md) |
 | `MIN_CLUSTER_SIZE` | 3 | smaller themes are merged into the nearest one |
 | `AGGLOMERATIVE_MAX_N` | 150 | agglomerative clustering is skipped above this many notes |
 | `KMEANS_RUNS` | 30 | k-means initializations per k; the best is kept |
 
-These are starting values; the benchmark slice tunes them against the datasets and records the results here.
+Values and the benchmark results behind them: [docs/ARCHITECTURE.md § Clustering constants](../ARCHITECTURE.md#clustering-constants).
 
 ## Hosting
 

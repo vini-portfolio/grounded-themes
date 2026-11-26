@@ -6,8 +6,12 @@
 export const REDUCED_DIMENSIONS = 28;
 /** Largest number of themes considered. */
 export const K_MAX = 12;
-/** The k range stops at floor(n / MIN_NOTES_PER_THEME). */
-export const MIN_NOTES_PER_THEME = 4;
+/**
+ * The k range stops at floor(n / MIN_NOTES_PER_THEME). 6 rather than 4: with
+ * 4, silhouette kept picking 10 themes for the 5-theme demo sample (see
+ * docs/benchmarks/2026-11-26-ci-current.md vs 2026-11-26-ci-min6.md).
+ */
+export const MIN_NOTES_PER_THEME = 6;
 /** Final themes smaller than this are merged into their nearest theme. */
 export const MIN_CLUSTER_SIZE = 3;
 /** Agglomerative clustering is skipped above this many notes (O(n^2) memory). */
