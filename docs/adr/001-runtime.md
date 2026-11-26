@@ -1,6 +1,6 @@
 # ADR 001: Runtime, models and budgets
 
-Status: proposed · 2026-11-26 (accepted once the reference setup below is recorded)
+Status: accepted · 2026-11-26
 
 ## Context
 
@@ -37,7 +37,13 @@ To be measured by the benchmark script (added in a later change) on the referenc
 | Notes per run | 8 to 500 |
 | Import file size | ≤ 2 MB |
 
-Reference setup: laptop, iPhone and connection to be recorded here before the first benchmark.
+Reference setup:
+
+| Item | Setup |
+|---|---|
+| Laptop | MacBook Pro, Apple M2, 16 GB RAM |
+| Phone | iPhone 15 Pro Max |
+| Connection | 1 Gbit/s; cold-run budgets are measured with the connection throttled to 50 Mbit/s, so the result reflects a typical visitor rather than the reference line |
 
 Measurement methods: memory from Chrome DevTools Protocol process metrics (cross-origin isolation is off, so `performance.measureUserAgentSpecificMemory` is unavailable) and Safari Web Inspector on the iPhone; cold runs throttled to 50 Mbit/s through DevTools Protocol network emulation.
 
