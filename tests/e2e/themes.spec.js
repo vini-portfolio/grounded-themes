@@ -27,6 +27,12 @@ test.describe('themes', () => {
     await recordStatus(page);
     await embedNotes(page, sample.map((n) => n.text));
     const count = Number(await page.locator('#app').getAttribute('data-themes'));
+    // Report what the real model produced, for tuning (not asserted here).
+    const summary = await page.evaluate(() => {
+      const c = window.__gtState.events.find((e) => e.stage === 'cluster').payload;
+      return { selected: c.selected, merges: c.merges.length, labels: window.__gtState.themes.map((t) => `${t.label} (${t.noteIndexes.length})`) };
+    });
+    console.log(`demo sample themes: ${JSON.stringify(summary)}`);
     expect(count).toBeGreaterThanOrEqual(2);
     await expect(page.locator('.theme')).toHaveCount(count);
     for (const theme of await page.locator('.theme').all()) {
