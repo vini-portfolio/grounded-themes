@@ -139,9 +139,15 @@ function noteItem(note, i) {
 function renderNotes() {
   const generation = ++renderGeneration;
   const notes = state.notes;
+  delete app.dataset.notesRendered;
   replace(notesList, ...notes.slice(0, RENDER_CHUNK).map((n, i) => noteItem(n, i)));
   const next = (start) => {
-    if (generation !== renderGeneration || start >= notes.length) return;
+    if (generation !== renderGeneration) return;
+    if (start >= notes.length) {
+      // Marks the whole list as in the page (the benchmark waits for it).
+      app.dataset.notesRendered = String(notes.length);
+      return;
+    }
     const frag = document.createDocumentFragment();
     for (let i = start; i < Math.min(start + RENDER_CHUNK, notes.length); i += 1) frag.append(noteItem(notes[i], i));
     notesList.append(frag);
@@ -176,7 +182,8 @@ function renderThemes() {
 function select(i) {
   if (state.vectors.length !== state.notes.length) return; // embeddings not ready for these notes
   state.selected = i;
-  renderNotes();
+  // Update the pressed state in place: re-rendering a long list would lose the scroll position.
+  notesList.querySelectorAll('button.note').forEach((b, j) => b.setAttribute('aria-pressed', String(j === i)));
   const neighbors = nearestNeighbors(state.vectors, i, 5);
   replace(
     neighborsPanel,
