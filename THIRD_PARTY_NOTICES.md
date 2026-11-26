@@ -14,6 +14,7 @@ Grounded Themes runs or bundles the following third-party components. Each keeps
 |---|---|---|
 | @huggingface/transformers | 4.3.2 | Apache-2.0 |
 | onnxruntime-web (including the WebAssembly runtime files served from /ort/) | 1.31.0-dev.20260914-8d85527a0 | MIT |
+| onnxruntime-common | 1.31.0-dev.20260911-2a43ec07e | MIT |
 | @huggingface/jinja | 0.5.13 | MIT |
 | @huggingface/tokenizers | 0.2.0 | Apache-2.0 |
 | flatbuffers | 25.9.23 | Apache-2.0 |
@@ -21,3 +22,5 @@ Grounded Themes runs or bundles the following third-party components. Each keeps
 | long | 5.3.2 | Apache-2.0 |
 | protobufjs | 7.6.6 | BSD-3-Clause |
 | platform | 1.3.6 | MIT |
+
+The ONNX Runtime WebAssembly files include third-party code compiled into them; see ONNX Runtime's [ThirdPartyNotices.txt](https://github.com/microsoft/onnxruntime/blob/main/ThirdPartyNotices.txt).

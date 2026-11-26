@@ -9,7 +9,7 @@ async function paste(page) {
 test.describe('failure handling', () => {
   test('names the blocked model host and recovers on Retry', async ({ page, context }) => {
     const block = (route) => route.abort('internetdisconnected');
-    await context.route('https://huggingface.co/**', block, { times: 1000 });
+    await context.route('https://huggingface.co/**', block);
     let dialogs = 0;
     page.on('dialog', () => (dialogs += 1));
     await page.goto('/');
@@ -24,14 +24,18 @@ test.describe('failure handling', () => {
     expect(dialogs).toBe(0);
   });
 
-  test('offers to run without saving the model when storage is full', async ({ page }) => {
+  test('says so when storage is full, and runs without saving the model', async ({ page }) => {
     await page.goto('/');
+    // The fault makes the worker's cache refuse writes with QuotaExceededError,
+    // the way a full device does.
     await page.evaluate(() => window.__gtInjectFault('quota'));
-    await paste(page);
-    await page.getByRole('button', { name: 'Find similar notes' }).click();
+    await embedNotes(page, NOTES);
+    await expect(page.locator('#app')).toHaveAttribute('data-embedded', '3');
     await expect(page.getByRole('alert')).toContainText("isn't enough browser storage");
     await page.getByRole('button', { name: 'Run without saving the model' }).click();
+    await expect(page.getByRole('alert')).toHaveCount(0);
     await expect(page.locator('#app')).toHaveAttribute('data-embedded', '3', { timeout: 120_000 });
+    expect(await page.evaluate(() => window.__gtState.cache)).toBe(false);
   });
 
   for (const [kind, text] of [
@@ -42,23 +46,33 @@ test.describe('failure handling', () => {
     test(`explains a ${kind} failure and retries on WebAssembly`, async ({ page }) => {
       await page.goto('/');
       await embedNotes(page, NOTES); // warm the model first
-      await page.evaluate((k) => window.__gtInjectFault(k), kind);
+      // Pretend this run uses the GPU, so the test fails unless Retry really
+      // switches to WebAssembly.
+      await page.evaluate((k) => {
+        window.__gtState.backend = 'webgpu';
+        window.__gtInjectFault(k);
+      }, kind);
       await page.getByRole('button', { name: 'Find similar notes' }).click();
       const alert = page.getByRole('alert');
       await expect(alert).toContainText(text, { timeout: 60_000 });
       await alert.getByRole('button', { name: 'Retry' }).click();
       await expect(page.getByRole('alert')).toHaveCount(0);
       await expect(page.getByRole('status')).toContainText('3 notes embedded', { timeout: 120_000 });
-      expect(await page.evaluate(() => window.__gtState.backend)).toBe('wasm');
+      await expect(page.locator('#app')).toHaveAttribute('data-backend', 'wasm');
     });
   }
 
-  test('explains when the browser has no WebAssembly', async ({ page }) => {
+  test('explains when the browser has no WebAssembly', async ({ page, context }) => {
+    const hub = [];
+    context.on('request', (r) => {
+      if (new URL(r.url()).host.endsWith('huggingface.co')) hub.push(r.url());
+    });
     await page.addInitScript(() => {
       delete globalThis.WebAssembly;
     });
     await page.goto('/');
     await expect(page.getByRole('alert')).toContainText("doesn't support WebAssembly");
     await expect(page.getByLabel('Paste notes')).toHaveCount(0);
+    expect(hub).toEqual([]);
   });
 });

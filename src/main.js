@@ -31,7 +31,7 @@ const embedder = createEmbedder({
       l += p.loaded;
       t += p.total;
     }
-    status.textContent = `Downloading the model: ${(l / 1048576).toFixed(1)} of ${(t / 1048576).toFixed(1)} MB`;
+    status.textContent = `Downloading the model: ${(l / 1048576).toFixed(1)} of at least ${(t / 1048576).toFixed(1)} MB`;
   },
 });
 if (import.meta.env.VITE_FAULT_HOOKS === '1') {
@@ -83,7 +83,13 @@ function renderNotes() {
       h('li', {}, [
         h(
           'button',
-          { type: 'button', class: 'note', 'aria-pressed': String(state.selected === i), onclick: () => select(i) },
+          {
+            type: 'button',
+            class: 'note',
+            'aria-pressed': String(state.selected === i),
+            disabled: state.vectors.length !== state.notes.length,
+            onclick: () => select(i),
+          },
           [note.text],
         ),
       ]),
@@ -92,6 +98,7 @@ function renderNotes() {
 }
 
 function select(i) {
+  if (state.vectors.length !== state.notes.length) return; // embeddings not ready for these notes
   state.selected = i;
   renderNotes();
   const neighbors = nearestNeighbors(state.vectors, i, 5);
@@ -117,7 +124,9 @@ async function run() {
     return;
   }
   state.notes = notes;
+  state.vectors = [];
   state.selected = null;
+  delete app.dataset.embedded;
   replace(neighborsPanel);
   renderNotes();
   runButton.disabled = true;
@@ -126,13 +135,29 @@ async function run() {
     state.backend ??= await detectBackend();
     const result = await embedder.embed(notes.map((n) => n.text), { backend: state.backend, cache: state.cache });
     state.vectors = result.vectors;
+    renderNotes();
+    app.dataset.backend = result.backend;
     const truncatedNote = result.truncated
       ? ` ${result.truncated} long ${result.truncated === 1 ? 'note was' : 'notes were'} shortened to the model's input limit.`
       : '';
     status.textContent = `${notes.length} notes embedded on this device.${truncatedNote} Select a note to see its closest matches.`;
+    if (result.cacheFailed && state.cache) {
+      replace(
+        errorBox,
+        h('div', { class: 'notice', role: 'alert' }, [
+          h('p', {}, [
+            "There isn't enough browser storage to keep the model, so the next visit will download it again.",
+          ]),
+          h('button', { type: 'button', onclick: () => { state.cache = false; replace(errorBox); run(); } }, [
+            'Run without saving the model',
+          ]),
+        ]),
+      );
+    }
     app.dataset.embedded = String(notes.length);
   } catch (error) {
-    if (error instanceof EmbeddingError && error.kind === 'crash') embedder.terminate();
+    // Start a fresh worker after a crash or out-of-memory error: its memory may be corrupt.
+    if (error instanceof EmbeddingError && ['crash', 'oom'].includes(error.kind)) embedder.terminate();
     showError(error);
   } finally {
     runButton.disabled = false;

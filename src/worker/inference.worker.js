@@ -36,7 +36,9 @@ function withProgress(res, file) {
     new TransformStream({
       transform(chunk, controller) {
         loaded += chunk.byteLength;
-        self.postMessage({ type: 'progress', file, loaded, total });
+        // content-length is the compressed size for compressed responses, so
+        // the total is only a lower bound.
+        self.postMessage({ type: 'progress', file, loaded, total: Math.max(total, loaded) });
         controller.enqueue(chunk);
       },
     }),
@@ -48,7 +50,8 @@ env.fetch = async (input, init) => {
   const url = new URL(typeof input === 'string' ? input : input.url ?? String(input), self.location.href);
   try {
     const res = await baseFetch(input, init);
-    if (!res.ok && res.status >= 500) failedHosts.add(url.host);
+    // 5xx, and the statuses proxies and filters use to block a host.
+    if (res.status >= 500 || [401, 403, 407, 451].includes(res.status)) failedHosts.add(url.host);
     const isRange = init?.headers && new Headers(init.headers).has('Range');
     return res.ok && !isRange ? withProgress(res, url.pathname.split('/').pop()) : res;
   } catch (err) {
@@ -58,6 +61,31 @@ env.fetch = async (input, init) => {
 };
 
 let loaded = null; // { tokenizer, model, backend, cache }
+let cacheFailed = false; // set when the browser refused to store a file (storage full)
+
+const MODEL_CACHE = 'transformers-cache';
+let modelCachePromise = null;
+// Wraps the browser cache so a refused write (storage full) is recorded and
+// reported instead of being logged and forgotten by the library.
+env.useCustomCache = 'caches' in self;
+env.customCache = {
+  async match(request) {
+    modelCachePromise ??= caches.open(MODEL_CACHE);
+    return (await modelCachePromise).match(request);
+  },
+  async put(request, response) {
+    modelCachePromise ??= caches.open(MODEL_CACHE);
+    try {
+      if (FAULT_HOOKS && pendingFault === 'quota') {
+        throw new DOMException('gt-fault-hook: simulated quota', 'QuotaExceededError');
+      }
+      await (await modelCachePromise).put(request, response);
+    } catch (err) {
+      if (classifyError(err) !== 'quota') throw err;
+      cacheFailed = true;
+    }
+  },
+};
 
 const TOKENIZER_CACHE = 'grounded-themes-tokenizer';
 
@@ -71,7 +99,17 @@ async function fetchModelJSON(file, cache) {
   if (!res) {
     res = await env.fetch(url);
     if (!res.ok) throw new Error(`model file ${file}: HTTP ${res.status}`);
-    if (store) await store.put(url, res.clone());
+    if (store) {
+      try {
+        if (FAULT_HOOKS && pendingFault === 'quota') {
+          throw new DOMException('gt-fault-hook: simulated quota', 'QuotaExceededError');
+        }
+        await store.put(url, res.clone());
+      } catch (err) {
+        if (classifyError(err) !== 'quota') throw err;
+        cacheFailed = true;
+      }
+    }
   }
   return res.json();
 }
@@ -88,8 +126,16 @@ async function loadTokenizer(cache) {
 // including config lookups, use the pinned revision.
 async function load(backend, cache) {
   if (loaded && loaded.backend === backend && loaded.cache === cache) return loaded;
-  if (loaded) await loaded.model.dispose?.();
-  env.useBrowserCache = cache;
+  if (loaded) {
+    try {
+      await loaded.model.dispose?.();
+    } catch {
+      // A lost GPU device can make disposal fail; the new load replaces it anyway.
+    }
+    loaded = null;
+  }
+  env.useCustomCache = cache && 'caches' in self;
+  env.useBrowserCache = false;
   env.useWasmCache = cache;
   const options = { revision: EMBEDDING_MODEL.revision };
   const [tokenizer, model] = await Promise.all([
@@ -101,37 +147,34 @@ async function load(backend, cache) {
 }
 
 function maybeFault(stage) {
-  if (!FAULT_HOOKS || !pendingFault) return;
+  if (!FAULT_HOOKS || !pendingFault || stage !== 'load') return;
   const kind = pendingFault;
-  if (kind === 'crash' && stage === 'embed') {
-    pendingFault = null;
-    // An uncaught error outside the message handler terminates processing the
-    // way a real crash does: the main thread sees a worker 'error' event.
+  if (kind === 'quota') return; // consumed by the cache wrapper on its next write
+  pendingFault = null;
+  if (kind === 'crash') {
+    // An uncaught error outside the message handler is what a real crash looks
+    // like to the main thread: a worker 'error' event.
     setTimeout(() => {
       throw new Error('gt-fault-hook: simulated worker crash');
     });
     throw new Error('gt-fault-hook: crash pending');
   }
-  if (kind === 'quota' && stage === 'load') {
-    pendingFault = null;
-    throw new DOMException('gt-fault-hook: simulated quota', 'QuotaExceededError');
-  }
-  if (kind === 'oom' && stage === 'embed') {
-    pendingFault = null;
-    throw new RangeError('gt-fault-hook: out of memory');
-  }
-  if (kind === 'device-lost' && stage === 'embed') {
-    pendingFault = null;
-    throw new Error('gt-fault-hook: WebGPU device lost');
-  }
+  if (kind === 'oom') throw new RangeError('gt-fault-hook: out of memory');
+  if (kind === 'device-lost') throw new Error('gt-fault-hook: WebGPU device lost');
 }
 
 async function embed({ id, texts, backend = 'wasm', cache = true }) {
   failedHosts.clear();
+  cacheFailed = false;
   try {
     maybeFault('load');
     const { tokenizer, model } = await load(backend, cache);
-    maybeFault('embed');
+    if (FAULT_HOOKS && pendingFault === 'quota') {
+      // The model is already cached from an earlier run: simulate the refusal
+      // on this run's write instead.
+      await env.customCache.put(`${MODEL_HOST}__gt_quota_probe`, new Response('x'));
+      pendingFault = null;
+    }
     let truncated = 0;
     for (const text of texts) {
       if (tokenizer.encode(text).length > MAX_TOKENS) truncated += 1;
@@ -141,7 +184,7 @@ async function embed({ id, texts, backend = 'wasm', cache = true }) {
     const pooled = mean_pooling(hidden, inputs.attention_mask).normalize(2, -1);
     const vectors = new Float32Array(pooled.data);
     const [count, dims] = pooled.dims;
-    self.postMessage({ type: 'result', id, vectors, dims, count, truncated, backend }, [vectors.buffer]);
+    self.postMessage({ type: 'result', id, vectors, dims, count, truncated, backend, cacheFailed }, [vectors.buffer]);
   } catch (err) {
     if (String(err?.message).includes('crash pending')) return;
     // Any failure while a request to the model host failed is a network
