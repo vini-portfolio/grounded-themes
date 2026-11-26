@@ -37,10 +37,13 @@ test.describe('@privacy network behavior', () => {
     expect(offSite.length).toBeGreaterThan(0); // the cold run really downloaded the model
     for (const url of offSite) {
       if (url.host === 'huggingface.co') {
-        // Every request to the hub names the pinned revision, never a branch.
-        expect(url.pathname, `unpinned request ${url.href}`).toContain(
+        // Every request to the hub names the pinned revision, never a branch
+        // (the hub may redirect /resolve/<rev>/ to /api/resolve-cache/models/<id>/<rev>/).
+        const pinned = [
           `/${EMBEDDING_MODEL.id}/resolve/${EMBEDDING_MODEL.revision}/`,
-        );
+          `/api/resolve-cache/models/${EMBEDDING_MODEL.id}/${EMBEDDING_MODEL.revision}/`,
+        ];
+        expect(pinned.some((p) => url.pathname.startsWith(p)), `unpinned request ${url.href}`).toBe(true);
       }
     }
     const ortRequests = requests.filter((r) => r.url().includes('ort-wasm-simd-threaded'));
