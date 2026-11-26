@@ -233,11 +233,18 @@ export function selectClustering(rows, rng, opts) {
       selected = s;
     }
   }
+  const best = selected;
   // Optional: prefer the smallest k whose silhouette is within kTolerance of the best.
   if (selected && kTolerance > 0) {
     const floor = selected.silhouette - kTolerance;
     const ok = scores.filter((s) => s.silhouette >= floor);
-    ok.sort((a, b) => a.k - b.k || (a.algorithm === 'kmeans' ? -1 : 1) - (b.algorithm === 'kmeans' ? -1 : 1) || b.silhouette - a.silhouette);
+    // Smallest k first; at equal k the higher silhouette, then k-means on a tie.
+    ok.sort(
+      (a, b) =>
+        a.k - b.k ||
+        b.silhouette - a.silhouette ||
+        (a.algorithm === 'kmeans' ? -1 : 1) - (b.algorithm === 'kmeans' ? -1 : 1),
+    );
     selected = ok[0];
   }
   const labels = selected ? labelsBy.get(`${selected.algorithm}:${selected.k}`) : rows.map(() => 0);
@@ -247,7 +254,7 @@ export function selectClustering(rows, rng, opts) {
     const other = labelsBy.get(`${selected.algorithm === 'kmeans' ? 'agglomerative' : 'kmeans'}:${selected.k}`);
     disagreements = disagreementIndexes(labels, other);
   }
-  return { ks, scores, selected, labels, skipAgglomerative, disagreements };
+  return { ks, scores, selected, best, kTolerance, labels, skipAgglomerative, disagreements };
 }
 
 /** Indexes whose cluster differs after matching clusters by largest overlap. */

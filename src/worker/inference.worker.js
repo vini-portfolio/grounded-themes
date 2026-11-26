@@ -1,11 +1,14 @@
 // Inference worker: the only module that imports the ML runtime. Loads the
 // embedding model once and runs the pipeline off the main thread.
 //
-// Messages in:  { type: 'run', id, texts, seed, backend?: 'webgpu' | 'wasm', cache?: boolean }
+// Messages in:  { type: 'run', id, texts, seed, backend?: 'webgpu' | 'wasm', cache?: boolean,
+//                 modelOverride?, pipelineOptions? }   (the last two honored in test builds only)
 //               { type: 'fault', kind }   (test builds only)
 // Messages out: { type: 'progress', file, loaded, total }
 //               { type: 'stage', id, stage } and { type: 'event', id, event } during a run
-//               { type: 'run-result', id, themes, assignments, coordinates, vectors: Float32Array, dims, count, truncated, backend, cacheFailed }
+//               { type: 'run-result', id, themes, assignments, coordinates, vectors: Float32Array, dims, count,
+//                 truncated, backend, cacheFailed, downloadedBytes, modelId }
+//               ({ type: 'error', id, kind: 'busy' } if a run is already in progress)
 //               { type: 'error', id, kind, hosts, message }
 import { AutoModel, BertTokenizer, env, mean_pooling } from '@huggingface/transformers';
 import { classifyError } from './errors.js';
@@ -66,7 +69,10 @@ env.fetch = async (input, init) => {
   }
 };
 
-let loaded = null; // { tokenizer, model, backend, cache }
+let loaded = null; // { tokenizer, model, backend, cache, key }
+let running = false;
+
+const modelKey = (m) => `${m.id}@${m.revision}:${m.dtype}`;
 let cacheFailed = false; // set when the browser refused to store a file (storage full)
 
 const MODEL_CACHE = 'transformers-cache';
@@ -125,13 +131,17 @@ async function loadTokenizer(cache) {
     fetchModelJSON('tokenizer.json', cache),
     fetchModelJSON('tokenizer_config.json', cache),
   ]);
+  // Only BERT-style tokenizers are wired up; fail clearly for anything else.
+  if (config.tokenizer_class && config.tokenizer_class !== 'BertTokenizer') {
+    throw new Error(`unsupported tokenizer ${config.tokenizer_class} for ${model.id}`);
+  }
   return new BertTokenizer(json, config);
 }
 
 // The model is loaded directly (not through pipeline()) so its requests,
 // including config lookups, use the pinned revision.
 async function load(backend, cache) {
-  if (loaded && loaded.backend === backend && loaded.cache === cache && loaded.modelId === model.id) return loaded;
+  if (loaded && loaded.backend === backend && loaded.cache === cache && loaded.key === modelKey(model)) return loaded;
   if (loaded) {
     try {
       await loaded.model.dispose?.();
@@ -147,7 +157,7 @@ async function load(backend, cache) {
     loadTokenizer(cache),
     AutoModel.from_pretrained(model.id, { revision: model.revision, dtype: model.dtype, device: backend }),
   ]);
-  loaded = { tokenizer, model: net, backend, cache, modelId: model.id };
+  loaded = { tokenizer, model: net, backend, cache, key: modelKey(model) };
   return loaded;
 }
 
@@ -217,9 +227,22 @@ async function prepare(backend, cache) {
 }
 
 /** Runs the whole pipeline here, off the main thread, reporting each stage. */
+const PIPELINE_OPTION_NAMES = ['reducedDimensions', 'minNotesPerTheme', 'kTolerance'];
+
 async function run({ id, texts, backend = 'wasm', cache = true, seed, modelOverride, pipelineOptions }) {
+  if (running) {
+    self.postMessage({ type: 'error', id, kind: 'busy', hosts: [], message: 'a run is already in progress' });
+    return;
+  }
+  running = true;
   try {
-    model = FAULT_HOOKS && modelOverride ? modelOverride : EMBEDDING_MODEL;
+    model = EMBEDDING_MODEL;
+    let testOptions = {};
+    if (FAULT_HOOKS) {
+      // gt-test-override: model and pipeline-option overrides exist only in test builds.
+      if (modelOverride) model = modelOverride;
+      for (const k of PIPELINE_OPTION_NAMES) if (pipelineOptions?.[k] !== undefined) testOptions[k] = pipelineOptions[k];
+    }
     downloadedBytes = 0;
     await prepare(backend, cache);
     let noteTruncated = 0;
@@ -227,7 +250,7 @@ async function run({ id, texts, backend = 'wasm', cache = true, seed, modelOverr
     const result = await runPipeline({
       texts,
       seed,
-      ...(FAULT_HOOKS ? pipelineOptions : {}),
+      ...testOptions,
       embed: async (batch) => {
         const out = await embedTexts(batch, backend, cache);
         if (first) noteTruncated = out.truncated; // the first call embeds the notes
@@ -259,6 +282,8 @@ async function run({ id, texts, backend = 'wasm', cache = true, seed, modelOverr
     );
   } catch (err) {
     postFailure(id, err);
+  } finally {
+    running = false;
   }
 }
 

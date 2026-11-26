@@ -11,7 +11,7 @@ const walk = (dir) =>
   readdirSync(dir).flatMap((f) => (statSync(join(dir, f)).isDirectory() ? walk(join(dir, f)) : [join(dir, f)]));
 for (const file of walk(dist).filter((f) => /\.(js|mjs|html)$/.test(f))) {
   const text = readFileSync(file, 'utf8');
-  if (text.includes('gt-fault-hook') || text.includes('__gtInjectFault') || text.includes('__gtExperiment')) problems.push(`${file}: contains test-only fault hooks`);
+  if (text.includes('gt-fault-hook') || text.includes('__gtInjectFault') || text.includes('__gtExperiment') || text.includes('gt-test-override')) problems.push(`${file}: contains test-only fault hooks`);
 }
 for (const file of ORT_FILES) if (!existsSync(join(dist, 'ort', file))) problems.push(`missing ${dist}/ort/${file}`);
 if (problems.length) {

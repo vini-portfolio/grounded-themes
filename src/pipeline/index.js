@@ -89,6 +89,8 @@ export async function runPipeline({
     kRange: chosen.ks,
     scores: chosen.scores.map((s) => ({ ...s, silhouette: round(s.silhouette) })),
     selected: chosen.selected ? { ...chosen.selected, silhouette: round(chosen.selected.silhouette) } : null,
+    best: chosen.best ? { ...chosen.best, silhouette: round(chosen.best.silhouette) } : null,
+    kTolerance: chosen.kTolerance,
     agglomerativeSkipped: chosen.skipAgglomerative,
     // Indexes of notes the two algorithms group differently at the selected k,
     // before small themes are merged.
