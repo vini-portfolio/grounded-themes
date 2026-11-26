@@ -23,7 +23,7 @@ export const STOPWORDS = new Set(
 
 /** Lowercase word tokens (letters in any script, digits, inner apostrophes and hyphens). */
 export function tokenize(text) {
-  return (String(text).toLowerCase().match(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu) ?? []).map((t) =>
+  return (String(text).normalize('NFC').toLowerCase().match(/[\p{L}\p{N}]+(?:['’-][\p{L}\p{N}]+)*/gu) ?? []).map((t) =>
     t.replace(/['’]/g, ''),
   );
 }
@@ -33,7 +33,7 @@ const isContent = (t) => t.length >= 3 && !STOPWORDS.has(t) && !/^\p{N}+$/u.test
 /** Distinct unigram and bigram candidates of one note. Bigrams don't cross sentence punctuation. */
 export function candidatesOf(text) {
   const out = new Set();
-  for (const part of String(text).split(/[.,;:!?()[\]"…]+/)) {
+  for (const part of String(text).normalize('NFC').split(/[.,;:!?()[\]"…]+/)) {
     const toks = tokenize(part);
     for (let i = 0; i < toks.length; i += 1) {
       if (isContent(toks[i])) out.add(toks[i]);

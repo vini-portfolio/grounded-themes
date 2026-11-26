@@ -211,6 +211,8 @@ export function selectClustering(rows, rng, opts) {
   const labelsBy = new Map();
   for (const k of ks) {
     const km = sphericalKMeans(rows, k, rng, { runs: kmeansRuns, maxIter: kmeansMaxIter });
+    const effectiveK = Math.max(...km) + 1; // fewer than k when there are fewer distinct points
+    if (effectiveK !== k) continue; // that k can't be realized; the smaller k is scored on its own
     scores.push({ algorithm: 'kmeans', k, silhouette: silhouette(rows, km) });
     labelsBy.set(`kmeans:${k}`, km);
     if (cut) {

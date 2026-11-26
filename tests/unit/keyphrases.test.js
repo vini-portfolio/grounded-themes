@@ -9,6 +9,7 @@ describe('keyphrase candidates', () => {
     expect([...candidatesOf('the and of a to')]).toEqual([]);
     expect(tokenize("didn't rise")).toEqual(['didnt', 'rise']);
     expect(tokenize('Café crème brûlée')).toEqual(['café', 'crème', 'brûlée']);
+    expect(tokenize('Cafe\u0301')).toEqual(['café']); // decomposed accent
     // No bigram across sentence punctuation.
     expect(candidatesOf('Great croissant. Butter prices up').has('croissant butter')).toBe(false);
   });

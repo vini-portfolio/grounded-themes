@@ -125,9 +125,10 @@ export async function runPipeline({ texts, embed, seed = C.DEFAULT_SEED, onStage
   const used = new Map();
   for (const th of themes) {
     const base = keyphraseName(th.keyphrases);
-    const n = (used.get(base) ?? 0) + 1;
-    used.set(base, n);
-    th.label = n === 1 ? base : `${base} ${n}`;
+    let label = base;
+    for (let n = 2; used.has(label); n += 1) label = `${base} ${n}`;
+    used.set(label, true);
+    th.label = label;
   }
   emit('label', t, {
     themes: themes.map((th) => ({
