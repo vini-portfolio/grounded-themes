@@ -8,16 +8,14 @@
     "node": ">=22"
   },
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "node scripts/copy-ort.mjs && vite",
+    "build": "node scripts/copy-ort.mjs && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
     "test:unit": "vitest run",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
     "check:weights": "node scripts/check-weights.mjs",
-    "predev": "node scripts/copy-ort.mjs",
-    "prebuild": "node scripts/copy-ort.mjs",
     "build:e2e": "node scripts/copy-ort.mjs && VITE_FAULT_HOOKS=1 vite build --outDir dist-e2e",
     "check:dist": "node scripts/check-dist.mjs"
   },
