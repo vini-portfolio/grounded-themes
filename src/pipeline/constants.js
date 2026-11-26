@@ -8,8 +8,8 @@ export const REDUCED_DIMENSIONS = 28;
 export const K_MAX = 12;
 /**
  * The k range stops at floor(n / MIN_NOTES_PER_THEME). 6 rather than 4: with
- * 4, silhouette kept picking 10 themes for the 5-theme demo sample (see
- * docs/benchmarks/2026-11-26-ci-current.md vs 2026-11-26-ci-min6.md).
+ * 4, agglomerative clustering won at k = 12 and gave 10 themes for the
+ * 5-theme demo sample. See docs/ARCHITECTURE.md (clustering constants).
  */
 export const MIN_NOTES_PER_THEME = 6;
 /** Final themes smaller than this are merged into their nearest theme. */

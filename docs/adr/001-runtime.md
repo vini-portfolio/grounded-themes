@@ -25,7 +25,7 @@ Grounded Themes runs every model in the visitor's browser. Note text must never 
 
 ## Performance budgets
 
-To be measured by the benchmark script (added in a later change) on the reference setup; every result will record the backend used.
+Measured by `npm run bench` (results in `docs/benchmarks/`); a run on the reference setup is marked with `--reference`. Every result records the backend used.
 
 | Budget | Value |
 |---|---|
@@ -45,7 +45,7 @@ Reference setup:
 | Phone | iPhone 15 Pro Max |
 | Connection | 1 Gbit/s; cold-run budgets are measured with the connection throttled to 50 Mbit/s, so the result reflects a typical visitor rather than the reference line |
 
-Measurement methods: memory from Chrome DevTools Protocol process metrics (cross-origin isolation is off, so `performance.measureUserAgentSpecificMemory` is unavailable) and Safari Web Inspector on the iPhone; cold runs throttled to 50 Mbit/s through DevTools Protocol network emulation.
+Measurement methods (`scripts/bench.mjs`): peak memory of the browser and all its processes, sampled every 100 ms, as proportional set size on Linux and resident set size elsewhere (which overstates, because shared pages count once per process); cross-origin isolation is off, so `performance.measureUserAgentSpecificMemory` is unavailable. The iPhone is measured by hand with Safari Web Inspector. Cold runs use a fresh browser profile and delay each response by its size at 50 Mbit/s after fetching it; parallel downloads overlap, so this approximates a shared link rather than shaping traffic. Long tasks are counted with a `PerformanceObserver` on the page, including one run per dataset through the real interface.
 
 ## Pipeline constants
 
@@ -55,7 +55,7 @@ Defined once in `src/pipeline/constants.js`; documentation and tests read them f
 |---|---|---|
 | `REDUCED_DIMENSIONS` | 28 | dimensions kept by PCA before clustering |
 | `K_MAX` | 12 | largest number of themes considered |
-| `MIN_NOTES_PER_THEME` | 6 | k range ends at floor(n / 6); was 4, changed after the 2026-11-26 benchmark (see docs/ARCHITECTURE.md) |
+| `MIN_NOTES_PER_THEME` | 6 | k range ends at floor(n / 6); was 4, changed after the 2026-11-26 benchmarks (see docs/ARCHITECTURE.md) |
 | `MIN_CLUSTER_SIZE` | 3 | smaller themes are merged into the nearest one |
 | `AGGLOMERATIVE_MAX_N` | 150 | agglomerative clustering is skipped above this many notes |
 | `KMEANS_RUNS` | 30 | k-means initializations per k; the best is kept |
