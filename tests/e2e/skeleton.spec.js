@@ -53,9 +53,11 @@ test.describe('paste and compare notes', () => {
 
   test('truncates long notes to the model input limit and says how many', async ({ page }) => {
     await page.goto('/');
-    // 300 words is well over 256 tokens. The second note adds a different
-    // ending after that point; if input is truncated, both embed identically.
-    const long = Array.from({ length: 300 }, (_, i) => `checkout${i % 7} delay`).join(' ');
+    // About 300 tokens: past the 256-token limit but well short of 512, so the
+    // different ending in the second note starts after token 256 and before
+    // the tokenizer's own 512 limit. Both embed identically only if input is
+    // cut at 256.
+    const long = Array.from({ length: 100 }, (_, i) => `checkout${i % 7} delay`).join(' ');
     const longWithTail = `${long} ${'dolphins swim near the coral reef '.repeat(30)}`;
     await embedNotes(page, ['A short note about pricing', long, longWithTail, 'Another short note about invoices']);
     await expect(page.getByRole('status')).toContainText("2 long notes were shortened to the model's input limit");

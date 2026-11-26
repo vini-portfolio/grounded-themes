@@ -32,10 +32,12 @@ test.describe('failure handling', () => {
     await embedNotes(page, NOTES);
     await expect(page.locator('#app')).toHaveAttribute('data-embedded', '3');
     await expect(page.getByRole('alert')).toContainText("isn't enough browser storage");
-    await page.getByRole('button', { name: 'Run without saving the model' }).click();
+    await page.getByRole('button', { name: 'Stop trying to save the model' }).click();
     await expect(page.getByRole('alert')).toHaveCount(0);
-    await expect(page.locator('#app')).toHaveAttribute('data-embedded', '3', { timeout: 120_000 });
     expect(await page.evaluate(() => window.__gtState.cache)).toBe(false);
+    // The next run works without the cache.
+    await embedNotes(page, ['fourth note about receipts', 'fifth note about payouts']);
+    await expect(page.locator('#app')).toHaveAttribute('data-embedded', '2');
   });
 
   for (const [kind, text] of [

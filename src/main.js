@@ -148,8 +148,8 @@ async function run() {
           h('p', {}, [
             "There isn't enough browser storage to keep the model, so the next visit will download it again.",
           ]),
-          h('button', { type: 'button', onclick: () => { state.cache = false; replace(errorBox); run(); } }, [
-            'Run without saving the model',
+          h('button', { type: 'button', onclick: () => { state.cache = false; replace(errorBox); } }, [
+            'Stop trying to save the model',
           ]),
         ]),
       );
