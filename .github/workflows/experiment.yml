@@ -19,3 +19,6 @@ jobs:
       - run: npm ci
       - run: npx playwright install --with-deps chromium
       - run: npm run experiment:embeddings
+        env:
+          MODELS: ${{ contains(github.event.head_commit.message, '[sweep]') && 'bge-small,e5-small,gte-small' || '' }}
+          SWEEP: ${{ contains(github.event.head_commit.message, '[sweep]') && '1' || '' }}

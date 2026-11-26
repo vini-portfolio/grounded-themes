@@ -7,10 +7,21 @@ import { adjustedRandIndex, normalizedMutualInfo } from './metrics.js';
 
 const load = (name) => JSON.parse(readFileSync(new URL(`../../data/${name}.json`, import.meta.url), 'utf8')).notes;
 const DATASETS = { sample: load('sample'), test: load('test'), stress: load('stress') };
-const DESIGNS = [
-  { key: 'pca28', pipelineOptions: {} },
-  { key: 'full', pipelineOptions: { reducedDimensions: null } },
-];
+const DESIGNS = process.env.SWEEP
+  ? [
+      { key: 'pca28', pipelineOptions: {} },
+      { key: 'pca16', pipelineOptions: { reducedDimensions: 16 } },
+      { key: 'pca48', pipelineOptions: { reducedDimensions: 48 } },
+      { key: 'min6', pipelineOptions: { minNotesPerTheme: 6 } },
+      { key: 'min8', pipelineOptions: { minNotesPerTheme: 8 } },
+      { key: 'tol.01', pipelineOptions: { kTolerance: 0.01 } },
+      { key: 'tol.02', pipelineOptions: { kTolerance: 0.02 } },
+      { key: 'min6tol.01', pipelineOptions: { minNotesPerTheme: 6, kTolerance: 0.01 } },
+    ]
+  : [
+      { key: 'pca28', pipelineOptions: {} },
+      { key: 'full', pipelineOptions: { reducedDimensions: null } },
+    ];
 const only = process.env.MODELS ? process.env.MODELS.split(',') : null;
 
 for (const model of CANDIDATES.filter((m) => !only || only.includes(m.key))) {

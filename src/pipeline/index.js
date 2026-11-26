@@ -31,6 +31,8 @@ export async function runPipeline({
   onEvent = () => {},
   now = () => performance.now(),
   reducedDimensions = C.REDUCED_DIMENSIONS,
+  minNotesPerTheme = C.MIN_NOTES_PER_THEME,
+  kTolerance = 0,
 }) {
   if (texts.length < 2) throw new RangeError('runPipeline needs at least two notes');
   const rng = createRng(seed);
@@ -75,7 +77,8 @@ export async function runPipeline({
   t = now();
   const chosen = selectClustering(reduced.projected, rng, {
     kMax: C.K_MAX,
-    minNotesPerTheme: C.MIN_NOTES_PER_THEME,
+    minNotesPerTheme,
+    kTolerance,
     agglomerativeMaxN: C.AGGLOMERATIVE_MAX_N,
     kmeansRuns: C.KMEANS_RUNS,
     kmeansMaxIter: C.KMEANS_MAX_ITER,
