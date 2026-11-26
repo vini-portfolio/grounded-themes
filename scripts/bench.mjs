@@ -137,14 +137,17 @@ async function waitForPort(port, timeoutMs = 30_000) {
 async function newPage(context) {
   const page = await context.newPage();
   await page.addInitScript(() => {
+    // Main-thread blocking, measured with a 20 ms heartbeat: a gap between
+    // ticks much longer than 20 ms means the thread was busy for that long.
+    // (The Long Tasks API reports nothing in headless Chromium.)
     window.__longTasks = [];
-    try {
-      new PerformanceObserver((list) => {
-        for (const e of list.getEntries()) window.__longTasks.push(e.duration);
-      }).observe({ type: 'longtask', buffered: true });
-    } catch {
-      // Long Tasks API unavailable in this browser
-    }
+    let last = performance.now();
+    setInterval(() => {
+      const now = performance.now();
+      const gap = now - last - 20;
+      if (gap > 50) window.__longTasks.push(gap);
+      last = now;
+    }, 20);
   });
   await page.goto(BASE);
   await page.waitForSelector('#app[data-ready="true"]');
@@ -308,7 +311,7 @@ async function main() {
         MEMORY_METHOD === 'pss'
           ? 'peak proportional set size (PSS, shared pages split) of the browser and all its processes, sampled every 100 ms'
           : 'peak resident set size (RSS) of the browser and all its processes, sampled every 100 ms with ps; RSS counts shared pages in every process, so this overstates',
-      longTasks: 'PerformanceObserver longtask entries on the page (main thread) during the run',
+      longTasks: 'main-thread blocking measured by a 20 ms heartbeat on the page: each gap between ticks beyond 20 ms counts as a task of that length (the Long Tasks API reports nothing in headless Chromium); validated by a deliberate 300 ms task before the runs',
       backend: 'WebAssembly (headless browsers have no GPU adapter)',
       maxNotes: `${BUDGETS.maxNotes} notes: the ${new Set(allNotes.map((n) => n.text)).size} unique dataset notes repeated; timing only`,
     },
@@ -332,7 +335,7 @@ async function main() {
     });
     await probe.waitForTimeout(200);
     const seen = await probe.evaluate(() => window.__longTasks);
-    result.longTaskSelfTest = { detected: seen.some((d) => d >= 250), entries: seen.map(Math.round) };
+    result.longTaskSelfTest = { detected: seen.some((d) => d >= 250 && d <= 400), entries: seen.map(Math.round) };
     await probeContext.close();
     log(`long-task self-test: ${result.longTaskSelfTest.detected ? 'observer works' : 'observer saw nothing'}`);
 
