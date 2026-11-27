@@ -38,11 +38,13 @@
       "if": { "properties": { "stage": { "const": "cluster" } } },
       "then": { "properties": { "payload": {
         "type": "object", "additionalProperties": false,
-        "required": ["kRange", "scores", "selected", "agglomerativeSkipped", "disagreements", "merges", "themeCount", "assignments"],
+        "required": ["kRange", "scores", "selected", "best", "kTolerance", "agglomerativeSkipped", "disagreements", "merges", "themeCount", "assignments"],
         "properties": {
           "kRange": { "type": "array", "items": { "type": "integer", "minimum": 2 } },
           "scores": { "type": "array", "items": { "$ref": "#/$defs/score" } },
           "selected": { "oneOf": [{ "$ref": "#/$defs/score" }, { "type": "null" }] },
+          "best": { "description": "highest-silhouette configuration; differs from selected only when kTolerance > 0", "oneOf": [{ "$ref": "#/$defs/score" }, { "type": "null" }] },
+          "kTolerance": { "type": "number", "minimum": 0 },
           "agglomerativeSkipped": { "type": "boolean" },
           "disagreements": { "description": "notes the two algorithms group differently at the selected k, before merging", "type": "array", "items": { "type": "integer", "minimum": 0 } },
           "merges": { "type": "array", "items": {

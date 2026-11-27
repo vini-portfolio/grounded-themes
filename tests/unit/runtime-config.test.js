@@ -12,7 +12,8 @@ const CHROME =
 describe('runtime configuration', () => {
   it('pins the embedding model to a full commit hash', () => {
     expect(EMBEDDING_MODEL.revision).toMatch(/^[0-9a-f]{40}$/);
-    expect(EMBEDDING_MODEL.license).toBe('Apache-2.0');
+    expect(EMBEDDING_MODEL.license).toBe('MIT');
+    expect(EMBEDDING_MODEL.pooling).toBe('cls');
   });
 
   it('serves ONNX Runtime from this site', () => {

@@ -38,7 +38,7 @@ Theme names are keyphrase-based for now; validated generated labels come next.
 
 | Model | Revision | License | Source |
 |---|---|---|---|
-| Xenova/all-MiniLM-L6-v2 (ONNX, q8) | `751bff3` | Apache-2.0 (upstream sentence-transformers/all-MiniLM-L6-v2) | [Hugging Face](https://huggingface.co/Xenova/all-MiniLM-L6-v2) |
+| Xenova/bge-small-en-v1.5 (ONNX, q8) | `ea104da` | MIT (upstream BAAI/bge-small-en-v1.5) | [Hugging Face](https://huggingface.co/Xenova/bge-small-en-v1.5) |
 
 Third-party libraries: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 

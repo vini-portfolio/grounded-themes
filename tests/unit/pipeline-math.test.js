@@ -130,6 +130,24 @@ describe('clustering', () => {
     expect(res.skipAgglomerative).toBe(false);
   });
 
+  it('with a tolerance, prefers the smallest k within it of the best silhouette', () => {
+    const opts = { kMax: 6, minNotesPerTheme: 4, agglomerativeMaxN: 150, kmeansRuns: 5, kmeansMaxIter: 50 };
+    const strict = selectClustering(rows, createRng(1), opts);
+    const loose = selectClustering(rows, createRng(1), { ...opts, kTolerance: 2 }); // every score qualifies
+    expect(loose.selected.k).toBe(2);
+    expect(loose.selected.k).toBeLessThanOrEqual(strict.selected.k);
+    const none = selectClustering(rows, createRng(1), { ...opts, kTolerance: 0 });
+    expect(none.selected).toEqual(strict.selected);
+    // An in-between tolerance keeps only k values whose score lies in the band.
+    const sorted = [...strict.scores].sort((a, b) => b.silhouette - a.silhouette);
+    const second = sorted.find((s) => s.k !== strict.selected.k);
+    const tol = (strict.selected.silhouette - second.silhouette) / 2;
+    const mid = selectClustering(rows, createRng(1), { ...opts, kTolerance: tol });
+    expect(mid.best).toEqual(strict.selected);
+    expect(mid.selected.silhouette).toBeGreaterThanOrEqual(strict.selected.silhouette - tol);
+    expect(mid.selected.k).toBe(strict.selected.k);
+  });
+
   it('skips agglomerative clustering above the size limit', () => {
     const res = selectClustering(rows, createRng(1), {
       kMax: 4, minNotesPerTheme: 4, agglomerativeMaxN: 10, kmeansRuns: 2, kmeansMaxIter: 20,

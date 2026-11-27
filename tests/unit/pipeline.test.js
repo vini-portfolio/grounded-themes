@@ -69,6 +69,15 @@ describe('pipeline', () => {
     for (const e of events) expect(validate(e), JSON.stringify(validate.errors)).toBe(true);
   });
 
+  it('passes k-range and tolerance options through to clustering', async () => {
+    const res = await runPipeline({ texts: texts('sample'), embed: bowEmbed, seed: 7, now, minNotesPerTheme: 10, kTolerance: 0.5 });
+    const cluster = res.events.find((e) => e.stage === 'cluster').payload;
+    expect(cluster.kRange).toEqual([2, 3, 4, 5]);
+    expect(cluster.kTolerance).toBe(0.5);
+    expect(cluster.selected.k).toBe(2);
+    expect(cluster.best).not.toBeNull();
+  });
+
   it('rejects non-finite embeddings with a clear error', async () => {
     const bad = async (t) => ({ vectors: t.map(() => Float32Array.from([NaN, 1])), dims: 2 });
     await expect(runPipeline({ texts: ['a b', 'c d'], embed: bad, now })).rejects.toThrow(/non-finite/);

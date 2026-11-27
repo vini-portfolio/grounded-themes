@@ -3,17 +3,21 @@
 // See docs/adr/001-runtime.md for the reasoning.
 
 export const EMBEDDING_MODEL = Object.freeze({
-  id: 'Xenova/all-MiniLM-L6-v2',
+  id: 'Xenova/bge-small-en-v1.5',
   // Pinned commit on the model host; bump only together with the ADR.
-  revision: '751bff37182d3f1213fa05d7196b954e230abad9',
+  revision: 'ea104dacec62c0de699686887e3f920caeb4f3e3',
   dtype: 'q8',
   dimensions: 384,
-  license: 'Apache-2.0',
-  upstream: 'sentence-transformers/all-MiniLM-L6-v2',
+  license: 'MIT',
+  upstream: 'BAAI/bge-small-en-v1.5',
+  // bge models are trained to use the [CLS] token's vector as the sentence
+  // embedding; no prefix is needed for clustering.
+  pooling: 'cls',
+  prefix: '',
 });
 
-// all-MiniLM-L6-v2 was trained with a 256-token limit (sentence-transformers
-// max_seq_length). Longer notes are truncated to this many tokens.
+// Notes are truncated to this many tokens. 256 keeps batches small and fast;
+// bge-small accepts up to 512, and notes are rarely longer than a few dozen.
 export const MAX_TOKENS = 256;
 
 export const MODEL_HOST = 'https://huggingface.co/';
