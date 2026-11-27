@@ -144,8 +144,8 @@ function renderNotes() {
   const next = (start) => {
     if (generation !== renderGeneration) return;
     if (start >= notes.length) {
-      // Marks the whole list as in the page (the benchmark waits for it).
-      app.dataset.notesRendered = String(notes.length);
+      // Marks the whole list as in the page and usable (the benchmark waits for it).
+      if (state.vectors.length === notes.length) app.dataset.notesRendered = String(notes.length);
       return;
     }
     const frag = document.createDocumentFragment();
