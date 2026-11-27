@@ -29,6 +29,6 @@ Themes:
 | Owner | Vinicius Morais |
 | Method | Drafted with AI assistance from the written brief below, then reviewed and approved by the owner |
 | Brief | Subject area: bakery menu brainstorm. Themes: new recipes, failed attempts, client favorites, seasonal products, plus pricing and costs. Stress set adds two neighbouring subject areas, café service and catering, with five themes each and at least 20% noisy notes. |
-| Approval | Pending: the owner approves in the pull request that adds these files; the date is recorded here on approval |
+| Approval | Approved by the owner on 2026-11-27 ([comment on #5](https://github.com/vini-portfolio/grounded-themes/pull/5#issuecomment-7230365001)) |
 
 `npm run check:data` validates the files: counts, required fields, unique IDs and texts, theme and domain counts, and the noisy-note share.
