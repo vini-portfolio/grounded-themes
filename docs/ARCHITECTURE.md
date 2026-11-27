@@ -10,15 +10,15 @@ Design notes, written as the implementation lands. Each section will state the d
 
 ## Clustering constants
 
-Defined in [`src/pipeline/constants.js`](../src/pipeline/constants.js). Evidence: CI benchmarks on 2026-11-26 (Linux, headless Chromium, WebAssembly backend; **not** the reference laptop), `bge-small-en-v1.5` embeddings, 10 warm runs per dataset with seeds 42–51, all six reports from one workflow run at commit `dee5486`. Main result: [2026-11-26-ci-committed](benchmarks/2026-11-26-ci-committed.md), repeated in [2026-11-26-ci-committed-repeat](benchmarks/2026-11-26-ci-committed-repeat.md) within tolerance.
+Defined in [`src/pipeline/constants.js`](../src/pipeline/constants.js). Evidence: CI benchmarks on 2026-11-26 (Linux, headless Chromium, WebAssembly backend; **not** the reference laptop), `bge-small-en-v1.5` embeddings, 10 warm runs per dataset with seeds 42–51, all six reports from one workflow run at commit `023456c`. Main result: [2026-11-26-ci-committed](benchmarks/2026-11-26-ci-committed.md), repeated in [2026-11-26-ci-committed-repeat](benchmarks/2026-11-26-ci-committed-repeat.md): same quality figures (the runs are seeded) and every timing within tolerance except one, the 16-note test set's extract stage (mean 294 ms vs 375 ms; single runs vary between 220 and 550 ms on the shared CI runner).
 
 | Constant | Value | Evidence |
 |---|---|---|
 | `MIN_NOTES_PER_THEME` | 6 | Tuned; see below. |
 | `K_MAX` | 12 | Not tuned. On the stress set (180 notes, 15 ground-truth themes) the cap binds: 8–12 themes, ARI 0.356 ([benchmark](benchmarks/2026-11-26-ci-committed.md)). Raising it is untested. |
 | `MIN_CLUSTER_SIZE` | 3 | Not tuned. No theme was merged in any run on any dataset, so it had no effect here ([benchmark](benchmarks/2026-11-26-ci-committed.md), "Small themes merged"). Kept at 3 so keyphrase statistics have at least three notes. |
-| `AGGLOMERATIVE_MAX_N` | 150 | Not tuned. The 500-note timing run took 13.2 s through the pipeline (cluster stage 1.4 s) and 14.0 s through the interface until the whole note list was rendered, with no main-thread block over 50 ms after the click, within the 40 s budget ([benchmark](benchmarks/2026-11-26-ci-committed.md)). |
-| `KMEANS_RUNS` | 30 | Not tuned. Cluster stage: 72 ms mean on the demo sample, 430 ms on the stress set ([benchmark](benchmarks/2026-11-26-ci-committed.md)). |
+| `AGGLOMERATIVE_MAX_N` | 150 | Not tuned. The 500-note timing run took 13.1 s through the pipeline (cluster stage 1.4 s) and 15.2 s through the interface until the whole note list was rendered, with no main-thread block over 50 ms after the click, within the 40 s budget ([benchmark](benchmarks/2026-11-26-ci-committed.md)). |
+| `KMEANS_RUNS` | 30 | Not tuned. Cluster stage: 59 ms mean on the demo sample, 412 ms on the stress set ([benchmark](benchmarks/2026-11-26-ci-committed.md)). |
 | `REDUCED_DIMENSIONS` | 28 | Not tuned in a benchmark; revisit with the label model in place. |
 
 ### Why one theme per 6 notes
