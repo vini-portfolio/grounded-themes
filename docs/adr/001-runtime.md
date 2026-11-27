@@ -25,7 +25,7 @@ Grounded Themes runs every model in the visitor's browser. Note text must never 
 
 ## Performance budgets
 
-To be measured by the benchmark script (added in a later change) on the reference setup; every result will record the backend used.
+Measured by `npm run bench` (results in `docs/benchmarks/`); a run on the reference setup is marked with `--reference`. Every result records the backend used.
 
 | Budget | Value |
 |---|---|
@@ -45,7 +45,7 @@ Reference setup:
 | Phone | iPhone 15 Pro Max |
 | Connection | 1 Gbit/s; cold-run budgets are measured with the connection throttled to 50 Mbit/s, so the result reflects a typical visitor rather than the reference line |
 
-Measurement methods: memory from Chrome DevTools Protocol process metrics (cross-origin isolation is off, so `performance.measureUserAgentSpecificMemory` is unavailable) and Safari Web Inspector on the iPhone; cold runs throttled to 50 Mbit/s through DevTools Protocol network emulation.
+Measurement methods (`scripts/bench.mjs`): peak memory of the browser and all its processes, sampled every 100 ms, as proportional set size on Linux and resident set size elsewhere (which overstates, because shared pages count once per process); cross-origin isolation is off, so `performance.measureUserAgentSpecificMemory` is unavailable. The iPhone is measured by hand with Safari Web Inspector. Cold runs use a fresh browser profile and delay each response by its size at 50 Mbit/s after fetching it; parallel downloads overlap, so this approximates a shared link rather than shaping traffic. Main-thread blocking is measured with a 20 ms heartbeat on the page (the Long Tasks API reports nothing in headless Chromium): a tick arriving more than 50 ms late is recorded as a block of that length, so blocks under 50 ms are not recorded, checked against a deliberate 300 ms task before each benchmark, including one run per dataset through the real interface. In those interface runs blocking counts from the click on "Find themes" until the themes and the whole note list are in the page; the time Chromium takes to fill the text box with the test's notes is the browser's own work and is reported separately.
 
 ## Pipeline constants
 
@@ -55,12 +55,12 @@ Defined once in `src/pipeline/constants.js`; documentation and tests read them f
 |---|---|---|
 | `REDUCED_DIMENSIONS` | 28 | dimensions kept by PCA before clustering |
 | `K_MAX` | 12 | largest number of themes considered |
-| `MIN_NOTES_PER_THEME` | 4 | k range ends at floor(n / 4) |
+| `MIN_NOTES_PER_THEME` | 6 | k range ends at floor(n / 6); was 4, changed after the 2026-11-26 benchmarks (see docs/ARCHITECTURE.md) |
 | `MIN_CLUSTER_SIZE` | 3 | smaller themes are merged into the nearest one |
 | `AGGLOMERATIVE_MAX_N` | 150 | agglomerative clustering is skipped above this many notes |
 | `KMEANS_RUNS` | 30 | k-means initializations per k; the best is kept |
 
-These are starting values; the benchmark slice tunes them against the datasets and records the results here.
+Values and the benchmark results behind them: [docs/ARCHITECTURE.md § Clustering constants](../ARCHITECTURE.md#clustering-constants).
 
 ## Hosting
 

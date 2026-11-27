@@ -1,0 +1,2459 @@
+{
+  "name": "2026-11-26-ci-min5",
+  "date": "2026-11-27T00:19:02.804Z",
+  "commit": "023456c",
+  "ciRun": "vini-portfolio/grounded-themes/actions/runs/45914774420",
+  "reference": false,
+  "machine": {
+    "platform": "linux",
+    "arch": "x64",
+    "cpu": "AMD EPYC 7763 64-Core Processor",
+    "cores": 4,
+    "memoryBytes": 16759431168
+  },
+  "model": {
+    "id": "Xenova/bge-small-en-v1.5",
+    "revision": "ea104dacec62c0de699686887e3f920caeb4f3e3",
+    "dtype": "q8"
+  },
+  "pipelineOptions": {
+    "minNotesPerTheme": 5
+  },
+  "constants": {
+    "REDUCED_DIMENSIONS": 28,
+    "K_MAX": 12,
+    "MIN_NOTES_PER_THEME": 6,
+    "MIN_CLUSTER_SIZE": 3,
+    "AGGLOMERATIVE_MAX_N": 150,
+    "KMEANS_RUNS": 30
+  },
+  "method": {
+    "runs": 10,
+    "coldRuns": 1,
+    "seeds": [
+      42,
+      43,
+      44,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51
+    ],
+    "cold": "fresh browser profile per run; each response delayed by its size at 50 Mbit/s after fetching (parallel downloads overlap, so this approximates a shared link rather than shaping traffic)",
+    "warm": "model files cached; a new page per run (as on a repeat visit), so the model is loaded from cache each time; pipeline driven through a test hook",
+    "ui": "one run per dataset through the real interface (paste, click, wait until the themes and the whole note list are in the page) to include rendering; time counts from the paste, main-thread blocking from the click (filling the text box is the browser's own work and is reported separately)",
+    "memory": "peak proportional set size (PSS, shared pages split) of the browser and all its processes, sampled every 100 ms",
+    "longTasks": "main-thread blocking measured by a 20 ms heartbeat on the page: each gap between ticks beyond 20 ms counts as a task of that length (the Long Tasks API reports nothing in headless Chromium); validated by a deliberate 300 ms task before the runs",
+    "backend": "WebAssembly (headless browsers have no GPU adapter)",
+    "maxNotes": "500 notes: the 246 unique dataset notes repeated; timing only"
+  },
+  "datasets": {
+    "sample": {
+      "notes": 50,
+      "trueThemes": 5,
+      "cold": {
+        "runs": [
+          {
+            "seed": 42,
+            "totalMs": 24547,
+            "loadMs": 21858,
+            "stageMs": {
+              "embed": 1967.8,
+              "reduce": 18.4,
+              "cluster": 78.3,
+              "extract": 425.3,
+              "label": 0.1,
+              "project": 7.1
+            },
+            "downloadedBytes": 61641705,
+            "themes": 5,
+            "selected": {
+              "algorithm": "kmeans",
+              "k": 5,
+              "silhouette": 0.146357
+            },
+            "merges": 0,
+            "silhouette": {
+              "kmeans": 0.146357,
+              "agglomerative": 0.128658
+            },
+            "bestK": {
+              "kmeans": 5,
+              "agglomerative": 10
+            },
+            "kAgreement": false,
+            "labels": {
+              "firstAttempt": 0,
+              "afterRetry": 0,
+              "fallback": 0,
+              "keyphraseOnly": 5
+            },
+            "ari": 0.8046727937105526,
+            "nmi": 0.8383493091597665,
+            "peakMemoryBytes": 857682944,
+            "longTasksOver200": 0,
+            "longestTaskMs": 0,
+            "backend": "wasm"
+          }
+        ],
+        "summary": {
+          "totalMs": {
+            "mean": 24547,
+            "min": 24547,
+            "max": 24547,
+            "n": 1
+          },
+          "loadMs": {
+            "mean": 21858,
+            "min": 21858,
+            "max": 21858,
+            "n": 1
+          },
+          "stageMs": {
+            "embed": {
+              "mean": 1967.8,
+              "min": 1967.8,
+              "max": 1967.8,
+              "n": 1
+            },
+            "reduce": {
+              "mean": 18.4,
+              "min": 18.4,
+              "max": 18.4,
+              "n": 1
+            },
+            "cluster": {
+              "mean": 78.3,
+              "min": 78.3,
+              "max": 78.3,
+              "n": 1
+            },
+            "extract": {
+              "mean": 425.3,
+              "min": 425.3,
+              "max": 425.3,
+              "n": 1
+            },
+            "label": {
+              "mean": 0.1,
+              "min": 0.1,
+              "max": 0.1,
+              "n": 1
+            },
+            "project": {
+              "mean": 7.1,
+              "min": 7.1,
+              "max": 7.1,
+              "n": 1
+            }
+          },
+          "downloadedBytes": {
+            "mean": 61641705,
+            "min": 61641705,
+            "max": 61641705,
+            "n": 1
+          },
+          "themes": {
+            "mean": 5,
+            "min": 5,
+            "max": 5,
+            "n": 1
+          },
+          "merges": {
+            "mean": 0,
+            "min": 0,
+            "max": 0,
+            "n": 1
+          },
+          "silhouetteKmeans": {
+            "mean": 0.146357,
+            "min": 0.146357,
+            "max": 0.146357,
+            "n": 1
+          },
+          "silhouetteAgglomerative": {
+            "mean": 0.128658,
+            "min": 0.128658,
+            "max": 0.128658,
+            "n": 1
+          },
+          "bestKKmeans": {
+            "mean": 5,
+            "min": 5,
+            "max": 5,
+            "n": 1
+          },
+          "bestKAgglomerative": {
+            "mean": 10,
+            "min": 10,
+            "max": 10,
+            "n": 1
+          },
+          "kAgreementShare": {
+            "mean": 0,
+            "min": 0,
+            "max": 0,
+            "n": 1
+          },
+          "ari": {
+            "mean": 0.8046727937105526,
+            "min": 0.8046727937105526,
+            "max": 0.8046727937105526,
+            "n": 1
+          },
+          "nmi": {
+            "mean": 0.8383493091597665,
+            "min": 0.8383493091597665,
+            "max": 0.8383493091597665,
+            "n": 1
+          },
+          "peakMemoryBytes": {
+            "mean": 857682944,
+            "min": 857682944,
+            "max": 857682944,
+            "n": 1
+          },
+          "longTasksOver200": {
+            "mean": 0,
+            "min": 0,
+            "max": 0,
+            "n": 1
+          },
+          "labelFirstAttempt": {
+            "mean": 0,
+            "min": 0,
+            "max": 0,
+            "n": 1
+          },
+          "labelAfterRetry": {
+            "mean": 0,
+            "min": 0,
+            "max": 0,
+            "n": 1
+          },
+          "labelFallback": {
+            "mean": 0,
+            "min": 0,
+            "max": 0,
+            "n": 1
+          }
+        }
+      },
+      "runs": [
+        {
+          "seed": 42,
+          "totalMs": 3615,
+          "loadMs": 1385,
+          "stageMs": {
+            "embed": 1598.2,
+            "reduce": 24.8,
+            "cluster": 79.1,
+            "extract": 478.4,
+            "label": 0,
+            "project": 8.3
+          },
+          "downloadedBytes": 0,
+          "themes": 5,
+          "selected": {
+            "algorithm": "kmeans",
+            "k": 5,
+            "silhouette": 0.146357
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.146357,
+            "agglomerative": 0.128658
+          },
+          "bestK": {
+            "kmeans": 5,
+            "agglomerative": 10
+          },
+          "kAgreement": false,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 5
+          },
+          "ari": 0.8046727937105526,
+          "nmi": 0.8383493091597665,
+          "peakMemoryBytes": 839128064,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 43,
+          "totalMs": 4265,
+          "loadMs": 1377,
+          "stageMs": {
+            "embed": 1932,
+            "reduce": 36.2,
+            "cluster": 84.5,
+            "extract": 775.9,
+            "label": 0.1,
+            "project": 18.4
+          },
+          "downloadedBytes": 0,
+          "themes": 9,
+          "selected": {
+            "algorithm": "agglomerative",
+            "k": 10,
+            "silhouette": 0.128658
+          },
+          "merges": 1,
+          "silhouette": {
+            "kmeans": 0.124308,
+            "agglomerative": 0.128658
+          },
+          "bestK": {
+            "kmeans": 5,
+            "agglomerative": 10
+          },
+          "kAgreement": false,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 9
+          },
+          "ari": 0.4673913043478261,
+          "nmi": 0.6083201751210502,
+          "peakMemoryBytes": 842421248,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 44,
+          "totalMs": 3955,
+          "loadMs": 1299,
+          "stageMs": {
+            "embed": 2058.5,
+            "reduce": 38.9,
+            "cluster": 95,
+            "extract": 416.1,
+            "label": 0,
+            "project": 7.3
+          },
+          "downloadedBytes": 0,
+          "themes": 5,
+          "selected": {
+            "algorithm": "kmeans",
+            "k": 5,
+            "silhouette": 0.135651
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.135651,
+            "agglomerative": 0.128658
+          },
+          "bestK": {
+            "kmeans": 5,
+            "agglomerative": 10
+          },
+          "kAgreement": false,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 5
+          },
+          "ari": 0.6874826687371749,
+          "nmi": 0.7566089047025152,
+          "peakMemoryBytes": 853165056,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 45,
+          "totalMs": 3832,
+          "loadMs": 1379,
+          "stageMs": {
+            "embed": 1841.8,
+            "reduce": 44.7,
+            "cluster": 161.1,
+            "extract": 356.9,
+            "label": 0.1,
+            "project": 7.9
+          },
+          "downloadedBytes": 0,
+          "themes": 4,
+          "selected": {
+            "algorithm": "kmeans",
+            "k": 4,
+            "silhouette": 0.142434
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.142434,
+            "agglomerative": 0.128658
+          },
+          "bestK": {
+            "kmeans": 4,
+            "agglomerative": 10
+          },
+          "kAgreement": false,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 4
+          },
+          "ari": 0.7011190624849911,
+          "nmi": 0.8222956863202169,
+          "peakMemoryBytes": 833537024,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 46,
+          "totalMs": 4393,
+          "loadMs": 1363,
+          "stageMs": {
+            "embed": 2450.1,
+            "reduce": 32.1,
+            "cluster": 74.9,
+            "extract": 426.7,
+            "label": 0.1,
+            "project": 7.6
+          },
+          "downloadedBytes": 0,
+          "themes": 5,
+          "selected": {
+            "algorithm": "kmeans",
+            "k": 5,
+            "silhouette": 0.128716
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.128716,
+            "agglomerative": 0.128658
+          },
+          "bestK": {
+            "kmeans": 5,
+            "agglomerative": 10
+          },
+          "kAgreement": false,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 5
+          },
+          "ari": 0.5886812889249932,
+          "nmi": 0.6711620679745737,
+          "peakMemoryBytes": 838836224,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 47,
+          "totalMs": 3799,
+          "loadMs": 1368,
+          "stageMs": {
+            "embed": 1700,
+            "reduce": 32.8,
+            "cluster": 104.9,
+            "extract": 541.6,
+            "label": 0.1,
+            "project": 6
+          },
+          "downloadedBytes": 0,
+          "themes": 6,
+          "selected": {
+            "algorithm": "kmeans",
+            "k": 6,
+            "silhouette": 0.132322
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.132322,
+            "agglomerative": 0.128658
+          },
+          "bestK": {
+            "kmeans": 6,
+            "agglomerative": 10
+          },
+          "kAgreement": false,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 6
+          },
+          "ari": 0.5217544684854186,
+          "nmi": 0.6420348011715672,
+          "peakMemoryBytes": 782991360,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 48,
+          "totalMs": 5032,
+          "loadMs": 1358,
+          "stageMs": {
+            "embed": 2681.7,
+            "reduce": 23.3,
+            "cluster": 111,
+            "extract": 809.7,
+            "label": 0.1,
+            "project": 7.4
+          },
+          "downloadedBytes": 0,
+          "themes": 9,
+          "selected": {
+            "algorithm": "agglomerative",
+            "k": 10,
+            "silhouette": 0.128658
+          },
+          "merges": 1,
+          "silhouette": {
+            "kmeans": 0.126774,
+            "agglomerative": 0.128658
+          },
+          "bestK": {
+            "kmeans": 4,
+            "agglomerative": 10
+          },
+          "kAgreement": false,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 9
+          },
+          "ari": 0.4673913043478261,
+          "nmi": 0.6083201751210502,
+          "peakMemoryBytes": 763998208,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 49,
+          "totalMs": 4115,
+          "loadMs": 1348,
+          "stageMs": {
+            "embed": 1796.9,
+            "reduce": 23.7,
+            "cluster": 84.2,
+            "extract": 810.9,
+            "label": 0.1,
+            "project": 6.6
+          },
+          "downloadedBytes": 0,
+          "themes": 9,
+          "selected": {
+            "algorithm": "agglomerative",
+            "k": 10,
+            "silhouette": 0.128658
+          },
+          "merges": 1,
+          "silhouette": {
+            "kmeans": 0.125423,
+            "agglomerative": 0.128658
+          },
+          "bestK": {
+            "kmeans": 5,
+            "agglomerative": 10
+          },
+          "kAgreement": false,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 9
+          },
+          "ari": 0.4673913043478261,
+          "nmi": 0.6083201751210502,
+          "peakMemoryBytes": 844866560,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 50,
+          "totalMs": 4075,
+          "loadMs": 1350,
+          "stageMs": {
+            "embed": 1794.2,
+            "reduce": 25.3,
+            "cluster": 86.6,
+            "extract": 772.8,
+            "label": 0,
+            "project": 5.8
+          },
+          "downloadedBytes": 0,
+          "themes": 9,
+          "selected": {
+            "algorithm": "agglomerative",
+            "k": 10,
+            "silhouette": 0.128658
+          },
+          "merges": 1,
+          "silhouette": {
+            "kmeans": 0.12844,
+            "agglomerative": 0.128658
+          },
+          "bestK": {
+            "kmeans": 4,
+            "agglomerative": 10
+          },
+          "kAgreement": false,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 9
+          },
+          "ari": 0.4673913043478261,
+          "nmi": 0.6083201751210502,
+          "peakMemoryBytes": 811904000,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 51,
+          "totalMs": 3851,
+          "loadMs": 1346,
+          "stageMs": {
+            "embed": 1970.9,
+            "reduce": 47,
+            "cluster": 83.2,
+            "extract": 358.4,
+            "label": 0,
+            "project": 6.8
+          },
+          "downloadedBytes": 0,
+          "themes": 4,
+          "selected": {
+            "algorithm": "kmeans",
+            "k": 4,
+            "silhouette": 0.140657
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.140657,
+            "agglomerative": 0.128658
+          },
+          "bestK": {
+            "kmeans": 4,
+            "agglomerative": 10
+          },
+          "kAgreement": false,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 4
+          },
+          "ari": 0.6312234658433037,
+          "nmi": 0.7378953735003239,
+          "peakMemoryBytes": 847084544,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        }
+      ],
+      "summary": {
+        "totalMs": {
+          "mean": 4093.2,
+          "min": 3615,
+          "max": 5032,
+          "n": 10
+        },
+        "loadMs": {
+          "mean": 1357.3,
+          "min": 1299,
+          "max": 1385,
+          "n": 10
+        },
+        "stageMs": {
+          "embed": {
+            "mean": 1982.4299999999998,
+            "min": 1598.2,
+            "max": 2681.7,
+            "n": 10
+          },
+          "reduce": {
+            "mean": 32.88,
+            "min": 23.3,
+            "max": 47,
+            "n": 10
+          },
+          "cluster": {
+            "mean": 96.45000000000002,
+            "min": 74.9,
+            "max": 161.1,
+            "n": 10
+          },
+          "extract": {
+            "mean": 574.74,
+            "min": 356.9,
+            "max": 810.9,
+            "n": 10
+          },
+          "label": {
+            "mean": 0.06,
+            "min": 0,
+            "max": 0.1,
+            "n": 10
+          },
+          "project": {
+            "mean": 8.209999999999999,
+            "min": 5.8,
+            "max": 18.4,
+            "n": 10
+          }
+        },
+        "downloadedBytes": {
+          "mean": 0,
+          "min": 0,
+          "max": 0,
+          "n": 10
+        },
+        "themes": {
+          "mean": 6.5,
+          "min": 4,
+          "max": 9,
+          "n": 10
+        },
+        "merges": {
+          "mean": 0.4,
+          "min": 0,
+          "max": 1,
+          "n": 10
+        },
+        "silhouetteKmeans": {
+          "mean": 0.13310820000000004,
+          "min": 0.124308,
+          "max": 0.146357,
+          "n": 10
+        },
+        "silhouetteAgglomerative": {
+          "mean": 0.12865799999999997,
+          "min": 0.128658,
+          "max": 0.128658,
+          "n": 10
+        },
+        "bestKKmeans": {
+          "mean": 4.7,
+          "min": 4,
+          "max": 6,
+          "n": 10
+        },
+        "bestKAgglomerative": {
+          "mean": 10,
+          "min": 10,
+          "max": 10,
+          "n": 10
+        },
+        "kAgreementShare": {
+          "mean": 0,
+          "min": 0,
+          "max": 0,
+          "n": 10
+        },
+        "ari": {
+          "mean": 0.5804498965577738,
+          "min": 0.4673913043478261,
+          "max": 0.8046727937105526,
+          "n": 10
+        },
+        "nmi": {
+          "mean": 0.6901626843313164,
+          "min": 0.6083201751210502,
+          "max": 0.8383493091597665,
+          "n": 10
+        },
+        "peakMemoryBytes": {
+          "mean": 825793228.8,
+          "min": 763998208,
+          "max": 853165056,
+          "n": 10
+        },
+        "longTasksOver200": {
+          "mean": 0,
+          "min": 0,
+          "max": 0,
+          "n": 10
+        },
+        "labelFirstAttempt": {
+          "mean": 0,
+          "min": 0,
+          "max": 0,
+          "n": 10
+        },
+        "labelAfterRetry": {
+          "mean": 0,
+          "min": 0,
+          "max": 0,
+          "n": 10
+        },
+        "labelFallback": {
+          "mean": 0,
+          "min": 0,
+          "max": 0,
+          "n": 10
+        }
+      },
+      "worstAriWindow": {
+        "mean": 0.4673913043478261,
+        "runs": [
+          7,
+          9
+        ]
+      },
+      "ui": {
+        "blocks": [],
+        "inputBlockMs": 0,
+        "totalMs": 3904,
+        "peakMemoryBytes": 857953280,
+        "longTasksOver200": 0,
+        "longestTaskMs": 0
+      }
+    },
+    "test": {
+      "notes": 16,
+      "trueThemes": 4,
+      "cold": {
+        "runs": [
+          {
+            "seed": 42,
+            "totalMs": 23481,
+            "loadMs": 21830,
+            "stageMs": {
+              "embed": 1157.8,
+              "reduce": 18.8,
+              "cluster": 14.4,
+              "extract": 239.4,
+              "label": 0,
+              "project": 1.7
+            },
+            "downloadedBytes": 61641705,
+            "themes": 2,
+            "selected": {
+              "algorithm": "agglomerative",
+              "k": 2,
+              "silhouette": 0.141135
+            },
+            "merges": 0,
+            "silhouette": {
+              "kmeans": 0.113773,
+              "agglomerative": 0.141135
+            },
+            "bestK": {
+              "kmeans": 3,
+              "agglomerative": 2
+            },
+            "kAgreement": false,
+            "labels": {
+              "firstAttempt": 0,
+              "afterRetry": 0,
+              "fallback": 0,
+              "keyphraseOnly": 2
+            },
+            "ari": 0.2857142857142857,
+            "nmi": 0.5771596324111234,
+            "peakMemoryBytes": 858493952,
+            "longTasksOver200": 0,
+            "longestTaskMs": 0,
+            "backend": "wasm"
+          }
+        ],
+        "summary": {
+          "totalMs": {
+            "mean": 23481,
+            "min": 23481,
+            "max": 23481,
+            "n": 1
+          },
+          "loadMs": {
+            "mean": 21830,
+            "min": 21830,
+            "max": 21830,
+            "n": 1
+          },
+          "stageMs": {
+            "embed": {
+              "mean": 1157.8,
+              "min": 1157.8,
+              "max": 1157.8,
+              "n": 1
+            },
+            "reduce": {
+              "mean": 18.8,
+              "min": 18.8,
+              "max": 18.8,
+              "n": 1
+            },
+            "cluster": {
+              "mean": 14.4,
+              "min": 14.4,
+              "max": 14.4,
+              "n": 1
+            },
+            "extract": {
+              "mean": 239.4,
+              "min": 239.4,
+              "max": 239.4,
+              "n": 1
+            },
+            "label": {
+              "mean": 0,
+              "min": 0,
+              "max": 0,
+              "n": 1
+            },
+            "project": {
+              "mean": 1.7,
+              "min": 1.7,
+              "max": 1.7,
+              "n": 1
+            }
+          },
+          "downloadedBytes": {
+            "mean": 61641705,
+            "min": 61641705,
+            "max": 61641705,
+            "n": 1
+          },
+          "themes": {
+            "mean": 2,
+            "min": 2,
+            "max": 2,
+            "n": 1
+          },
+          "merges": {
+            "mean": 0,
+            "min": 0,
+            "max": 0,
+            "n": 1
+          },
+          "silhouetteKmeans": {
+            "mean": 0.113773,
+            "min": 0.113773,
+            "max": 0.113773,
+            "n": 1
+          },
+          "silhouetteAgglomerative": {
+            "mean": 0.141135,
+            "min": 0.141135,
+            "max": 0.141135,
+            "n": 1
+          },
+          "bestKKmeans": {
+            "mean": 3,
+            "min": 3,
+            "max": 3,
+            "n": 1
+          },
+          "bestKAgglomerative": {
+            "mean": 2,
+            "min": 2,
+            "max": 2,
+            "n": 1
+          },
+          "kAgreementShare": {
+            "mean": 0,
+            "min": 0,
+            "max": 0,
+            "n": 1
+          },
+          "ari": {
+            "mean": 0.2857142857142857,
+            "min": 0.2857142857142857,
+            "max": 0.2857142857142857,
+            "n": 1
+          },
+          "nmi": {
+            "mean": 0.5771596324111234,
+            "min": 0.5771596324111234,
+            "max": 0.5771596324111234,
+            "n": 1
+          },
+          "peakMemoryBytes": {
+            "mean": 858493952,
+            "min": 858493952,
+            "max": 858493952,
+            "n": 1
+          },
+          "longTasksOver200": {
+            "mean": 0,
+            "min": 0,
+            "max": 0,
+            "n": 1
+          },
+          "labelFirstAttempt": {
+            "mean": 0,
+            "min": 0,
+            "max": 0,
+            "n": 1
+          },
+          "labelAfterRetry": {
+            "mean": 0,
+            "min": 0,
+            "max": 0,
+            "n": 1
+          },
+          "labelFallback": {
+            "mean": 0,
+            "min": 0,
+            "max": 0,
+            "n": 1
+          }
+        }
+      },
+      "runs": [
+        {
+          "seed": 42,
+          "totalMs": 3177,
+          "loadMs": 1297,
+          "stageMs": {
+            "embed": 1335.3,
+            "reduce": 9.6,
+            "cluster": 29,
+            "extract": 462.6,
+            "label": 0.1,
+            "project": 3.1
+          },
+          "downloadedBytes": 0,
+          "themes": 2,
+          "selected": {
+            "algorithm": "agglomerative",
+            "k": 2,
+            "silhouette": 0.141135
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.113773,
+            "agglomerative": 0.141135
+          },
+          "bestK": {
+            "kmeans": 3,
+            "agglomerative": 2
+          },
+          "kAgreement": false,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 2
+          },
+          "ari": 0.2857142857142857,
+          "nmi": 0.5771596324111234,
+          "peakMemoryBytes": 794006528,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 43,
+          "totalMs": 3228,
+          "loadMs": 1353,
+          "stageMs": {
+            "embed": 1330.5,
+            "reduce": 3.5,
+            "cluster": 5.3,
+            "extract": 490.3,
+            "label": 0.1,
+            "project": 2.3
+          },
+          "downloadedBytes": 0,
+          "themes": 2,
+          "selected": {
+            "algorithm": "kmeans",
+            "k": 2,
+            "silhouette": 0.142221
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.142221,
+            "agglomerative": 0.141135
+          },
+          "bestK": {
+            "kmeans": 2,
+            "agglomerative": 2
+          },
+          "kAgreement": true,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 2
+          },
+          "ari": 0.25396825396825395,
+          "nmi": 0.4787358769176763,
+          "peakMemoryBytes": 802468864,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 44,
+          "totalMs": 2566,
+          "loadMs": 1362,
+          "stageMs": {
+            "embed": 927.1,
+            "reduce": 7,
+            "cluster": 5.8,
+            "extract": 220.5,
+            "label": 0.1,
+            "project": 3.4
+          },
+          "downloadedBytes": 0,
+          "themes": 2,
+          "selected": {
+            "algorithm": "kmeans",
+            "k": 2,
+            "silhouette": 0.142221
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.142221,
+            "agglomerative": 0.141135
+          },
+          "bestK": {
+            "kmeans": 2,
+            "agglomerative": 2
+          },
+          "kAgreement": true,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 2
+          },
+          "ari": 0.25396825396825395,
+          "nmi": 0.4787358769176763,
+          "peakMemoryBytes": 767803392,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 45,
+          "totalMs": 3241,
+          "loadMs": 1339,
+          "stageMs": {
+            "embed": 1312.6,
+            "reduce": 21.3,
+            "cluster": 28.7,
+            "extract": 495.7,
+            "label": 0.2,
+            "project": 2.1
+          },
+          "downloadedBytes": 0,
+          "themes": 2,
+          "selected": {
+            "algorithm": "kmeans",
+            "k": 2,
+            "silhouette": 0.142221
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.142221,
+            "agglomerative": 0.141135
+          },
+          "bestK": {
+            "kmeans": 2,
+            "agglomerative": 2
+          },
+          "kAgreement": true,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 2
+          },
+          "ari": 0.25396825396825395,
+          "nmi": 0.4787358769176763,
+          "peakMemoryBytes": 827294720,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 46,
+          "totalMs": 3587,
+          "loadMs": 1411,
+          "stageMs": {
+            "embed": 1583.2,
+            "reduce": 42.4,
+            "cluster": 19.8,
+            "extract": 487.7,
+            "label": 0.1,
+            "project": 2.4
+          },
+          "downloadedBytes": 0,
+          "themes": 2,
+          "selected": {
+            "algorithm": "kmeans",
+            "k": 2,
+            "silhouette": 0.142221
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.142221,
+            "agglomerative": 0.141135
+          },
+          "bestK": {
+            "kmeans": 2,
+            "agglomerative": 2
+          },
+          "kAgreement": true,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 2
+          },
+          "ari": 0.25396825396825395,
+          "nmi": 0.4787358769176763,
+          "peakMemoryBytes": 822010880,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 47,
+          "totalMs": 3144,
+          "loadMs": 1325,
+          "stageMs": {
+            "embed": 1290.8,
+            "reduce": 13.1,
+            "cluster": 6.3,
+            "extract": 467.7,
+            "label": 0.2,
+            "project": 2.3
+          },
+          "downloadedBytes": 0,
+          "themes": 2,
+          "selected": {
+            "algorithm": "agglomerative",
+            "k": 2,
+            "silhouette": 0.141135
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.126728,
+            "agglomerative": 0.141135
+          },
+          "bestK": {
+            "kmeans": 3,
+            "agglomerative": 2
+          },
+          "kAgreement": false,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 2
+          },
+          "ari": 0.2857142857142857,
+          "nmi": 0.5771596324111234,
+          "peakMemoryBytes": 764093440,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 48,
+          "totalMs": 2239,
+          "loadMs": 1340,
+          "stageMs": {
+            "embed": 579.9,
+            "reduce": 19.4,
+            "cluster": 15.6,
+            "extract": 241,
+            "label": 0.2,
+            "project": 2.9
+          },
+          "downloadedBytes": 0,
+          "themes": 2,
+          "selected": {
+            "algorithm": "agglomerative",
+            "k": 2,
+            "silhouette": 0.141135
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.120811,
+            "agglomerative": 0.141135
+          },
+          "bestK": {
+            "kmeans": 3,
+            "agglomerative": 2
+          },
+          "kAgreement": false,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 2
+          },
+          "ari": 0.2857142857142857,
+          "nmi": 0.5771596324111234,
+          "peakMemoryBytes": 794108928,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 49,
+          "totalMs": 3188,
+          "loadMs": 1355,
+          "stageMs": {
+            "embed": 1298.3,
+            "reduce": 5.3,
+            "cluster": 6.2,
+            "extract": 482.2,
+            "label": 0.1,
+            "project": 1.9
+          },
+          "downloadedBytes": 0,
+          "themes": 2,
+          "selected": {
+            "algorithm": "kmeans",
+            "k": 2,
+            "silhouette": 0.142221
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.142221,
+            "agglomerative": 0.141135
+          },
+          "bestK": {
+            "kmeans": 2,
+            "agglomerative": 2
+          },
+          "kAgreement": true,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 2
+          },
+          "ari": 0.25396825396825395,
+          "nmi": 0.4787358769176763,
+          "peakMemoryBytes": 810083328,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 50,
+          "totalMs": 2629,
+          "loadMs": 1352,
+          "stageMs": {
+            "embed": 990.4,
+            "reduce": 5.3,
+            "cluster": 6.3,
+            "extract": 231.5,
+            "label": 0.1,
+            "project": 2.2
+          },
+          "downloadedBytes": 0,
+          "themes": 2,
+          "selected": {
+            "algorithm": "kmeans",
+            "k": 2,
+            "silhouette": 0.142221
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.142221,
+            "agglomerative": 0.141135
+          },
+          "bestK": {
+            "kmeans": 2,
+            "agglomerative": 2
+          },
+          "kAgreement": true,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 2
+          },
+          "ari": 0.25396825396825395,
+          "nmi": 0.4787358769176763,
+          "peakMemoryBytes": 777166848,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 51,
+          "totalMs": 2796,
+          "loadMs": 1326,
+          "stageMs": {
+            "embed": 1123,
+            "reduce": 16.2,
+            "cluster": 7.2,
+            "extract": 278.6,
+            "label": 0.1,
+            "project": 2.8
+          },
+          "downloadedBytes": 0,
+          "themes": 2,
+          "selected": {
+            "algorithm": "kmeans",
+            "k": 2,
+            "silhouette": 0.142221
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.142221,
+            "agglomerative": 0.141135
+          },
+          "bestK": {
+            "kmeans": 2,
+            "agglomerative": 2
+          },
+          "kAgreement": true,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 2
+          },
+          "ari": 0.25396825396825395,
+          "nmi": 0.4787358769176763,
+          "peakMemoryBytes": 845859840,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        }
+      ],
+      "summary": {
+        "totalMs": {
+          "mean": 2979.5,
+          "min": 2239,
+          "max": 3587,
+          "n": 10
+        },
+        "loadMs": {
+          "mean": 1346,
+          "min": 1297,
+          "max": 1411,
+          "n": 10
+        },
+        "stageMs": {
+          "embed": {
+            "mean": 1177.11,
+            "min": 579.9,
+            "max": 1583.2,
+            "n": 10
+          },
+          "reduce": {
+            "mean": 14.309999999999999,
+            "min": 3.5,
+            "max": 42.4,
+            "n": 10
+          },
+          "cluster": {
+            "mean": 13.02,
+            "min": 5.3,
+            "max": 29,
+            "n": 10
+          },
+          "extract": {
+            "mean": 385.78,
+            "min": 220.5,
+            "max": 495.7,
+            "n": 10
+          },
+          "label": {
+            "mean": 0.13000000000000003,
+            "min": 0.1,
+            "max": 0.2,
+            "n": 10
+          },
+          "project": {
+            "mean": 2.54,
+            "min": 1.9,
+            "max": 3.4,
+            "n": 10
+          }
+        },
+        "downloadedBytes": {
+          "mean": 0,
+          "min": 0,
+          "max": 0,
+          "n": 10
+        },
+        "themes": {
+          "mean": 2,
+          "min": 2,
+          "max": 2,
+          "n": 10
+        },
+        "merges": {
+          "mean": 0,
+          "min": 0,
+          "max": 0,
+          "n": 10
+        },
+        "silhouetteKmeans": {
+          "mean": 0.13568589999999997,
+          "min": 0.113773,
+          "max": 0.142221,
+          "n": 10
+        },
+        "silhouetteAgglomerative": {
+          "mean": 0.141135,
+          "min": 0.141135,
+          "max": 0.141135,
+          "n": 10
+        },
+        "bestKKmeans": {
+          "mean": 2.3,
+          "min": 2,
+          "max": 3,
+          "n": 10
+        },
+        "bestKAgglomerative": {
+          "mean": 2,
+          "min": 2,
+          "max": 2,
+          "n": 10
+        },
+        "kAgreementShare": {
+          "mean": 0.7,
+          "min": 0,
+          "max": 1,
+          "n": 10
+        },
+        "ari": {
+          "mean": 0.26349206349206344,
+          "min": 0.25396825396825395,
+          "max": 0.2857142857142857,
+          "n": 10
+        },
+        "nmi": {
+          "mean": 0.5082630035657105,
+          "min": 0.4787358769176763,
+          "max": 0.5771596324111234,
+          "n": 10
+        },
+        "peakMemoryBytes": {
+          "mean": 800489676.8,
+          "min": 764093440,
+          "max": 845859840,
+          "n": 10
+        },
+        "longTasksOver200": {
+          "mean": 0,
+          "min": 0,
+          "max": 0,
+          "n": 10
+        },
+        "labelFirstAttempt": {
+          "mean": 0,
+          "min": 0,
+          "max": 0,
+          "n": 10
+        },
+        "labelAfterRetry": {
+          "mean": 0,
+          "min": 0,
+          "max": 0,
+          "n": 10
+        },
+        "labelFallback": {
+          "mean": 0,
+          "min": 0,
+          "max": 0,
+          "n": 10
+        }
+      },
+      "worstAriWindow": {
+        "mean": 0.25396825396825395,
+        "runs": [
+          2,
+          4
+        ]
+      },
+      "ui": {
+        "blocks": [],
+        "inputBlockMs": 0,
+        "totalMs": 3504,
+        "peakMemoryBytes": 851901440,
+        "longTasksOver200": 0,
+        "longestTaskMs": 0
+      }
+    },
+    "stress": {
+      "notes": 180,
+      "trueThemes": 15,
+      "cold": {
+        "runs": [
+          {
+            "seed": 42,
+            "totalMs": 29408,
+            "loadMs": 23247,
+            "stageMs": {
+              "embed": 4429.9,
+              "reduce": 108.3,
+              "cluster": 418.3,
+              "extract": 881.8,
+              "label": 0.1,
+              "project": 88.7
+            },
+            "downloadedBytes": 61641705,
+            "themes": 12,
+            "selected": {
+              "algorithm": "kmeans",
+              "k": 12,
+              "silhouette": 0.190557
+            },
+            "merges": 0,
+            "silhouette": {
+              "kmeans": 0.190557,
+              "agglomerative": null
+            },
+            "bestK": {
+              "kmeans": 12,
+              "agglomerative": null
+            },
+            "kAgreement": null,
+            "labels": {
+              "firstAttempt": 0,
+              "afterRetry": 0,
+              "fallback": 0,
+              "keyphraseOnly": 12
+            },
+            "ari": 0.3792206986732547,
+            "nmi": 0.5995136212082287,
+            "peakMemoryBytes": 745628672,
+            "longTasksOver200": 0,
+            "longestTaskMs": 0,
+            "backend": "wasm"
+          }
+        ],
+        "summary": {
+          "totalMs": {
+            "mean": 29408,
+            "min": 29408,
+            "max": 29408,
+            "n": 1
+          },
+          "loadMs": {
+            "mean": 23247,
+            "min": 23247,
+            "max": 23247,
+            "n": 1
+          },
+          "stageMs": {
+            "embed": {
+              "mean": 4429.9,
+              "min": 4429.9,
+              "max": 4429.9,
+              "n": 1
+            },
+            "reduce": {
+              "mean": 108.3,
+              "min": 108.3,
+              "max": 108.3,
+              "n": 1
+            },
+            "cluster": {
+              "mean": 418.3,
+              "min": 418.3,
+              "max": 418.3,
+              "n": 1
+            },
+            "extract": {
+              "mean": 881.8,
+              "min": 881.8,
+              "max": 881.8,
+              "n": 1
+            },
+            "label": {
+              "mean": 0.1,
+              "min": 0.1,
+              "max": 0.1,
+              "n": 1
+            },
+            "project": {
+              "mean": 88.7,
+              "min": 88.7,
+              "max": 88.7,
+              "n": 1
+            }
+          },
+          "downloadedBytes": {
+            "mean": 61641705,
+            "min": 61641705,
+            "max": 61641705,
+            "n": 1
+          },
+          "themes": {
+            "mean": 12,
+            "min": 12,
+            "max": 12,
+            "n": 1
+          },
+          "merges": {
+            "mean": 0,
+            "min": 0,
+            "max": 0,
+            "n": 1
+          },
+          "silhouetteKmeans": {
+            "mean": 0.190557,
+            "min": 0.190557,
+            "max": 0.190557,
+            "n": 1
+          },
+          "silhouetteAgglomerative": {
+            "mean": null,
+            "min": null,
+            "max": null,
+            "n": 0
+          },
+          "bestKKmeans": {
+            "mean": 12,
+            "min": 12,
+            "max": 12,
+            "n": 1
+          },
+          "bestKAgglomerative": {
+            "mean": null,
+            "min": null,
+            "max": null,
+            "n": 0
+          },
+          "kAgreementShare": {
+            "mean": null,
+            "min": null,
+            "max": null,
+            "n": 0
+          },
+          "ari": {
+            "mean": 0.3792206986732547,
+            "min": 0.3792206986732547,
+            "max": 0.3792206986732547,
+            "n": 1
+          },
+          "nmi": {
+            "mean": 0.5995136212082287,
+            "min": 0.5995136212082287,
+            "max": 0.5995136212082287,
+            "n": 1
+          },
+          "peakMemoryBytes": {
+            "mean": 745628672,
+            "min": 745628672,
+            "max": 745628672,
+            "n": 1
+          },
+          "longTasksOver200": {
+            "mean": 0,
+            "min": 0,
+            "max": 0,
+            "n": 1
+          },
+          "labelFirstAttempt": {
+            "mean": 0,
+            "min": 0,
+            "max": 0,
+            "n": 1
+          },
+          "labelAfterRetry": {
+            "mean": 0,
+            "min": 0,
+            "max": 0,
+            "n": 1
+          },
+          "labelFallback": {
+            "mean": 0,
+            "min": 0,
+            "max": 0,
+            "n": 1
+          }
+        }
+      },
+      "runs": [
+        {
+          "seed": 42,
+          "totalMs": 6779,
+          "loadMs": 1450,
+          "stageMs": {
+            "embed": 3773.7,
+            "reduce": 105,
+            "cluster": 400.8,
+            "extract": 933.9,
+            "label": 0.2,
+            "project": 73.3
+          },
+          "downloadedBytes": 0,
+          "themes": 12,
+          "selected": {
+            "algorithm": "kmeans",
+            "k": 12,
+            "silhouette": 0.190557
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.190557,
+            "agglomerative": null
+          },
+          "bestK": {
+            "kmeans": 12,
+            "agglomerative": null
+          },
+          "kAgreement": null,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 12
+          },
+          "ari": 0.3792206986732547,
+          "nmi": 0.5995136212082287,
+          "peakMemoryBytes": 848269312,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 43,
+          "totalMs": 7024,
+          "loadMs": 1440,
+          "stageMs": {
+            "embed": 4117.4,
+            "reduce": 116.9,
+            "cluster": 422.5,
+            "extract": 806.2,
+            "label": 0.1,
+            "project": 77.4
+          },
+          "downloadedBytes": 0,
+          "themes": 11,
+          "selected": {
+            "algorithm": "kmeans",
+            "k": 11,
+            "silhouette": 0.184399
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.184399,
+            "agglomerative": null
+          },
+          "bestK": {
+            "kmeans": 11,
+            "agglomerative": null
+          },
+          "kAgreement": null,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 11
+          },
+          "ari": 0.3673474321410268,
+          "nmi": 0.6110011711740535,
+          "peakMemoryBytes": 777171968,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 44,
+          "totalMs": 6908,
+          "loadMs": 1323,
+          "stageMs": {
+            "embed": 4118.8,
+            "reduce": 106.8,
+            "cluster": 432.7,
+            "extract": 812.6,
+            "label": 0.1,
+            "project": 73.4
+          },
+          "downloadedBytes": 0,
+          "themes": 11,
+          "selected": {
+            "algorithm": "kmeans",
+            "k": 11,
+            "silhouette": 0.184745
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.184745,
+            "agglomerative": null
+          },
+          "bestK": {
+            "kmeans": 11,
+            "agglomerative": null
+          },
+          "kAgreement": null,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 11
+          },
+          "ari": 0.32773797489836126,
+          "nmi": 0.5741777453173859,
+          "peakMemoryBytes": 846897152,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 45,
+          "totalMs": 6942,
+          "loadMs": 1344,
+          "stageMs": {
+            "embed": 4105,
+            "reduce": 108.1,
+            "cluster": 449.3,
+            "extract": 837.5,
+            "label": 0.2,
+            "project": 55
+          },
+          "downloadedBytes": 0,
+          "themes": 12,
+          "selected": {
+            "algorithm": "kmeans",
+            "k": 12,
+            "silhouette": 0.197143
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.197143,
+            "agglomerative": null
+          },
+          "bestK": {
+            "kmeans": 12,
+            "agglomerative": null
+          },
+          "kAgreement": null,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 12
+          },
+          "ari": 0.393747849238404,
+          "nmi": 0.6210267729532807,
+          "peakMemoryBytes": 803127296,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 46,
+          "totalMs": 6595,
+          "loadMs": 1347,
+          "stageMs": {
+            "embed": 3803.2,
+            "reduce": 109.2,
+            "cluster": 408.6,
+            "extract": 823.4,
+            "label": 0.2,
+            "project": 65.1
+          },
+          "downloadedBytes": 0,
+          "themes": 12,
+          "selected": {
+            "algorithm": "kmeans",
+            "k": 12,
+            "silhouette": 0.190174
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.190174,
+            "agglomerative": null
+          },
+          "bestK": {
+            "kmeans": 12,
+            "agglomerative": null
+          },
+          "kAgreement": null,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 12
+          },
+          "ari": 0.3229884461944976,
+          "nmi": 0.5633323919208938,
+          "peakMemoryBytes": 838901760,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 47,
+          "totalMs": 6637,
+          "loadMs": 1357,
+          "stageMs": {
+            "embed": 3823.2,
+            "reduce": 113.7,
+            "cluster": 407.4,
+            "extract": 838.6,
+            "label": 0.1,
+            "project": 54.6
+          },
+          "downloadedBytes": 0,
+          "themes": 11,
+          "selected": {
+            "algorithm": "kmeans",
+            "k": 11,
+            "silhouette": 0.188681
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.188681,
+            "agglomerative": null
+          },
+          "bestK": {
+            "kmeans": 11,
+            "agglomerative": null
+          },
+          "kAgreement": null,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 11
+          },
+          "ari": 0.3315657310606333,
+          "nmi": 0.5830252783809349,
+          "peakMemoryBytes": 840946688,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 48,
+          "totalMs": 6440,
+          "loadMs": 1351,
+          "stageMs": {
+            "embed": 3635,
+            "reduce": 113.2,
+            "cluster": 447.3,
+            "extract": 796,
+            "label": 0.2,
+            "project": 56.3
+          },
+          "downloadedBytes": 0,
+          "themes": 12,
+          "selected": {
+            "algorithm": "kmeans",
+            "k": 12,
+            "silhouette": 0.191288
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.191288,
+            "agglomerative": null
+          },
+          "bestK": {
+            "kmeans": 12,
+            "agglomerative": null
+          },
+          "kAgreement": null,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 12
+          },
+          "ari": 0.34045960733826847,
+          "nmi": 0.5862222346506525,
+          "peakMemoryBytes": 853716992,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 49,
+          "totalMs": 6985,
+          "loadMs": 1362,
+          "stageMs": {
+            "embed": 4121.1,
+            "reduce": 125.1,
+            "cluster": 438.8,
+            "extract": 808.1,
+            "label": 0.1,
+            "project": 88.1
+          },
+          "downloadedBytes": 0,
+          "themes": 12,
+          "selected": {
+            "algorithm": "kmeans",
+            "k": 12,
+            "silhouette": 0.186151
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.186151,
+            "agglomerative": null
+          },
+          "bestK": {
+            "kmeans": 12,
+            "agglomerative": null
+          },
+          "kAgreement": null,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 12
+          },
+          "ari": 0.412775424527709,
+          "nmi": 0.6440329215956928,
+          "peakMemoryBytes": 795770880,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 50,
+          "totalMs": 6335,
+          "loadMs": 1285,
+          "stageMs": {
+            "embed": 3565.9,
+            "reduce": 115.5,
+            "cluster": 424,
+            "extract": 849.6,
+            "label": 0.2,
+            "project": 55.3
+          },
+          "downloadedBytes": 0,
+          "themes": 12,
+          "selected": {
+            "algorithm": "kmeans",
+            "k": 12,
+            "silhouette": 0.185568
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.185568,
+            "agglomerative": null
+          },
+          "bestK": {
+            "kmeans": 12,
+            "agglomerative": null
+          },
+          "kAgreement": null,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 12
+          },
+          "ari": 0.35493525531395065,
+          "nmi": 0.6023978806082557,
+          "peakMemoryBytes": 794533888,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        },
+        {
+          "seed": 51,
+          "totalMs": 7003,
+          "loadMs": 1311,
+          "stageMs": {
+            "embed": 4427.3,
+            "reduce": 110.7,
+            "cluster": 435.3,
+            "extract": 603.1,
+            "label": 0.1,
+            "project": 75.7
+          },
+          "downloadedBytes": 0,
+          "themes": 8,
+          "selected": {
+            "algorithm": "kmeans",
+            "k": 8,
+            "silhouette": 0.181941
+          },
+          "merges": 0,
+          "silhouette": {
+            "kmeans": 0.181941,
+            "agglomerative": null
+          },
+          "bestK": {
+            "kmeans": 8,
+            "agglomerative": null
+          },
+          "kAgreement": null,
+          "labels": {
+            "firstAttempt": 0,
+            "afterRetry": 0,
+            "fallback": 0,
+            "keyphraseOnly": 8
+          },
+          "ari": 0.32934213802728274,
+          "nmi": 0.5821448092653364,
+          "peakMemoryBytes": 846922752,
+          "longTasksOver200": 0,
+          "longestTaskMs": 0,
+          "backend": "wasm"
+        }
+      ],
+      "summary": {
+        "totalMs": {
+          "mean": 6764.8,
+          "min": 6335,
+          "max": 7024,
+          "n": 10
+        },
+        "loadMs": {
+          "mean": 1357,
+          "min": 1285,
+          "max": 1450,
+          "n": 10
+        },
+        "stageMs": {
+          "embed": {
+            "mean": 3949.0600000000004,
+            "min": 3565.9,
+            "max": 4427.3,
+            "n": 10
+          },
+          "reduce": {
+            "mean": 112.42,
+            "min": 105,
+            "max": 125.1,
+            "n": 10
+          },
+          "cluster": {
+            "mean": 426.6700000000001,
+            "min": 400.8,
+            "max": 449.3,
+            "n": 10
+          },
+          "extract": {
+            "mean": 810.9000000000001,
+            "min": 603.1,
+            "max": 933.9,
+            "n": 10
+          },
+          "label": {
+            "mean": 0.15000000000000002,
+            "min": 0.1,
+            "max": 0.2,
+            "n": 10
+          },
+          "project": {
+            "mean": 67.42,
+            "min": 54.6,
+            "max": 88.1,
+            "n": 10
+          }
+        },
+        "downloadedBytes": {
+          "mean": 0,
+          "min": 0,
+          "max": 0,
+          "n": 10
+        },
+        "themes": {
+          "mean": 11.3,
+          "min": 8,
+          "max": 12,
+          "n": 10
+        },
+        "merges": {
+          "mean": 0,
+          "min": 0,
+          "max": 0,
+          "n": 10
+        },
+        "silhouetteKmeans": {
+          "mean": 0.18806470000000003,
+          "min": 0.181941,
+          "max": 0.197143,
+          "n": 10
+        },
+        "silhouetteAgglomerative": {
+          "mean": null,
+          "min": null,
+          "max": null,
+          "n": 0
+        },
+        "bestKKmeans": {
+          "mean": 11.3,
+          "min": 8,
+          "max": 12,
+          "n": 10
+        },
+        "bestKAgglomerative": {
+          "mean": null,
+          "min": null,
+          "max": null,
+          "n": 0
+        },
+        "kAgreementShare": {
+          "mean": null,
+          "min": null,
+          "max": null,
+          "n": 0
+        },
+        "ari": {
+          "mean": 0.3560120557413389,
+          "min": 0.3229884461944976,
+          "max": 0.412775424527709,
+          "n": 10
+        },
+        "nmi": {
+          "mean": 0.5966874827074715,
+          "min": 0.5633323919208938,
+          "max": 0.6440329215956928,
+          "n": 10
+        },
+        "peakMemoryBytes": {
+          "mean": 824625868.8,
+          "min": 777171968,
+          "max": 853716992,
+          "n": 10
+        },
+        "longTasksOver200": {
+          "mean": 0,
+          "min": 0,
+          "max": 0,
+          "n": 10
+        },
+        "labelFirstAttempt": {
+          "mean": 0,
+          "min": 0,
+          "max": 0,
+          "n": 10
+        },
+        "labelAfterRetry": {
+          "mean": 0,
+          "min": 0,
+          "max": 0,
+          "n": 10
+        },
+        "labelFallback": {
+          "mean": 0,
+          "min": 0,
+          "max": 0,
+          "n": 10
+        }
+      },
+      "worstAriWindow": {
+        "mean": 0.3316712615311331,
+        "runs": [
+          5,
+          7
+        ]
+      },
+      "ui": {
+        "blocks": [],
+        "inputBlockMs": 79,
+        "totalMs": 7727,
+        "peakMemoryBytes": 834969600,
+        "longTasksOver200": 0,
+        "longestTaskMs": 0
+      }
+    }
+  },
+  "browser": "chromium 159.0.8154.6 (headless)",
+  "longTaskSelfTest": {
+    "detected": true,
+    "entries": [
+      283
+    ]
+  },
+  "maxNotes": {
+    "notes": 500,
+    "totalMs": 13056,
+    "loadMs": 1360,
+    "stageMs": {
+      "embed": 8759.6,
+      "reduce": 424.8,
+      "cluster": 1431,
+      "extract": 671.5,
+      "label": 0.2,
+      "project": 365
+    },
+    "peakMemoryBytes": 831389696,
+    "longTasksOver200": 0,
+    "ui": {
+      "blocks": [],
+      "inputBlockMs": 361,
+      "totalMs": 14601,
+      "peakMemoryBytes": 1117062144,
+      "longTasksOver200": 0,
+      "longestTaskMs": 0
+    }
+  },
+  "budgets": [
+    {
+      "budget": "Warm run, demo sample (mean)",
+      "threshold": "≤ 20 s",
+      "measured": "4.1 s",
+      "verdict": "pass"
+    },
+    {
+      "budget": "Cold run, demo sample, 50 Mbit/s (mean)",
+      "threshold": "≤ 90 s",
+      "measured": "24.5 s",
+      "verdict": "pass"
+    },
+    {
+      "budget": "Total model download",
+      "threshold": "≤ 300 MB",
+      "measured": "58.8 MB",
+      "verdict": "pass"
+    },
+    {
+      "budget": "Peak memory, demo sample (laptop)",
+      "threshold": "≤ 2 GB",
+      "measured": "0.80 GB (PSS)",
+      "verdict": "pass"
+    },
+    {
+      "budget": "Peak memory (iPhone)",
+      "threshold": "≤ 1 GB",
+      "measured": "measured by hand with Safari Web Inspector",
+      "verdict": "not measured"
+    },
+    {
+      "budget": "Warm run, 500 notes (through the interface)",
+      "threshold": "≤ 40 s",
+      "measured": "14.6 s",
+      "verdict": "pass"
+    },
+    {
+      "budget": "Main-thread tasks over 200 ms (every run, including the interface runs)",
+      "threshold": "0",
+      "measured": "0",
+      "verdict": "pass"
+    }
+  ],
+  "quality": [
+    {
+      "check": "Demo sample: 4–8 themes in every warm run",
+      "measured": "5, 9, 5, 4, 5, 6, 9, 9, 9, 4",
+      "verdict": "fail"
+    },
+    {
+      "check": "Demo sample: mean ARI over all 10 warm runs ≥ 0.6",
+      "measured": "0.580",
+      "verdict": "fail"
+    },
+    {
+      "check": "Demo sample: worst mean ARI over 3 consecutive runs (for information)",
+      "measured": "0.467",
+      "verdict": "below 0.6"
+    }
+  ]
+}

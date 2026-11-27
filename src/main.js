@@ -68,6 +68,10 @@ if (import.meta.env.VITE_FAULT_HOOKS === '1') {
       modelId: r.modelId,
       backend: r.backend,
       cluster: events.find((e) => e.stage === 'cluster').payload.selected,
+      clusterScores: events.find((e) => e.stage === 'cluster').payload.scores,
+      merges: events.find((e) => e.stage === 'cluster').payload.merges.length,
+      labelSources: events.find((e) => e.stage === 'label').payload.themes.map((t) => t.source),
+      loadMs: r.loadMs,
       stageMs: Object.fromEntries(events.map((e) => [e.stage, e.durationMs])),
     };
   };
@@ -109,25 +113,47 @@ function showError(error) {
   status.textContent = '';
 }
 
-function renderNotes() {
-  replace(
-    notesList,
-    ...state.notes.map((note, i) =>
-      h('li', {}, [
-        h(
-          'button',
-          {
-            type: 'button',
-            class: 'note',
-            'aria-pressed': String(state.selected === i),
-            disabled: state.vectors.length !== state.notes.length,
-            onclick: () => select(i),
-          },
-          [note.text],
-        ),
-      ]),
+const RENDER_CHUNK = 100;
+let renderGeneration = 0;
+
+function noteItem(note, i) {
+  return h('li', {}, [
+    h(
+      'button',
+      {
+        type: 'button',
+        class: 'note',
+        'aria-pressed': String(state.selected === i),
+        disabled: state.vectors.length !== state.notes.length,
+        onclick: () => select(i),
+      },
+      [note.text],
     ),
-  );
+  ]);
+}
+
+/**
+ * Renders the note list. The first chunk renders immediately; the rest in
+ * later tasks, so long lists don't block the main thread in one go.
+ */
+function renderNotes() {
+  const generation = ++renderGeneration;
+  const notes = state.notes;
+  delete app.dataset.notesRendered;
+  replace(notesList, ...notes.slice(0, RENDER_CHUNK).map((n, i) => noteItem(n, i)));
+  const next = (start) => {
+    if (generation !== renderGeneration) return;
+    if (start >= notes.length) {
+      // Marks the whole list as in the page and usable (the benchmark waits for it).
+      if (state.vectors.length === notes.length) app.dataset.notesRendered = String(notes.length);
+      return;
+    }
+    const frag = document.createDocumentFragment();
+    for (let i = start; i < Math.min(start + RENDER_CHUNK, notes.length); i += 1) frag.append(noteItem(notes[i], i));
+    notesList.append(frag);
+    setTimeout(() => next(start + RENDER_CHUNK));
+  };
+  setTimeout(() => next(RENDER_CHUNK));
 }
 
 function renderThemes() {
@@ -156,7 +182,8 @@ function renderThemes() {
 function select(i) {
   if (state.vectors.length !== state.notes.length) return; // embeddings not ready for these notes
   state.selected = i;
-  renderNotes();
+  // Update the pressed state in place: re-rendering a long list would lose the scroll position.
+  notesList.querySelectorAll('button.note').forEach((b, j) => b.setAttribute('aria-pressed', String(j === i)));
   const neighbors = nearestNeighbors(state.vectors, i, 5);
   replace(
     neighborsPanel,
@@ -194,6 +221,8 @@ async function run() {
   try {
     state.backend ??= await detectBackend();
     const result = await embedder.run(notes.map((n) => n.text), {
+      // Test builds only: benchmarks can try pipeline options through the real interface.
+      ...(import.meta.env.VITE_FAULT_HOOKS === '1' ? { pipelineOptions: window.__gtPipelineOptions } : {}),
       backend: state.backend,
       cache: state.cache,
       onStage: (stage) => {
@@ -206,8 +235,9 @@ async function run() {
     });
     state.vectors = result.vectors;
     state.themes = result.themes;
-    renderNotes();
     renderThemes();
+    // Re-render the (now enabled) note list in a later task, after the themes.
+    setTimeout(renderNotes);
     app.dataset.themes = String(result.themes.length);
     app.dataset.backend = result.backend;
     const truncatedNote = result.truncated

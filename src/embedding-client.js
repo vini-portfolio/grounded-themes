@@ -48,7 +48,7 @@ export function createEmbedder({ onProgress = () => {} } = {}) {
       if (msg.type === 'run-result') {
         const vectors = [];
         for (let i = 0; i < msg.count; i += 1) vectors.push(msg.vectors.subarray(i * msg.dims, (i + 1) * msg.dims));
-        const { themes, assignments, coordinates, truncated, backend, cacheFailed, downloadedBytes, modelId } = msg;
+        const { themes, assignments, coordinates, truncated, backend, cacheFailed, downloadedBytes, loadMs, modelId } = msg;
         entry.resolve({
           vectors,
           dims: msg.dims,
@@ -59,6 +59,7 @@ export function createEmbedder({ onProgress = () => {} } = {}) {
           backend,
           cacheFailed,
           downloadedBytes,
+          loadMs,
           modelId,
         });
       } else if (msg.type === 'error') {

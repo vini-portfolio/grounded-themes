@@ -11,3 +11,4 @@ test-results/
 public/ort/
 dist-e2e/
 .model-cache/
+docs/benchmarks/*.partial.json
