@@ -337,7 +337,7 @@ async function main() {
         MEMORY_METHOD === 'pss'
           ? 'peak proportional set size (PSS, shared pages split) of the browser and all its processes, sampled every 100 ms'
           : 'peak resident set size (RSS) of the browser and all its processes, sampled every 100 ms with ps; RSS counts shared pages in every process, so this overstates',
-      longTasks: 'main-thread blocking measured by a 20 ms heartbeat on the page: each gap between ticks beyond 20 ms counts as a task of that length (the Long Tasks API reports nothing in headless Chromium); validated by a deliberate 300 ms task before the runs',
+      longTasks: 'main-thread blocking measured by a 20 ms heartbeat on the page: a tick arriving more than 50 ms late is recorded as a block of that length, so blocks under 50 ms are not recorded (the Long Tasks API reports nothing in headless Chromium); validated by a deliberate 300 ms task before the runs',
       backend: 'WebAssembly (headless browsers have no GPU adapter)',
       maxNotes: `${BUDGETS.maxNotes} notes: the ${new Set(allNotes.map((n) => n.text)).size} unique dataset notes repeated; timing only`,
     },
