@@ -41,9 +41,23 @@ Reference setup:
 
 | Item | Setup |
 |---|---|
-| Laptop | MacBook Pro, Apple M2, 16 GB RAM |
+| Laptop | MacBook Pro, Apple M2 Pro (10 cores), 16 GB RAM |
 | Phone | iPhone 15 Pro Max |
 | Connection | 1 Gbit/s; cold-run budgets are measured with the connection throttled to 50 Mbit/s, so the result reflects a typical visitor rather than the reference line |
+
+Latest reference result ([2026-11-28-macbook-m2](../benchmarks/2026-11-28-macbook-m2.md), commit `ee986d8`, before the label model exists, WebAssembly backend in headless Chromium):
+
+| Budget | Measured | Verdict |
+|---|---|---|
+| Warm run, demo sample (mean of 10) | 2.0 s | pass |
+| Cold run at 50 Mbit/s, demo sample (mean of 3) | 17.8 s | pass |
+| Total model download | 58.8 MB | pass |
+| Peak memory, laptop, demo sample | 1.03 GB (resident set size, which overstates; the 500-note interface run peaked at 1.19 GB) | pass |
+| Peak memory, iPhone | not measured yet (by hand with Safari Web Inspector) | — |
+| 500 notes through the interface | 12.2 s | pass |
+| Main-thread blocks over 200 ms | 0 | pass |
+
+Clustering results match the CI runs exactly (the runs are seeded): demo sample mean ARI 0.632, 4–6 themes per run.
 
 Measurement methods (`scripts/bench.mjs`): peak memory of the browser and all its processes, sampled every 100 ms, as proportional set size on Linux and resident set size elsewhere (which overstates, because shared pages count once per process); cross-origin isolation is off, so `performance.measureUserAgentSpecificMemory` is unavailable. The iPhone is measured by hand with Safari Web Inspector. Cold runs use a fresh browser profile and delay each response by its size at 50 Mbit/s after fetching it; parallel downloads overlap, so this approximates a shared link rather than shaping traffic. Main-thread blocking is measured with a 20 ms heartbeat on the page (the Long Tasks API reports nothing in headless Chromium): a tick arriving more than 50 ms late is recorded as a block of that length, so blocks under 50 ms are not recorded, checked against a deliberate 300 ms task before each benchmark, including one run per dataset through the real interface. In those interface runs blocking counts from the click on "Find themes" until the themes and the whole note list are in the page; the time Chromium takes to fill the text box with the test's notes is the browser's own work and is reported separately.
 

@@ -5,11 +5,13 @@
 //
 // Usage: npm run bench -- [--runs N] [--cold-runs M] [--name NAME] [--reference]
 //                         [--no-build] [--datasets a,b] [--option key=value ...]
+//        npm run bench -- --report-from docs/benchmarks/NAME.json
 //   --runs N       warm runs per dataset (default 3); run i uses seed 42 + i
 //   --cold-runs M  cold runs per dataset, each in a fresh browser profile (default 3)
 //   --reference    mark the result as measured on the reference setup (docs/adr/001-runtime.md)
 //   --name NAME    output file name (default: today's date, YYYY-MM-DD)
 //   --option k=v   pipeline option to try instead of the constants (repeatable)
+//   --report-from FILE  only rewrite the .md report next to an existing benchmark .json
 import { execFileSync, spawn } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import net from 'node:net';
@@ -563,7 +565,16 @@ function markdown(r) {
   return `${L.join('\n')}\n`;
 }
 
-main().catch((err) => {
+const reportFrom = opt('report-from', null);
+const entry = reportFrom
+  ? async () => {
+      if (!reportFrom.endsWith('.json')) throw new Error('--report-from needs a benchmark .json file');
+      writeFileSync(reportFrom.replace(/\.json$/, '.md'), markdown(JSON.parse(readFileSync(reportFrom, 'utf8'))));
+      log(`wrote ${reportFrom.replace(/\.json$/, '.md')}`);
+    }
+  : main;
+
+entry().catch((err) => {
   console.error(err);
   process.exit(1);
 });
