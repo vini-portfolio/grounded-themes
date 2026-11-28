@@ -3,14 +3,17 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
     <meta name="description" content="On-device NLP pipeline that turns research notes into themes and shows its work." />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <title>Grounded Themes</title>
   </head>
   <body>
     <main id="app">
-      <h1>Grounded Themes</h1>
-      <p>On-device NLP that turns research notes into themes, and shows its work. Your notes never leave this browser.</p>
+      <header class="intro">
+        <h1>Grounded Themes</h1>
+        <p class="lede">Find the themes in a pile of notes. It runs entirely in your browser, so your notes never leave this device.</p>
+      </header>
       <div id="workspace"></div>
     </main>
     <script type="module" src="/src/main.js"></script>

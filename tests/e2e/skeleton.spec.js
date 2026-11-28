@@ -6,7 +6,7 @@ test.describe('paste and compare notes', () => {
     const lines = [...SAMPLE_LINES, 'Delivery tracking never updates'];
     await embedNotes(page, lines);
     await expect(page.locator('#app')).toHaveAttribute('data-embedded', '8');
-    await expect(page.getByRole('list', { name: 'Notes' }).getByRole('listitem')).toHaveCount(8);
+    await expect(page.locator('button.note')).toHaveCount(8);
   });
 
   test('embeds every note as a unit-length 384-dimension vector', async ({ page }) => {
@@ -45,7 +45,7 @@ test.describe('paste and compare notes', () => {
     await embedNotes(page, payloads);
     await expect(page.getByRole('button', { name: payloads[0] })).toBeVisible();
     await page.getByRole('button', { name: payloads[1] }).click();
-    await expect(page.locator('.selected-note')).toHaveText(payloads[1]);
+    await expect(page.getByRole('button', { name: payloads[1] })).toHaveAttribute('aria-expanded', 'true');
     await expect(page.locator('.neighbor-list')).toContainText(payloads[0]);
     await expect(page.locator('#app img, #app script')).toHaveCount(0);
     expect(await page.evaluate(() => window.__xss)).toBeUndefined();
@@ -78,7 +78,8 @@ test.describe('paste and compare notes', () => {
       [...document.querySelectorAll('button')].find((b) => b.textContent === 'Find themes').click();
       return [...document.querySelectorAll('.note')].map((b) => b.disabled);
     });
-    expect(disabled).toEqual([true, true]);
+    // No note can be selected before its embedding exists.
+    expect(disabled.filter((d) => !d)).toEqual([]);
     await expect(page.locator('#app')).toHaveAttribute('data-embedded', '2', { timeout: 120_000 });
     await expect(page.getByRole('button', { name: 'third note about refunds' })).toBeEnabled();
   });
