@@ -25,15 +25,29 @@ const STAGE_NAMES = {
   cluster: 'Clustering into themes',
   extract: 'Extracting keyphrases',
   label: 'Naming themes',
-  project: 'Placing notes on the map',
+  project: 'Computing note positions',
 };
 const status = h('p', { class: 'status', role: 'status', 'aria-live': 'polite' });
 const errorBox = h('div', { class: 'error-slot' });
-const notesList = h('ol', { class: 'notes', 'aria-label': 'Notes' });
-const neighborsPanel = h('section', { class: 'neighbors', 'aria-label': 'Most similar notes' });
-const themesPanel = h('section', { class: 'themes', 'aria-label': 'Themes' });
+const themesPanel = h('section', { class: 'themes', 'aria-labelledby': 'themes-heading' });
+const progressBar = h('progress', { class: 'progress', 'aria-label': 'Finding themes', hidden: true });
+const stepText = h('span', { class: 'step', 'aria-hidden': 'true' });
+const STAGE_ORDER = Object.keys(STAGE_NAMES);
+
+/** Shows a determinate progress bar (value of max), or hides it when value is null. */
+function setProgress(value, max = 1, step = '') {
+  progressBar.hidden = value === null;
+  if (value !== null) {
+    progressBar.max = max;
+    progressBar.value = value;
+  }
+  stepText.textContent = step;
+  if (step) progressBar.setAttribute('aria-valuetext', step);
+  else progressBar.removeAttribute('aria-valuetext');
+}
 
 const progress = new Map();
+let lastAnnounced = -1;
 const embedder = createEmbedder({
   onProgress: ({ file, loaded, total }) => {
     progress.set(file, { loaded, total });
@@ -43,7 +57,13 @@ const embedder = createEmbedder({
       l += p.loaded;
       t += p.total;
     }
-    status.textContent = `Downloading the model: ${(l / 1048576).toFixed(1)} of at least ${(t / 1048576).toFixed(1)} MB`;
+    // Announce at most every 10%, so screen readers aren't flooded with byte counts.
+    const tenth = Math.floor((l / Math.max(t, 1)) * 10);
+    if (tenth !== lastAnnounced) {
+      lastAnnounced = tenth;
+      status.textContent = `Downloading the model: ${(l / 1048576).toFixed(1)} of at least ${(t / 1048576).toFixed(1)} MB`;
+    }
+    setProgress(l, Math.max(t, l, 1), 'First run only');
   },
 });
 if (import.meta.env.VITE_FAULT_HOOKS === '1') {
@@ -78,16 +98,22 @@ if (import.meta.env.VITE_FAULT_HOOKS === '1') {
   };
 }
 
-const input = h('textarea', { id: 'notes-input', rows: '8', placeholder: 'One note per line' });
-const runButton = h('button', { type: 'button', onclick: () => run() }, ['Find themes']);
+const input = h('textarea', { id: 'notes-input', rows: '6', 'aria-describedby': 'notes-hint' });
+const runButton = h('button', { type: 'button', class: 'secondary', onclick: () => run(runButton) }, ['Find themes']);
+// The benchmark's measured download size (docs/benchmarks).
+const downloadNotice = h('p', { class: 'download-notice' }, [
+  'The first run downloads a 59 MB language model. After that it is saved in this browser, and nothing you paste is uploaded.',
+]);
 // Loads the demo sample in one click and runs it.
 const sampleButton = h(
   'button',
   {
     type: 'button',
+    class: 'primary',
     onclick: () => {
+      if (running) return;
       input.value = sampleNotes.map((n) => n.text).join('\n');
-      run();
+      run(sampleButton);
     },
   },
   ['Run on the sample'],
@@ -124,95 +150,122 @@ function showError(error) {
     ]),
   );
   status.textContent = '';
+  keepFocus(errorBox.querySelector('button'));
 }
 
-const RENDER_CHUNK = 100;
-let renderGeneration = 0;
-
-function noteItem(note, i) {
-  return h('li', {}, [
-    h(
-      'button',
-      {
-        type: 'button',
-        class: 'note',
-        'aria-pressed': String(state.selected === i),
-        disabled: state.vectors.length !== state.notes.length,
-        onclick: () => select(i),
-      },
-      [note.text],
-    ),
-  ]);
-}
-
-/**
- * Renders the note list. The first chunk renders immediately; the rest in
- * later tasks, so long lists don't block the main thread in one go.
- */
-function renderNotes() {
-  const generation = ++renderGeneration;
-  const notes = state.notes;
-  delete app.dataset.notesRendered;
-  replace(notesList, ...notes.slice(0, RENDER_CHUNK).map((n, i) => noteItem(n, i)));
-  const next = (start) => {
-    if (generation !== renderGeneration) return;
-    if (start >= notes.length) {
-      // Marks the whole list as in the page and usable (the benchmark waits for it).
-      if (state.vectors.length === notes.length) app.dataset.notesRendered = String(notes.length);
-      return;
-    }
-    const frag = document.createDocumentFragment();
-    for (let i = start; i < Math.min(start + RENDER_CHUNK, notes.length); i += 1) frag.append(noteItem(notes[i], i));
-    notesList.append(frag);
-    setTimeout(() => next(start + RENDER_CHUNK));
-  };
-  setTimeout(() => next(RENDER_CHUNK));
-}
-
+/** Renders the themes as cards; every note is a button that shows its closest matches. */
 function renderThemes() {
   if (!state.themes.length) return replace(themesPanel);
+  const ready = state.vectors.length === state.notes.length;
   replace(
     themesPanel,
-    h('h2', {}, ['Themes']),
+    h('h2', { id: 'themes-heading', tabindex: '-1' }, ['Themes']),
     h(
       'ol',
       { class: 'theme-list' },
-      state.themes.map((theme) =>
+      state.themes.map((theme, t) =>
         h('li', { class: 'theme' }, [
-          h('h3', {}, [theme.label]),
-          h('p', { class: 'keyphrases' }, [`Keyphrases: ${theme.keyphrases.join(', ')}`]),
+          h('div', { class: 'theme-header' }, [
+            h('h3', { id: `theme-${t}` }, [theme.label]),
+            h('span', { class: 'count' }, [`${theme.noteIndexes.length} ${theme.noteIndexes.length === 1 ? 'note' : 'notes'}`]),
+          ]),
+          theme.keyphrases.length
+            ? h('ul', { class: 'chips', 'aria-label': 'Keyphrases' }, theme.keyphrases.map((k) => h('li', {}, [k])))
+            : null,
           h(
             'ul',
-            { class: 'theme-notes' },
-            theme.noteIndexes.map((i) => h('li', {}, [state.notes[i].text])),
+            { class: 'theme-notes', 'aria-labelledby': `theme-${t}` },
+            theme.noteIndexes.map((i) =>
+              h('li', {}, [
+                h(
+                  'button',
+                  {
+                    type: 'button',
+                    class: 'note',
+                    'data-index': String(i),
+                    'aria-expanded': 'false',
+                    'aria-controls': `neighbors-${i}`,
+                    disabled: !ready,
+                    onclick: () => select(i),
+                  },
+                  [state.notes[i].text],
+                ),
+                h('div', { class: 'neighbors', id: `neighbors-${i}`, hidden: true }),
+              ]),
+            ),
           ),
         ]),
       ),
     ),
   );
+  // Marks every note as in the page and usable (the benchmark waits for it).
+  if (ready) app.dataset.notesRendered = String(state.notes.length);
 }
 
+/** Shows (or hides, on a second click) the five notes most similar to note i, right below it. */
 function select(i) {
   if (state.vectors.length !== state.notes.length) return; // embeddings not ready for these notes
-  state.selected = i;
-  // Update the pressed state in place: re-rendering a long list would lose the scroll position.
-  notesList.querySelectorAll('button.note').forEach((b, j) => b.setAttribute('aria-pressed', String(j === i)));
+  const closing = state.selected === i;
+  if (state.selected !== null) {
+    const prev = themesPanel.querySelector(`button.note[data-index="${state.selected}"]`);
+    prev?.setAttribute('aria-expanded', 'false');
+    const panel = themesPanel.querySelector(`#neighbors-${state.selected}`);
+    if (panel) {
+      panel.hidden = true;
+      replace(panel);
+    }
+  }
+  state.selected = closing ? null : i;
+  if (closing) return;
+  themesPanel.querySelector(`button.note[data-index="${i}"]`)?.setAttribute('aria-expanded', 'true');
+  const panel = themesPanel.querySelector(`#neighbors-${i}`);
+  if (!panel) return;
   const neighbors = nearestNeighbors(state.vectors, i, 5);
   replace(
-    neighborsPanel,
-    h('h2', {}, ['Most similar notes']),
-    h('p', { class: 'selected-note' }, [state.notes[i].text]),
+    panel,
+    h('p', { class: 'neighbors-title' }, ['Most similar notes (similarity from 0 to 1)']),
     h(
       'ol',
       { class: 'neighbor-list' },
       neighbors.map((n) =>
-        h('li', {}, [h('span', { class: 'similarity' }, [n.similarity.toFixed(2)]), ' ', state.notes[n.index].text]),
+        h('li', {}, [
+          h('span', { class: 'neighbor-text' }, [state.notes[n.index].text]),
+          h('span', { class: 'score' }, [
+            h('span', { class: 'visually-hidden' }, ['similarity ']),
+            h('span', { class: 'similarity' }, [n.similarity.toFixed(2)]),
+          ]),
+        ]),
       ),
     ),
   );
+  panel.hidden = false;
 }
 
-async function run() {
+let running = false;
+let lastTrigger = null;
+
+/** Marks the run buttons busy without disabling them, so keyboard focus is never lost. */
+function setBusy(busy) {
+  running = busy;
+  for (const b of [runButton, sampleButton]) {
+    if (busy) b.setAttribute('aria-disabled', 'true');
+    else b.removeAttribute('aria-disabled');
+  }
+}
+
+/** Moves focus to el if focus would otherwise be lost (on the page body or inside removed content). */
+function keepFocus(el, from = null) {
+  const active = document.activeElement;
+  if (!active || active === document.body || (from && from.contains(active)) || active === runButton || active === sampleButton) {
+    el?.focus();
+  }
+}
+
+async function run(trigger) {
+  if (running) return;
+  if (trigger) lastTrigger = trigger;
+  // Retrying removes the error box; keep keyboard focus on the button that started the run.
+  keepFocus(lastTrigger ?? runButton, errorBox);
   replace(errorBox);
   const notes = parsePastedNotes(input.value);
   if (notes.length < 2) {
@@ -226,12 +279,12 @@ async function run() {
   state.selected = null;
   delete app.dataset.embedded;
   delete app.dataset.themes;
-  replace(neighborsPanel);
+  delete app.dataset.notesRendered;
   replace(themesPanel);
-  renderNotes();
-  runButton.disabled = true;
-  sampleButton.disabled = true;
+  themesPanel.setAttribute('aria-busy', 'true');
+  setBusy(true);
   status.textContent = 'Loading the model…';
+  setProgress(0, 1, '');
   try {
     state.backend ??= await detectBackend();
     const result = await embedder.run(notes.map((n) => n.text), {
@@ -241,6 +294,8 @@ async function run() {
       cache: state.cache,
       onStage: (stage) => {
         status.textContent = `${STAGE_NAMES[stage] ?? stage}…`;
+        const n = STAGE_ORDER.indexOf(stage);
+        if (n >= 0) setProgress(n + 1, STAGE_ORDER.length, `Step ${n + 1} of ${STAGE_ORDER.length}`);
       },
       onEvent: (event) => {
         state.events.push(event);
@@ -250,8 +305,8 @@ async function run() {
     state.vectors = result.vectors;
     state.themes = result.themes;
     renderThemes();
-    // Re-render the (now enabled) note list in a later task, after the themes.
-    setTimeout(renderNotes);
+    // Take keyboard and screen-reader users to the results they asked for.
+    keepFocus(themesPanel.querySelector('h2'));
     app.dataset.themes = String(result.themes.length);
     app.dataset.backend = result.backend;
     const truncatedNote = result.truncated
@@ -266,35 +321,60 @@ async function run() {
           h('p', {}, [
             "There isn't enough browser storage to keep the model, so the next visit will download it again.",
           ]),
-          h('button', { type: 'button', onclick: () => { state.cache = false; replace(errorBox); } }, [
+          h('button', { type: 'button', onclick: () => { state.cache = false; keepFocus(themesPanel.querySelector('h2'), errorBox); replace(errorBox); } }, [
             'Stop trying to save the model',
           ]),
         ]),
       );
     }
     app.dataset.embedded = String(notes.length);
+    downloadNotice.hidden = true;
   } catch (error) {
     // Start a fresh worker after a crash or out-of-memory error: its memory may be corrupt.
     if (error instanceof EmbeddingError && ['crash', 'oom'].includes(error.kind)) embedder.terminate();
     showError(error);
   } finally {
-    runButton.disabled = false;
-    sampleButton.disabled = false;
+    themesPanel.removeAttribute('aria-busy');
+    setProgress(null);
+    setBusy(false);
   }
 }
 
 if (webAssemblySupported()) {
   replace(
     workspace,
-    h('label', { for: 'notes-input' }, ['Paste notes']),
-    input,
-    h('div', { class: 'actions' }, [runButton, sampleButton]),
-    status,
+    h('section', { class: 'start', 'aria-labelledby': 'start-heading' }, [
+      h('h2', { id: 'start-heading', class: 'visually-hidden' }, ['Choose your notes']),
+      h('div', { class: 'choices' }, [
+        h('div', { class: 'card' }, [
+          h('h3', {}, ['Try the sample']),
+          h('p', { class: 'hint' }, [`${sampleNotes.length} notes from a bakery menu brainstorm.`]),
+          sampleButton,
+        ]),
+        h('div', { class: 'card' }, [
+          h('h3', {}, ['Use your own notes']),
+          h('label', { for: 'notes-input' }, ['Paste notes']),
+          h('p', { id: 'notes-hint', class: 'hint' }, ['One note per line, at least two notes.']),
+          input,
+          runButton,
+        ]),
+      ]),
+      downloadNotice,
+    ]),
+    h('div', { class: 'progress-area' }, [h('div', { class: 'progress-row' }, [progressBar, stepText]), status]),
     errorBox,
     themesPanel,
-    notesList,
-    neighborsPanel,
   );
+  // The download notice only matters until the model is saved in this browser.
+  if ('caches' in window) {
+    caches
+      .has('transformers-cache')
+      .then(async (has) => has && (await (await caches.open('transformers-cache')).keys()).length > 0)
+      .then((cached) => {
+        if (cached) downloadNotice.hidden = true;
+      })
+      .catch(() => {});
+  }
 } else {
   replace(
     workspace,

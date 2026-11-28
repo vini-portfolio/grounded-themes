@@ -23,6 +23,7 @@
     "bench:compare": "node scripts/bench-compare.mjs"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.1",
     "@eslint/js": "10.0.1",
     "@playwright/test": "1.65.1",
     "@vitest/coverage-v8": "5.1.2",

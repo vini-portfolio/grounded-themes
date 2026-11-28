@@ -24,9 +24,18 @@ Design notes: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md). Runtime decisions: [
 
 ## What works today
 
-Paste notes (one per line) and Grounded Themes groups them into themes on your device: it embeds each note, reduces the vectors with principal component analysis, compares spherical k-means with agglomerative clustering and picks the number of themes by silhouette score, then names each theme from its most distinctive keyphrases. Select any note to see its five closest matches. Everything runs in a Web Worker in your browser.
+Run the 50-note demo sample in one click, or paste notes (one per line), and Grounded Themes groups them into themes on your device: it embeds each note, reduces the vectors with principal component analysis, compares spherical k-means with agglomerative clustering and picks the number of themes by silhouette score, then names each theme from its most distinctive keyphrases. Open any note in a theme to see its five closest matches right below it. Everything runs in a Web Worker in your browser.
 
 Theme names are keyphrase-based for now; validated generated labels come next.
+
+## Accessibility
+
+Designed to meet WCAG 2.2 AA. What is verified so far:
+
+- an automated axe scan for WCAG A and AA rules on the landing page, the results and an open note, in light and dark color schemes ([`tests/e2e/a11y.spec.js`](tests/e2e/a11y.spec.js), run in CI)
+- a keyboard-only test: run the sample, open and close a note's closest matches
+
+Not yet done: a manual audit and a screen-reader pass (VoiceOver on Safari and iOS). Automated scans find only part of the issues, so "designed to meet" stays until those are recorded.
 
 ## Network
 
