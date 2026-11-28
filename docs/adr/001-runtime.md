@@ -52,7 +52,7 @@ Latest reference result ([2026-11-28-macbook-m2](../benchmarks/2026-11-28-macboo
 | Warm run, demo sample (mean of 10) | 2.0 s | pass |
 | Cold run at 50 Mbit/s, demo sample (mean of 3) | 17.8 s | pass |
 | Total model download | 58.8 MB | pass |
-| Peak memory, laptop | 1.03 GB (resident set size, which overstates) | pass |
+| Peak memory, laptop, demo sample | 1.03 GB (resident set size, which overstates; the 500-note interface run peaked at 1.19 GB) | pass |
 | Peak memory, iPhone | not measured yet (by hand with Safari Web Inspector) | — |
 | 500 notes through the interface | 12.2 s | pass |
 | Main-thread blocks over 200 ms | 0 | pass |

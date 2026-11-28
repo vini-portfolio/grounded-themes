@@ -5,6 +5,7 @@
 //
 // Usage: npm run bench -- [--runs N] [--cold-runs M] [--name NAME] [--reference]
 //                         [--no-build] [--datasets a,b] [--option key=value ...]
+//        npm run bench -- --report-from docs/benchmarks/NAME.json
 //   --runs N       warm runs per dataset (default 3); run i uses seed 42 + i
 //   --cold-runs M  cold runs per dataset, each in a fresh browser profile (default 3)
 //   --reference    mark the result as measured on the reference setup (docs/adr/001-runtime.md)
@@ -567,6 +568,7 @@ function markdown(r) {
 const reportFrom = opt('report-from', null);
 const entry = reportFrom
   ? async () => {
+      if (!reportFrom.endsWith('.json')) throw new Error('--report-from needs a benchmark .json file');
       writeFileSync(reportFrom.replace(/\.json$/, '.md'), markdown(JSON.parse(readFileSync(reportFrom, 'utf8'))));
       log(`wrote ${reportFrom.replace(/\.json$/, '.md')}`);
     }
