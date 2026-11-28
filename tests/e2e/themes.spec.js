@@ -42,6 +42,15 @@ async function recordStatus(page) {
 }
 
 test.describe('themes', () => {
+  test('one click on "Run on the sample" loads and groups the demo sample', async ({ page }) => {
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Run on the sample' }).click();
+    await expect(page.getByLabel('Paste notes')).toHaveValue(sample.map((n) => n.text).join('\n'));
+    await expect(page.locator('#app')).toHaveAttribute('data-embedded', String(sample.length), { timeout: 120_000 });
+    await expect(page.locator('#app')).toHaveAttribute('data-themes', /^[1-9]\d*$/);
+    await expect(page.getByRole('button', { name: 'Run on the sample' })).toBeEnabled();
+  });
+
   test('groups the demo sample into themes with one valid event per stage', async ({ page }) => {
     await page.goto('/');
     await recordStatus(page);

@@ -4,6 +4,7 @@ import { parsePastedNotes } from './io/paste.js';
 import { nearestNeighbors } from './similarity.js';
 import { h, replace } from './ui/dom.js';
 import { debug } from './debug.js';
+import { notes as sampleNotes } from '../data/sample.json';
 
 const app = document.querySelector('#app');
 const workspace = document.querySelector('#workspace');
@@ -79,6 +80,18 @@ if (import.meta.env.VITE_FAULT_HOOKS === '1') {
 
 const input = h('textarea', { id: 'notes-input', rows: '8', placeholder: 'One note per line' });
 const runButton = h('button', { type: 'button', onclick: () => run() }, ['Find themes']);
+// Loads the demo sample in one click and runs it.
+const sampleButton = h(
+  'button',
+  {
+    type: 'button',
+    onclick: () => {
+      input.value = sampleNotes.map((n) => n.text).join('\n');
+      run();
+    },
+  },
+  ['Run on the sample'],
+);
 
 function showError(error) {
   const kind = error instanceof EmbeddingError ? error.kind : 'unknown';
@@ -217,6 +230,7 @@ async function run() {
   replace(themesPanel);
   renderNotes();
   runButton.disabled = true;
+  sampleButton.disabled = true;
   status.textContent = 'Loading the model…';
   try {
     state.backend ??= await detectBackend();
@@ -265,6 +279,7 @@ async function run() {
     showError(error);
   } finally {
     runButton.disabled = false;
+    sampleButton.disabled = false;
   }
 }
 
@@ -273,7 +288,7 @@ if (webAssemblySupported()) {
     workspace,
     h('label', { for: 'notes-input' }, ['Paste notes']),
     input,
-    h('div', { class: 'actions' }, [runButton]),
+    h('div', { class: 'actions' }, [runButton, sampleButton]),
     status,
     errorBox,
     themesPanel,
