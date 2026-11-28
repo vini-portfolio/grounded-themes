@@ -10,6 +10,7 @@
 //   --reference    mark the result as measured on the reference setup (docs/adr/001-runtime.md)
 //   --name NAME    output file name (default: today's date, YYYY-MM-DD)
 //   --option k=v   pipeline option to try instead of the constants (repeatable)
+//   --report-from FILE  only rewrite the .md report next to an existing benchmark .json
 import { execFileSync, spawn } from 'node:child_process';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import net from 'node:net';
@@ -563,7 +564,15 @@ function markdown(r) {
   return `${L.join('\n')}\n`;
 }
 
-main().catch((err) => {
+const reportFrom = opt('report-from', null);
+const entry = reportFrom
+  ? async () => {
+      writeFileSync(reportFrom.replace(/\.json$/, '.md'), markdown(JSON.parse(readFileSync(reportFrom, 'utf8'))));
+      log(`wrote ${reportFrom.replace(/\.json$/, '.md')}`);
+    }
+  : main;
+
+entry().catch((err) => {
   console.error(err);
   process.exit(1);
 });
