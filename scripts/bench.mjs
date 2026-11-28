@@ -199,8 +199,8 @@ async function runUiOnce(page, texts, pid) {
   });
   await page.getByRole('button', { name: 'Find themes' }).click();
   await page.waitForSelector('#app[data-themes]', { timeout: 10 * 60_000 });
-  // The note list finishes rendering in later tasks; wait for all of it,
-  // then one more heartbeat period so a block at the very end is recorded.
+  // Wait until every note is in the page and usable, then one more heartbeat
+  // period so a block at the very end is recorded.
   await page.waitForSelector(`#app[data-notes-rendered="${texts.length}"]`, { timeout: 60_000 });
   const totalMs = Date.now() - t0;
   await page.waitForTimeout(150);

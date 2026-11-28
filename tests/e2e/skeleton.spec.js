@@ -78,8 +78,9 @@ test.describe('paste and compare notes', () => {
       [...document.querySelectorAll('button')].find((b) => b.textContent === 'Find themes').click();
       return [...document.querySelectorAll('.note')].map((b) => b.disabled);
     });
-    // No note can be selected before its embedding exists.
-    expect(disabled.filter((d) => !d)).toEqual([]);
+    // Starting a run removes the previous run's notes, so nothing can be
+    // selected before the new embeddings exist.
+    expect(disabled).toEqual([]);
     await expect(page.locator('#app')).toHaveAttribute('data-embedded', '2', { timeout: 120_000 });
     await expect(page.getByRole('button', { name: 'third note about refunds' })).toBeEnabled();
   });

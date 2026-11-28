@@ -28,14 +28,30 @@ for (const colorScheme of ['light', 'dark']) {
 test('the sample run and a note\'s matches work with the keyboard alone', async ({ page }) => {
   await page.goto('/');
   await page.keyboard.press('Tab');
-  await expect(page.getByRole('button', { name: 'Run on the sample' })).toBeFocused();
+  const sampleButton = page.getByRole('button', { name: 'Run on the sample' });
+  await expect(sampleButton).toBeFocused();
   await page.keyboard.press('Enter');
+  // Focus stays on the button during the run, then moves to the results.
+  await expect(sampleButton).toBeFocused();
   await expect(page.locator('#app')).toHaveAttribute('data-themes', /\d+/, { timeout: 120_000 });
+  await expect(page.getByRole('heading', { level: 2, name: 'Themes' })).toBeFocused();
+  await page.keyboard.press('Tab');
   const first = page.locator('button.note').first();
-  await first.focus();
+  await expect(first).toBeFocused();
   await page.keyboard.press('Enter');
   await expect(first).toHaveAttribute('aria-expanded', 'true');
   await expect(page.locator('.neighbor-list li')).toHaveCount(5);
   await page.keyboard.press('Space');
   await expect(first).toHaveAttribute('aria-expanded', 'false');
+});
+
+test('the page reflows at 320 px without sideways scrolling, even with a long unbroken note', async ({ page }) => {
+  await page.setViewportSize({ width: 320, height: 800 });
+  await page.goto('/');
+  const long = `https://example.com/${'a'.repeat(200)}`;
+  await page.getByLabel('Paste notes').fill(`${long}\nshort note about bread\nanother note about cakes`);
+  await page.getByRole('button', { name: 'Find themes' }).click();
+  await expect(page.locator('#app')).toHaveAttribute('data-themes', /\d+/, { timeout: 120_000 });
+  await page.getByRole('button', { name: long }).click();
+  expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(320);
 });

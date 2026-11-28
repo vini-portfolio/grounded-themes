@@ -80,7 +80,7 @@ test.describe('themes', () => {
       'Clustering into themes…',
       'Extracting keyphrases…',
       'Naming themes…',
-      'Placing notes on the map…',
+      'Computing note positions…',
     ]) {
       expect(shown).toContain(name);
     }

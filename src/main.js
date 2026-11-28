@@ -25,12 +25,12 @@ const STAGE_NAMES = {
   cluster: 'Clustering into themes',
   extract: 'Extracting keyphrases',
   label: 'Naming themes',
-  project: 'Placing notes on the map',
+  project: 'Computing note positions',
 };
 const status = h('p', { class: 'status', role: 'status', 'aria-live': 'polite' });
 const errorBox = h('div', { class: 'error-slot' });
 const themesPanel = h('section', { class: 'themes', 'aria-labelledby': 'themes-heading' });
-const progressBar = h('progress', { class: 'progress', 'aria-label': 'Progress', hidden: true });
+const progressBar = h('progress', { class: 'progress', 'aria-label': 'Finding themes', hidden: true });
 const stepText = h('span', { class: 'step', 'aria-hidden': 'true' });
 const STAGE_ORDER = Object.keys(STAGE_NAMES);
 
@@ -42,9 +42,12 @@ function setProgress(value, max = 1, step = '') {
     progressBar.value = value;
   }
   stepText.textContent = step;
+  if (step) progressBar.setAttribute('aria-valuetext', step);
+  else progressBar.removeAttribute('aria-valuetext');
 }
 
 const progress = new Map();
+let lastAnnounced = -1;
 const embedder = createEmbedder({
   onProgress: ({ file, loaded, total }) => {
     progress.set(file, { loaded, total });
@@ -54,7 +57,12 @@ const embedder = createEmbedder({
       l += p.loaded;
       t += p.total;
     }
-    status.textContent = `Downloading the model: ${(l / 1048576).toFixed(1)} of at least ${(t / 1048576).toFixed(1)} MB`;
+    // Announce at most every 10%, so screen readers aren't flooded with byte counts.
+    const tenth = Math.floor((l / Math.max(t, 1)) * 10);
+    if (tenth !== lastAnnounced) {
+      lastAnnounced = tenth;
+      status.textContent = `Downloading the model: ${(l / 1048576).toFixed(1)} of at least ${(t / 1048576).toFixed(1)} MB`;
+    }
     setProgress(l, Math.max(t, l, 1), 'First run only');
   },
 });
@@ -91,7 +99,7 @@ if (import.meta.env.VITE_FAULT_HOOKS === '1') {
 }
 
 const input = h('textarea', { id: 'notes-input', rows: '6', 'aria-describedby': 'notes-hint' });
-const runButton = h('button', { type: 'button', class: 'secondary', onclick: () => run() }, ['Find themes']);
+const runButton = h('button', { type: 'button', class: 'secondary', onclick: () => run(runButton) }, ['Find themes']);
 // The benchmark's measured download size (docs/benchmarks).
 const downloadNotice = h('p', { class: 'download-notice' }, [
   'The first run downloads a 59 MB language model. After that it is saved in this browser, and nothing you paste is uploaded.',
@@ -103,8 +111,9 @@ const sampleButton = h(
     type: 'button',
     class: 'primary',
     onclick: () => {
+      if (running) return;
       input.value = sampleNotes.map((n) => n.text).join('\n');
-      run();
+      run(sampleButton);
     },
   },
   ['Run on the sample'],
@@ -141,6 +150,7 @@ function showError(error) {
     ]),
   );
   status.textContent = '';
+  keepFocus(errorBox.querySelector('button'));
 }
 
 /** Renders the themes as cards; every note is a button that shows its closest matches. */
@@ -149,7 +159,7 @@ function renderThemes() {
   const ready = state.vectors.length === state.notes.length;
   replace(
     themesPanel,
-    h('h2', { id: 'themes-heading' }, ['Themes']),
+    h('h2', { id: 'themes-heading', tabindex: '-1' }, ['Themes']),
     h(
       'ol',
       { class: 'theme-list' },
@@ -231,7 +241,31 @@ function select(i) {
   panel.hidden = false;
 }
 
-async function run() {
+let running = false;
+let lastTrigger = null;
+
+/** Marks the run buttons busy without disabling them, so keyboard focus is never lost. */
+function setBusy(busy) {
+  running = busy;
+  for (const b of [runButton, sampleButton]) {
+    if (busy) b.setAttribute('aria-disabled', 'true');
+    else b.removeAttribute('aria-disabled');
+  }
+}
+
+/** Moves focus to el if focus would otherwise be lost (on the page body or inside removed content). */
+function keepFocus(el, from = null) {
+  const active = document.activeElement;
+  if (!active || active === document.body || (from && from.contains(active)) || active === runButton || active === sampleButton) {
+    el?.focus();
+  }
+}
+
+async function run(trigger) {
+  if (running) return;
+  if (trigger) lastTrigger = trigger;
+  // Retrying removes the error box; keep keyboard focus on the button that started the run.
+  keepFocus(lastTrigger ?? runButton, errorBox);
   replace(errorBox);
   const notes = parsePastedNotes(input.value);
   if (notes.length < 2) {
@@ -248,8 +282,7 @@ async function run() {
   delete app.dataset.notesRendered;
   replace(themesPanel);
   themesPanel.setAttribute('aria-busy', 'true');
-  runButton.disabled = true;
-  sampleButton.disabled = true;
+  setBusy(true);
   status.textContent = 'Loading the model…';
   setProgress(0, 1, '');
   try {
@@ -272,6 +305,8 @@ async function run() {
     state.vectors = result.vectors;
     state.themes = result.themes;
     renderThemes();
+    // Take keyboard and screen-reader users to the results they asked for.
+    keepFocus(themesPanel.querySelector('h2'));
     app.dataset.themes = String(result.themes.length);
     app.dataset.backend = result.backend;
     const truncatedNote = result.truncated
@@ -286,7 +321,7 @@ async function run() {
           h('p', {}, [
             "There isn't enough browser storage to keep the model, so the next visit will download it again.",
           ]),
-          h('button', { type: 'button', onclick: () => { state.cache = false; replace(errorBox); } }, [
+          h('button', { type: 'button', onclick: () => { state.cache = false; keepFocus(themesPanel.querySelector('h2'), errorBox); replace(errorBox); } }, [
             'Stop trying to save the model',
           ]),
         ]),
@@ -301,8 +336,7 @@ async function run() {
   } finally {
     themesPanel.removeAttribute('aria-busy');
     setProgress(null);
-    runButton.disabled = false;
-    sampleButton.disabled = false;
+    setBusy(false);
   }
 }
 

@@ -208,7 +208,7 @@ button {
   color: var(--on-accent);
 }
 
-.primary:hover:not(:disabled),
+.primary:hover:not(:disabled):not([aria-disabled='true']),
 .notice button:hover,
 .error button:hover {
   background: var(--accent-hover);
@@ -220,11 +220,12 @@ button {
   color: var(--accent);
 }
 
-.secondary:hover:not(:disabled) {
+.secondary:hover:not(:disabled):not([aria-disabled='true']) {
   background: var(--accent-soft);
 }
 
-button:disabled {
+button:disabled,
+button[aria-disabled='true'] {
   cursor: not-allowed;
   opacity: 0.55;
 }
@@ -281,9 +282,7 @@ button:disabled {
 
 .error summary {
   cursor: pointer;
-  min-height: var(--target);
-  display: flex;
-  align-items: center;
+  padding: var(--space-3) 0;
 }
 
 /* Themes */
@@ -399,7 +398,19 @@ button:disabled {
 
 .neighbor-list {
   margin: 0;
-  padding-left: var(--space-2);
+  padding: 0;
+  list-style: none;
+  counter-reset: rank;
+}
+
+/* Visible rank numbers (the list stays an ordered list for assistive tech). */
+.neighbor-list li::before {
+  counter-increment: rank;
+  content: counter(rank) '.';
+  flex: none;
+  min-width: 1.5rem;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
 }
 
 @media (min-width: 48rem) {
@@ -410,9 +421,20 @@ button:disabled {
 
 .neighbor-list li {
   display: flex;
-  justify-content: space-between;
-  gap: var(--space-3);
+  gap: var(--space-2);
   padding: var(--space-1) 0;
+}
+
+.neighbor-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.note,
+.neighbor-text,
+.chips li,
+.theme-header h3 {
+  overflow-wrap: anywhere;
 }
 
 .score {
